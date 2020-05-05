@@ -29,16 +29,15 @@ def generate_training_data(Masteroutputdir, Masterlabel,SaveNpzDirectory, SaveNa
                        Images = sorted(glob(outputdir + '/' +'*.tif'))
                        Images = list(map(imread, Images))
                        #Normalize everything before it goes inside the training
-                       NormalizeImages = [normalizeFloatZeroOne(image,1,99.8) for image in tqdm(Images)]
+                       NormalizeImages = [normalizeFloatZeroOne(image.astype('uint16') ,1,99.8) for image in tqdm(Images)]
 		
                      
                      
                     
                        for n in NormalizeImages:
                       
-                          blankX = n[starttime:endtime,:,:]
+                           blankX = n[starttime:endtime,:,:]
                           
-                          if blankX.shape[0] == endtime - starttime and blankX.shape[1] == TrainshapeX and blankX.shape[2] == TrainshapeY: 
 
                            blankY = Masterlabel[i]
                             
@@ -49,13 +48,10 @@ def generate_training_data(Masteroutputdir, Masterlabel,SaveNpzDirectory, SaveNa
                            label.append(blankY)
                        
             
-                          else : 
-                              print(blankX.shape,blankY.shape, len(data), len(label))
-                       print(np.array(label).shape)
+                          
                           
                 dataarr = np.array(data)
                 labelarr = np.array(label)
-                dataarr = dataarr.astype('uint16') 
                 print(dataarr.shape, labelarr.shape)
                 traindata, validdata, trainlabel, validlabel = train_test_split(dataarr, labelarr, train_size=0.95,test_size=0.05, shuffle= True)
                 save_full_training_data(SaveNpzDirectory, SaveName, traindata, trainlabel, axes)

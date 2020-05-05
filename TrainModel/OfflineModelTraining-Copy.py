@@ -11,7 +11,8 @@ sys.path.append("../NEAT")
 from NEATModels import NEATDetection, nets 
 from NEATUtils import helpers
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
@@ -25,7 +26,7 @@ ValidationModelName = 'MasterONEATValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'MidONEATd29cl48.h5'
+Model_Name = 'MidONEATd38cl48.h5'
 
 
 # In[3]:
@@ -38,7 +39,7 @@ categories = 6
 batch_size = 10
 lstm_hidden_units = 16
 epochs = 150
-depth = 29
+depth = 38
 includeTop = True
 show = False
 TrainModel = nets.ONETresnet_v2

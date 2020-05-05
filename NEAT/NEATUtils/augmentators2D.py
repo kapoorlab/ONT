@@ -27,7 +27,7 @@ except (ImportError,AttributeError):
     from backports import tempfile
 
 
-class Augmentation(object):
+class Augmentation2D(object):
     
     """
     Data augmentation for input movies with Gaussian Blur, Random Rotations and optional Deformations
@@ -78,7 +78,7 @@ class Augmentation(object):
     
         HEIGHT = self.resizeX
         WIDTH = self.resizeY
-        axes = 'TYX'
+        axes = 'YX'
         
         ImageFiles = sorted(glob(self.inputdir + '/' + '*.tif'))
         CsvFile = sorted(glob(self.inputdir + '/' + '*.csv'))
@@ -93,14 +93,13 @@ class Augmentation(object):
         origcount = 0
         for n in X:
     
-          Time = n.shape[0]
         
-          m = np.zeros([Time, HEIGHT, WIDTH])
+          m = np.zeros([HEIGHT, WIDTH])
         
           #Resize all movies   
-          for i in range(0, Time):
+         
         
-            m[i,:,:] =    cv2.resize(n[i,:,:], (HEIGHT, WIDTH), interpolation = cv2.INTER_LANCZOS4)
+          m =    cv2.resize(n, (HEIGHT, WIDTH), interpolation = cv2.INTER_LANCZOS4)
           
           origcount = origcount + 1 
           Path(self.outputdir + '/ResizeOriginal/').mkdir(exist_ok=True)
@@ -157,24 +156,20 @@ class Augmentation(object):
     
 def random_deform(image, sigma = 1, points = 3):
     
-    deformedimage = elasticdeform.deform_random_grid(image,sigma = sigma, points = points, axis = (1,2))
+    deformedimage = elasticdeform.deform_random_grid(image,sigma = sigma, points = points, axis = (0,1))
    
     return deformedimage
     
     
 def random_rotation(image):
       angle = random.uniform(-2, 2)
-      rotatedimage = image
-      for t in range(0, image.shape[0]):
-         rotatedimage[t,:,:] = scipy.ndimage.interpolation.rotate(image[t,:,:], angle, mode = 'reflect', axes = (1,0), reshape = False)
+      
+      
+      rotatedimage = scipy.ndimage.interpolation.rotate(image, angle, mode = 'reflect', axes = (1,0), reshape = False)
       return rotatedimage
 
 def random_noise(image, sigmaA = 0.2):
-        noisyimageA = image
-
-    
-        for t in range(0, image.shape[0]):
-            noisyimageA[t,:,:] = ndimage.gaussian_filter(image[t,:,:],sigmaA, mode = 'reflect')
+        noisyimageA = ndimage.gaussian_filter(image,sigmaA, mode = 'reflect')
    
               
         return noisyimageA
