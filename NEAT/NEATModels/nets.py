@@ -144,8 +144,8 @@ def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,  input_weig
       input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
       input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
     
-      output_cat = (Conv2D(categories, (28,28),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-      output_box = (Conv2D((box_vector), (28,28),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+      output_cat = (Conv2D(categories, (input_shape[1]//2,input_shape[2]//2),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+      output_box = (Conv2D((box_vector), (input_shape[1]//2,input_shape[2]//2),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
       block = Concat(-1)
       outputs = block([output_cat,output_box]) 
@@ -261,8 +261,8 @@ def LSTMresnet_v2(input_shape, categories,unit, box_vector,depth = 29,  input_we
       input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
     
      
-      output_cat = (Conv2D(categories, (28,28),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-      output_box = (Conv2D((box_vector), (28,28),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+      output_cat = (Conv2D(categories, (input_shape[1]//2,input_shape[2]//2),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+      output_box = (Conv2D((box_vector), (input_shape[1]//2,input_shape[2]//2),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
     
       block = Concat(-1)
@@ -442,8 +442,8 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,  input_
       input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
     
             
-      output_cat = (Conv2D(categories, (28,28),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-      output_box = (Conv2D((box_vector), (28,28),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+      output_cat = (Conv2D(categories, (input_shape[1]//2,input_shape[2]//2),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+      output_box = (Conv2D((box_vector), (input_shape[1]//2,input_shape[2]//2),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
 
@@ -601,8 +601,8 @@ def ONETresnet_v2(input_shape, categories,unit, box_vector,depth = 38,  input_we
       input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
     
             
-      output_cat = (Conv2D(categories, (28,28),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-      output_box = (Conv2D((box_vector), (28,28),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+      output_cat = (Conv2D(categories, (input_shape[1]//2,input_shape[2]//2),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+      output_box = (Conv2D((box_vector), (input_shape[1]//2,input_shape[2]//2),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
 
 
 
@@ -836,8 +836,8 @@ def ONET(input_shape, categories,unit, box_vector,depth = 29,  input_weights = N
       input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
       input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
     
-      output_cat = (Conv2D(categories, (28,28),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'deep1'))(input_cat)
-      output_box = (Conv2D((box_vector), (28,28),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'deep2'))(input_box)
+      output_cat = (Conv2D(categories, (input_shape[1]//2,input_shape[2]//2),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'deep1'))(input_cat)
+      output_box = (Conv2D((box_vector), (input_shape[1]//2,input_shape[2]//2),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'deep2'))(input_box)
     
       block = Concat(-1)
       outputs = block([output_cat,output_box]) 
