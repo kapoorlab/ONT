@@ -988,8 +988,8 @@ def resnet_v2(input_shape, categories, box_vector, depth = 38, input_weights = N
       
     
 
-      output_cat = (Conv2D(categories, (input_shape[1]//4,input_shape[2]//4),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-      output_box = (Conv2D((box_vector), (input_shape[1]//4,input_shape[2]//4),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+      output_cat = (Conv2D(categories, (input_shape[0]//4,input_shape[1]//4),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+      output_box = (Conv2D((box_vector), (input_shape[0]//4,input_shape[1]//4),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
       block = Concat(-1)

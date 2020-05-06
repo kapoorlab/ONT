@@ -2,16 +2,15 @@ import keras
 import matplotlib.pyplot as plt
 import random
 from NEATUtils.helpers import Printpredict
-from IPython.display import clear_output
 class PlotHistory(keras.callbacks.Callback):
     
     
-    def __init__(self, Trainingmodel, X, Y, Categories_Name, plot = False,  DualModel = True):
+    def __init__(self, Trainingmodel, X, Y, Categories_Name, plot = False):
        self.Trainingmodel = Trainingmodel 
        self.X = X
        self.Y = Y
        self.plot = plot
-       self.DualModel = DualModel
+      
        self.Categories_Name = Categories_Name
     def on_train_begin(self, logs={}):
         self.i = 0
@@ -51,6 +50,6 @@ class PlotHistory(keras.callbacks.Callback):
          plt.show()
          #clear_output(True)
         idx = random.randint(1,self.X.shape[0] - 1)
-        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, plot = self.plot, DualModel = self.DualModel)
+        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, plot = self.plot)
         
       

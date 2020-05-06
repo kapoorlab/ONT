@@ -64,7 +64,7 @@ class NEATDetection(object):
     
     
     
-    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, includeTop = True, lstm_hidden_unit1 = 4,lstm_hidden_unit2 = None, epochs = 55, batch_size = 20, dfactor = 1, show = False):        
+    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None,  lstm_hidden_unit1 = 4, epochs = 55, batch_size = 20,  show = False):        
      
         self.NpzDirectory = NpzDirectory
         self.TrainModelName = TrainModelName
@@ -76,12 +76,12 @@ class NEATDetection(object):
         self.model_keras = model_keras
         self.model_weights = model_weights
         self.lstm_hidden_unit1 = lstm_hidden_unit1
-        self.lstm_hidden_unit2 = lstm_hidden_unit2
+      
         self.epochs = epochs
         self.batch_size = batch_size
-        self.dfactor = dfactor
+        
         self.show = show
-        self.includeTop = includeTop
+        
     
         self.depth = depth
         #Attributes to be filled later
@@ -141,7 +141,7 @@ class NEATDetection(object):
         d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
         d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
-        self.Trainingmodel = self.model_keras(input_shape, self.categories, box_vector = Y_rest.shape[-1] , depth = self.depth, input_weights  =  self.model_weights,  unit = self.lstm_hidden_unit1, includeTop = self.includeTop)
+        self.Trainingmodel = self.model_keras(input_shape, self.categories, box_vector = Y_rest.shape[-1] , depth = self.depth, input_weights  =  self.model_weights,  unit = self.lstm_hidden_unit1)
         
         learning_rate = 1.0E-4
             
@@ -153,8 +153,8 @@ class NEATDetection(object):
         #Keras callbacks
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)#, min_delta=0.0000001)
         hrate = callbacks.History()
-        srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show, DualModel = True)
+        srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
+        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show)
         
         
         #Train the model and save as a h5 file
