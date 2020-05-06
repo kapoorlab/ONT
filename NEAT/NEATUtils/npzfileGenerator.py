@@ -72,27 +72,15 @@ def generate_2D_training_data(Masteroutputdir, Masterlabel,SaveNpzDirectory, Sav
                 for i in range(0,len(Masteroutputdir)):
 
                        outputdir =  Masteroutputdir[i]
-
-                       print(outputdir)
-                   #for x in outputdir:
-                
-                       #currentdir = outputdir + out
-                       #print(currentdir)
-                       
                       
                        Images = sorted(glob(outputdir + '/' +'*.tif'))
                        Images = list(map(imread, Images))
                        #Normalize everything before it goes inside the training
                        NormalizeImages = [normalizeFloatZeroOne(image.astype('uint16'),1,99.8) for image in tqdm(Images)]
-		
-                     
-                     
                     
                        for n in NormalizeImages:
                       
-                          blankX = n[:,:]
-                          
-                          if blankX.shape[0] == TrainshapeX and blankX.shape[1] == TrainshapeY: 
+                           blankX = n
 
                            blankY = Masterlabel[i]
                                 
@@ -101,13 +89,11 @@ def generate_2D_training_data(Masteroutputdir, Masterlabel,SaveNpzDirectory, Sav
     
                            data.append(blankX)
                            label.append(blankY)
-                          else : 
-                              print(blankX.shape,blankY.shape, len(data), len(label))
+                          
                           
                 dataarr = np.array(data)
                 labelarr = np.array(label)
-                dataarr = dataarr.astype(np.float16)
-                print(dataarr.shape, labelarr.shape)
+               
                 traindata, validdata, trainlabel, validlabel = train_test_split(dataarr, labelarr, train_size=0.95,test_size=0.05, shuffle= True)
                 save_full_training_data(SaveNpzDirectory, SaveName, traindata, trainlabel, axes)
                 save_full_training_data(SaveNpzDirectory, SaveNameVal, validdata, validlabel, axes)
