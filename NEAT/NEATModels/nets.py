@@ -328,9 +328,7 @@ def TDresnext_layer(inputs,
     
     group_list = []
     for c in range(cardinality):
-        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters]
-        if K.image_data_format() == 'channels_last' else
-        lambda z: z[:, c * num_filters:(c + 1) * num_filters, :, :])(inputs)
+        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters])(inputs)
 
         x = TimeDistributed(Conv2D(num_filters,
                   kernel_size=kernel_size,
@@ -1020,9 +1018,7 @@ def ThreeDresnext_layer(inputs,
     
     group_list = []
     for c in range(cardinality):
-        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters]
-        if K.image_data_format() == 'channels_last' else
-        lambda z: z[:, c * num_filters:(c + 1) * num_filters, :, :])(inputs)
+        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters])(inputs)
 
         x = Conv3D(num_filters,
                   kernel_size=kernel_size,
@@ -1548,9 +1544,7 @@ def resnext_layer(inputs,
     
     group_list = []
     for c in range(cardinality):
-        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters]
-        if K.image_data_format() == 'channels_last' else
-        lambda z: z[:, c * num_filters:(c + 1) * num_filters, :, :])(inputs)
+        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters])(inputs)
 
         x = (Conv2D(num_filters,
                   kernel_size=kernel_size,
