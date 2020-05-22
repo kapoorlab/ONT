@@ -40,7 +40,7 @@ batch_size = 10
 lstm_hidden_units = 16
 epochs = 150
 depth = 38
-includeTop = True
+cardinality = 16
 show = False
 TrainModel = nets.ONETresnet_v2
 model_weights = Model_dir + Model_Name
@@ -67,7 +67,7 @@ Categories_Name.append(['MatureP1', 5])
 
 global Trainingmodel
 #Initate training of the model
-Trainingmodel = NEATDetection(NpzDirectory, TrainModelName,ValidationModelName, categories, Categories_Name, Model_dir, Model_Name, TrainModel, depth = depth, model_weights = model_weights, includeTop = includeTop, lstm_hidden_unit1 = lstm_hidden_units
+Trainingmodel = NEATDetection(NpzDirectory, TrainModelName,ValidationModelName, categories, Categories_Name, Model_dir, Model_Name, TrainModel, depth = depth, model_weights = model_weights, cardinality = cardinality, lstm_hidden_unit1 = lstm_hidden_units
              ,epochs = epochs, batch_size = batch_size, show = show )
 
 
