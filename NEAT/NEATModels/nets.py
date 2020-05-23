@@ -215,6 +215,7 @@ def LSTMresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinalit
                 num_filters_out = num_filters_in * 2
                 if res_block == 0:  # not first layer and not first stage
                     strides = 2   # downsample
+                    
 
             # bottleneck residual unit
             y = TDLSTMresnet_layer(inputs=x,
@@ -327,25 +328,40 @@ def TDresnext_layer(inputs,
                  conv_first=True):
     
     group_list = []
-    for c in range(cardinality):
-        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters])(inputs)
+    grouped_channels = int(num_filters / cardinality)
+    
+    if cardinality == 1:
+        
+                x = TimeDistributed(Conv2D(grouped_channels,
+                  kernel_size=kernel_size,
+                  strides=strides,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=regularizers.l2(1e-4)))(inputs)
+                   
+                x = TimeDistributed(BatchNormalization())(x)
+                if activation is not None:
+                    x = TimeDistributed(Activation(activation))(x)
+                return x    
+    else:
+      for c in range(cardinality):
+        
+          x = Lambda(lambda z: z[:, :, :,:, c * grouped_channels: (c + 1) * grouped_channels])(inputs)
 
-        x = TimeDistributed(Conv2D(num_filters,
+          x = TimeDistributed(Conv2D(grouped_channels,
                   kernel_size=kernel_size,
                   strides=strides,
                   padding='same',
                   kernel_initializer='he_normal',
                   kernel_regularizer=regularizers.l2(1e-4)))(x)
 
-        group_list.append(x)
-
-    group_merge = concatenate(group_list, axis=-1)
+          group_list.append(x)
+       
+      group_merge = concatenate(group_list, axis=-1)
    
-    x = group_merge
-    if batch_normalization:
-        x = TimeDistributed(BatchNormalization())(x)
-    if activation is not None:
-        x = TimeDistributed(Activation(activation))(x)
+      x = TimeDistributed(BatchNormalization())(group_merge)
+      if activation is not None:
+          x = TimeDistributed(Activation(activation))(x)
 
     return x
    
@@ -656,9 +672,9 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
     num_res_blocks = int((depth - 2) / 9)
 
     # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
-    x = ThreeDresnext_layer(inputs=img_input,
+    x = ThreeDresnet_layer(inputs=img_input,
                      num_filters=num_filters_in,
-                     cardinality = cardinality,
+                   
                      conv_first=True)
 
     # Instantiate the stack of residual units
@@ -672,6 +688,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                 if res_block == 0:  # first layer and first stage
                     activation = None
                     batch_normalization = False
+                   
             else:
                 num_filters_out = num_filters_in * 2
                 if res_block == 0:  # not first layer and not first stage
@@ -682,7 +699,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                              num_filters=num_filters_in,
                              kernel_size=1,
                              strides=strides,
-                             cardinality = cardinality,
+                             cardinality = 1,
                              activation=activation,
                              batch_normalization=batch_normalization,
                              conv_first=False)
@@ -692,7 +709,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                              conv_first=False)
             y = ThreeDresnext_layer(inputs=y,
                              num_filters=num_filters_out,
-                             cardinality = cardinality,
+                             cardinality = 1,
                              kernel_size=1,
                              conv_first=False)
             if res_block == 0:
@@ -702,7 +719,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                                  num_filters=num_filters_out,
                                  kernel_size=1,
                                  strides=strides,
-                                 cardinality = cardinality,
+                                 cardinality = 1,
                                  activation=None,
                                  batch_normalization=False)
               
@@ -716,9 +733,9 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
     num_filters_in_TD = startfilter
     num_res_blocks = int((depth - 2) / 9)
     
-    z = TDresnext_layer(inputs=img_input,
+    z = TDresnet_layer(inputs=img_input,
                      num_filters=num_filters_in_TD,
-                     cardinality = cardinality,
+                     
                      conv_first=True)
 
     # Instantiate the stack of residual units
@@ -742,7 +759,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                              num_filters=num_filters_in_TD,
                              kernel_size=1,
                              strides=strides,
-                             cardinality = cardinality,
+                             cardinality = 1,
                              activation=activation,
                              batch_normalization=batch_normalization,
                              conv_first=False)
@@ -752,7 +769,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                              conv_first=False)
             yz = TDresnext_layer(inputs=yz,
                              num_filters=num_filters_out,
-                             cardinality = cardinality,
+                             cardinality = 1,
                              kernel_size=1,
                              conv_first=False)
             if res_block == 0:
@@ -762,7 +779,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                                  num_filters=num_filters_out,
                                  kernel_size=1,
                                  strides=strides,
-                                 cardinality = cardinality,
+                                 cardinality = 1,
                                  activation=None,
                                  batch_normalization=False)
               
@@ -1017,25 +1034,37 @@ def ThreeDresnext_layer(inputs,
                  conv_first=True):
     
     group_list = []
-    for c in range(cardinality):
-        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters])(inputs)
+    grouped_channels = int(num_filters / cardinality)
+    if cardinality == 1:
+                x = Conv3D(grouped_channels,
+                  kernel_size=kernel_size,
+                  strides=(1,strides,strides),
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=regularizers.l2(1e-4))(inputs)
+                x = (BatchNormalization())(x)
+                if activation is not None:
+                     x = (Activation(activation))(x)
+                return x     
+    else:    
+      for c in range(cardinality):
+        
+          x = Lambda(lambda z:z[:, :, :, :,c * grouped_channels: (c + 1) * grouped_channels])(inputs)
 
-        x = Conv3D(num_filters,
+          x = Conv3D(grouped_channels,
                   kernel_size=kernel_size,
                   strides=(1,strides,strides),
                   padding='same',
                   kernel_initializer='he_normal',
                   kernel_regularizer=regularizers.l2(1e-4))(x)
 
-        group_list.append(x)
-
-    group_merge = concatenate(group_list, axis=-1)
+          group_list.append(x)
+       
+      group_merge = concatenate(group_list, axis=-1)
    
-    x = group_merge
-    if batch_normalization:
-        x = TimeDistributed(BatchNormalization())(x)
-    if activation is not None:
-        x = TimeDistributed(Activation(activation))(x)
+      x = (BatchNormalization())(group_merge)
+      if activation is not None:
+          x = (Activation(activation))(x)
 
     return x    
 def Timedistributedidentity_block(input_tensor, kernel_size, filters):
@@ -1406,9 +1435,9 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
     num_res_blocks = int((depth - 2) / 9)
 
     # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
-    x = resnext_layer(inputs=img_input,
+    x = resnet_layer(inputs=img_input,
                      num_filters=num_filters_in,
-                     cardinality = cardinality,
+                     
                      conv_first=True)
 
     # Instantiate the stack of residual units
@@ -1422,6 +1451,7 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
                 if res_block == 0:  # first layer and first stage
                     activation = None
                     batch_normalization = False
+                   
             else:
                 num_filters_out = num_filters_in * 2
                 if res_block == 0:  # not first layer and not first stage
@@ -1432,7 +1462,7 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
                              num_filters=num_filters_in,
                              kernel_size=1,
                              strides=strides,
-                             cardinality = cardinality,
+                             cardinality = 1,
                              activation=activation,
                              batch_normalization=batch_normalization,
                              conv_first=False)
@@ -1442,7 +1472,7 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
                              conv_first=False)
             y = resnext_layer(inputs=y,
                              num_filters=num_filters_out,
-                             cardinality = cardinality,
+                             cardinality = 1,
                              kernel_size=1,
                              conv_first=False)
             if res_block == 0:
@@ -1452,7 +1482,7 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
                                  num_filters=num_filters_out,
                                  kernel_size=1,
                                  strides=strides,
-                                 cardinality = cardinality,
+                                 cardinality = 1,
                                  activation=None,
                                  batch_normalization=False)
               
@@ -1543,25 +1573,43 @@ def resnext_layer(inputs,
                  conv_first=True):
     
     group_list = []
-    for c in range(cardinality):
-        x = Lambda(lambda z: z[:, :, :, c * num_filters:(c + 1) * num_filters])(inputs)
+   
+    grouped_channels = int(num_filters / cardinality)
+    if cardinality == 1:
+        
+        x = (Conv2D(grouped_channels,
+                  kernel_size=kernel_size,
+                  strides=strides,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=regularizers.l2(1e-4)))(inputs)
+        x = (BatchNormalization())(x)
+        if activation is not None:
+              x = (Activation(activation))(x)
+        return x 
 
-        x = (Conv2D(num_filters,
+         
+    else:    
+      for c in range(cardinality):
+        
+          x = Lambda(lambda z:z[:, :, :, c * grouped_channels: (c + 1) * grouped_channels])(inputs)
+
+          x = (Conv2D(grouped_channels,
                   kernel_size=kernel_size,
                   strides=strides,
                   padding='same',
                   kernel_initializer='he_normal',
                   kernel_regularizer=regularizers.l2(1e-4)))(x)
 
-        group_list.append(x)
-
-    group_merge = concatenate(group_list, axis=-1)
+          group_list.append(x)
+        
+      group_merge = concatenate(group_list, axis=-1)
    
-    x = group_merge
-    if batch_normalization:
-        x = TimeDistributed(BatchNormalization())(x)
-    if activation is not None:
-        x = TimeDistributed(Activation(activation))(x)
+    
+    
+      x = (BatchNormalization())(group_merge)
+      if activation is not None:
+          x = (Activation(activation))(x)
 
-    return x
+      return x
    
