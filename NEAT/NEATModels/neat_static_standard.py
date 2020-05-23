@@ -148,7 +148,7 @@ class NEATStaticDetection(object):
         d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
         d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
-        self.Trainingmodel = self.model_keras(input_shape, self.categories, box_vector = Y_rest.shape[-1] , depth = self.depth, input_weights  =  self.model_weights,  unit = 1, cardinality = self.cardinality)
+        self.Trainingmodel = self.model_keras(input_shape, self.categories, box_vector = Y_rest.shape[-1] , depth = self.depth, input_weights  =  self.model_weights, cardinality = self.cardinality)
         
         learning_rate = 1.0E-4
             
@@ -161,7 +161,7 @@ class NEATStaticDetection(object):
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)#, min_delta=0.0000001)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show)
+        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show)
         
         
         #Train the model and save as a h5 file

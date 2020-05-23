@@ -425,6 +425,57 @@ def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshol
            i += 1
            if i >= prediction.shape[0]:
                   break
+              
+                
+def PrintStaticpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshold=.8, plot = False,  DualModel = True):
+
+    try:
+        idx = list(idx)
+    except:
+        idx = [idx]
+        
+
+    data = data[idx]
+    Truelabel = Truelabel[idx]
+    mean = np.mean(data)
+    
+    if mean > 0:
+      prediction = model.predict(data)
+   
+      i = 0
+   
+      while i < prediction.shape[0]:
+           
+          
+        
+        for i in range(0,(prediction.shape[0])): 
+           
+           
+           
+            img = data[i,:,:,0]
+            if plot:
+              import matplotlib.pyplot as plt   
+              plt.imshow(img, cm.Spectral)
+              plt.show()   
+            if len(Categories_name) > 1: 
+              for k in range(0, len(Categories_name)):
+               
+               Name, Label = Categories_name[k]
+               
+               print('Top predictions : ' , Name, 'Probability', ':' , prediction[i,:,:, int(Label)])
+  
+                   
+            print('X Y',prediction[i,:,:,int(Label)+1:int(Label)+3])
+            print('True Label : ', Truelabel)
+            
+         
+
+            if plot:
+              plt.show()     
+          
+            i += 1
+            if i >= prediction.shape[0]:
+                  break              
 
 def X_right_prediction(image,sY, sX, time_prediction, stride, inputtime, Categories_Name, Categories_event_threshold, TrainshapeX, TrainshapeY, TimeFrames):
     
