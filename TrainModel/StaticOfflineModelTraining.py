@@ -8,10 +8,10 @@ import sys
 import os
 from glob import glob
 sys.path.append("../NEAT")
-from NEATModels import NEATDetection, nets 
+from NEATModels import NEATStaticDetection, nets 
 from NEATUtils import helpers
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
@@ -20,12 +20,12 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 #Specify the location and name of the npz file for training and validation data
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'ONEATBin2.npz'
-ValidationModelName = 'ONEATBin2Validation.npz'
+TrainModelName = 'StaticONEATBin2.npz'
+ValidationModelName = 'StaticONEATBin2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'ONEXTd29ls16ca16.h5'
+Model_Name = 'StaticONEXTd29cl48ca16.h5'
 
 
 # In[3]:
@@ -35,14 +35,14 @@ Model_Name = 'ONEXTd29ls16ca16.h5'
 
 #Normal Events = 0, Apoptosis = 1, Division = 2
 categories = 6
-batch_size = 15
-lstm_hidden_units = 16
+batch_size = 80
+
 epochs = 150
 depth = 29
 cardinality = 16
 
 show = False
-TrainModel = nets.ONETresnext_v2
+TrainModel = nets.resnext_v2
 model_weights = Model_dir + Model_Name
 
 if os.path.exists(model_weights):
@@ -55,11 +55,11 @@ else:
 
 Categories_Name = []
 Categories_Name.append(['Normal', 0])
-Categories_Name.append(['Apoptosis', 1])
-Categories_Name.append(['Divisions', 2])
-Categories_Name.append(['MacroKitty', 3])
-Categories_Name.append(['NonMatureP1', 4])
-Categories_Name.append(['MatureP1', 5])
+Categories_Name.append(['Apoptosis', 4])
+Categories_Name.append(['Divisions', 5])
+Categories_Name.append(['MacroKitty', 1])
+Categories_Name.append(['NonMatureP1', 2])
+Categories_Name.append(['MatureP1', 3])
 
 
 # In[ ]:
@@ -67,8 +67,7 @@ Categories_Name.append(['MatureP1', 5])
 
 global Trainingmodel
 #Initate training of the model
-Trainingmodel = NEATDetection(NpzDirectory, TrainModelName,ValidationModelName, categories, Categories_Name, Model_dir, Model_Name, TrainModel, depth = depth, model_weights = model_weights, cardinality = cardinality, lstm_hidden_unit1 = lstm_hidden_units
-             ,epochs = epochs, batch_size = batch_size, show = show )
+Trainingmodel = NEATStaticDetection(NpzDirectory, TrainModelName,ValidationModelName, categories, Categories_Name, Model_dir, Model_Name, TrainModel, depth = depth, model_weights = model_weights, cardinality = cardinality ,epochs = epochs, batch_size = batch_size, show = show )
 
 
 # In[ ]:
