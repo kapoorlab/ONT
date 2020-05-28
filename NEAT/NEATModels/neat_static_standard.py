@@ -150,7 +150,7 @@ class NEATStaticDetection(object):
         
         self.Trainingmodel = self.model_keras(input_shape, self.categories, box_vector = Y_rest.shape[-1] , depth = self.depth, input_weights  =  self.model_weights, cardinality = self.cardinality)
         
-        learning_rate = 1.0E-2
+        learning_rate = 1.0E-4
             
         sgd = optimizers.SGD(lr=learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         self.Trainingmodel.compile(optimizer=sgd, loss=yolo_loss(Ncat = self.categories), metrics=['accuracy'])
