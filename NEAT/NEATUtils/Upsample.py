@@ -4,6 +4,7 @@ import csv
 import os
 import cv2
 import glob
+import shutil
 import numpy as np
 from tifffile import imread 
 from NEATUtils.helpers import save_tiff_imagej_compatible
@@ -32,8 +33,10 @@ def UpsampleMovies(TargetDir, SourceDir, SizeX, SizeY):
       currentTargetDir = TargetDir + '/' + x
       Path(currentTargetDir).mkdir(exist_ok = True)  
       Raw_path = os.path.join(currentdir,'*.tif')
+      Csv_path = os.path.join(currentdir,'*.csv')
       X = glob.glob(Raw_path)
-
+      XCsv = glob.glob(Csv_path)  
+      shutil.copyfile(XCsv[0], currentTargetDir + '/' + 'Label' + '.csv')  
       
       for y in X:
          image = imread(y)
@@ -53,9 +56,11 @@ def UpsampleImages(TargetDir, SourceDir, SizeX, SizeY):
       currentTargetDir = TargetDir + '/' + x
       Path(currentTargetDir).mkdir(exist_ok = True)  
       Raw_path = os.path.join(currentdir,'*.tif')
+      Csv_path = os.path.join(currentdir,'*.csv')
       X = glob.glob(Raw_path)
-
- 
+      XCsv = glob.glob(Csv_path)  
+      shutil.copyfile(XCsv[0], currentTargetDir + '/' + 'Label' + '.csv')  
+      
       for y in X:
          image = imread(y)
          targetimage = np.zeros([SizeX, SizeY])
