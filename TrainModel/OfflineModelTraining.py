@@ -47,7 +47,7 @@ model_weights = Model_dir + Model_Name
 
 if os.path.exists(model_weights):
 
-    model_weights = model_weights
+    model_weights = None
     print('loading weights')
 else:
    
