@@ -14,7 +14,7 @@ import os
 from glob import glob
 sys.path.append("../NEAT")
 from  NEATUtils import Augmentation
-from NEATUtils import MovieCreator, npzfileGenerator
+from NEATUtils import MovieCreator, npzfileGenerator, UpSample
 try:
     from pathlib import Path
     Path().expanduser()
@@ -54,23 +54,24 @@ except (ImportError,AttributeError):
 
 
 ###### Specify the image used for making the csv file
-SourceDir = '/home/sancere/VarunNewton/TrainingDataONEAT/CSVforNeat/NEATcsvfiles/'
-SourceImage = imread(SourceDir + 'wt_N10.tif')
+SourceDir = '/home/sancere/VarunNewton/TrainingDataONEATBin2/CSVforNeat/NEATcsvfiles/'
+SourceImage = imread(SourceDir + 'EventMovie.tif')
 NormalCSV = SourceDir + 'Movie2Normal.csv'
-ApoptosisCSV = SourceDir +  'wt_N10Apoptosis.csv'
-DivisionCSV = SourceDir +  'wt_N10Division.csv'
+ApoptosisCSV = SourceDir +  'Movie2Apoptosis.csv'
+DivisionCSV = SourceDir +  'Movie2Division.csv'
 MacrocheateCSV = SourceDir +  'Movie2MacroKitty.csv'
 NonMatureCSV = SourceDir +  'Movie2NonMature.csv'
 MatureCSV = SourceDir +  'Movie2Mature.csv'
 
-Rawsave_dir = '/home/sancere/VarunNewton/TrainingDataONEAT/'
-RawNormalsave_dir = Rawsave_dir + 'MidDynamicNormalEventTrainingData'
-RawApoptosissave_dir = Rawsave_dir + 'MidDynamicMasterApoptosisEventTrainingData'
-RawDivisionsave_dir = Rawsave_dir + 'MidDynamicMasterDivisionEventTrainingData'
-RawMacrocheatesave_dir = Rawsave_dir + 'MidDynamicMacroKittyEventTrainingData'
-RawNonMaturesave_dir = Rawsave_dir + 'MidDynamicNonMatureP1EventTrainingData'
-RawMaturesave_dir = Rawsave_dir + 'MidDynamicMatureP1EventTrainingData'
+Rawsave_dir = '/home/sancere/VarunNewton/TrainingDataONEATBin2/'
+RawNormalsave_dir = Rawsave_dir + 'DynamicNormalEventTrainingDataBin2'
+RawApoptosissave_dir = Rawsave_dir + 'DynamicMasterApoptosisEventTrainingDataBin2'
+RawDivisionsave_dir = Rawsave_dir + 'DynamicMasterDivisionEventTrainingDataBin2'
+RawMacrocheatesave_dir = Rawsave_dir + 'DynamicMacroKittyEventTrainingDataBin2'
+RawNonMaturesave_dir = Rawsave_dir + 'DynamicNonMatureP1EventTrainingDataBin2'
+RawMaturesave_dir = Rawsave_dir + 'DynamicMatureP1EventTrainingDataBin2'
 
+Path(Rawsave_dir).mkdir(exist_ok = True)
 Path(RawNormalsave_dir).mkdir(exist_ok = True)
 Path(RawApoptosissave_dir).mkdir(exist_ok = True)
 Path(RawDivisionsave_dir).mkdir(exist_ok = True)
@@ -79,12 +80,12 @@ Path(RawNonMaturesave_dir).mkdir(exist_ok = True)
 Path(RawMaturesave_dir).mkdir(exist_ok = True)
 
 Localizationsave_dir = '/home/sancere/VarunNewton/CurieTrainingDatasets/Raw_Datasets/Neat/'
-LocalizationNormalsave_dir = Localizationsave_dir +  'MidDynamicNormalEventTrainingData'
-LocalizationApoptosissave_dir = Localizationsave_dir + 'MidDynamicMasterApoptosisEventTrainingData'
-LocalizationDivisionsave_dir = Localizationsave_dir + 'MidDynamicMasterDivisionEventTrainingData'
-LocalizationMacrocheatesave_dir = Localizationsave_dir + 'MidDynamicMacroKittyEventTrainingData'
-LocalizationNonMaturesave_dir = Localizationsave_dir + 'MidDynamicNonMatureP1EventTrainingData'
-LocalizationMaturesave_dir = Localizationsave_dir +  'MidDynamicMatureP1EventTrainingData'
+LocalizationNormalsave_dir = Localizationsave_dir +  'DynamicNormalEventTrainingDataBin2'
+LocalizationApoptosissave_dir = Localizationsave_dir + 'DynamicMasterApoptosisEventTrainingDataBin2'
+LocalizationDivisionsave_dir = Localizationsave_dir + 'DynamicMasterDivisionEventTrainingDataBin2'
+LocalizationMacrocheatesave_dir = Localizationsave_dir + 'DynamicMacroKittyEventTrainingDataBin2'
+LocalizationNonMaturesave_dir = Localizationsave_dir + 'DynamicNonMatureP1EventTrainingDataBin2'
+LocalizationMaturesave_dir = Localizationsave_dir +  'DynamicMatureP1EventTrainingDataBin2'
 
 Path(LocalizationNormalsave_dir).mkdir(exist_ok = True)
 Path(LocalizationApoptosissave_dir).mkdir(exist_ok = True)
@@ -95,12 +96,22 @@ Path(LocalizationMaturesave_dir).mkdir(exist_ok = True)
 
 SaveNpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
 
-crop_size = [64,64,3]
+crop_size = [54,54,3]
 SizeX = crop_size[0]
 SizeY = crop_size[1]
 #Shift the event by these many pixels
 shift = 10
 TotalCategories = 6
+
+
+# In[ ]:
+
+
+RawBin1Divisionsave_dir = '/home/sancere/VarunNewton/TrainingDataONEATBin1/' + 'DynamicDivisionEventTrainingDataBin1'
+RawBin1Apoptosissave_dir = '/home/sancere/VarunNewton/TrainingDataONEATBin1/' + 'DynamicApoptosisEventTrainingDataBin1'
+#Target and Source , upsample all movies
+Upsample.DownsampleMovies(RawDivisionsave_dir, RawBin1Divisionsave_dir,SizeX, SizeY)
+Upsample.DownsampleMovies(RawMaturesave_dir, RawBin1Maturesave_dir,SizeX, SizeY)
 
 
 # In[ ]:
@@ -125,47 +136,53 @@ MovieCreator.CreateMoviesTXYZ(DivisionCSV, SourceImage, crop_size, shift,TotalCa
 # In[ ]:
 
 
+
+
+
+# In[ ]:
+
+
 #elasticDeform = True, putNoise (Blur) = True in that order
 Subdir = next(os.walk(RawNormalsave_dir))
 
 for x in Subdir[1]:
     currentdir = RawNormalsave_dir + '/' + x
-    Augmentation(currentdir,LocalizationNormalsave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Master')
+    Augmentation(currentdir,LocalizationNormalsave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Bin2')
     
 Subdir = next(os.walk(RawApoptosissave_dir))
 
 for x in Subdir[1]:
     
     currentdir = RawApoptosissave_dir + '/' + x
-    Augmentation(currentdir,LocalizationApoptosissave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Master') 
+    Augmentation(currentdir,LocalizationApoptosissave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Bin2') 
     
 Subdir = next(os.walk(RawDivisionsave_dir))
 
 for x in Subdir[1]:
     
     currentdir = RawDivisionsave_dir + '/' + x
-    Augmentation(currentdir,LocalizationDivisionsave_dir +'/' + x, SizeX, SizeY, False,False,AppendName = 'Master') 
+    Augmentation(currentdir,LocalizationDivisionsave_dir +'/' + x, SizeX, SizeY, False,False,AppendName = 'Bin2') 
     
 Subdir = next(os.walk(RawMacrocheatesave_dir))
 
 for x in Subdir[1]:
     
     currentdir = RawMacrocheatesave_dir + '/' + x
-    Augmentation(currentdir,LocalizationMacrocheatesave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Master') 
+    Augmentation(currentdir,LocalizationMacrocheatesave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Bin2') 
 
 Subdir = next(os.walk(RawNonMaturesave_dir))
 
 for x in Subdir[1]:
     
     currentdir = RawNonMaturesave_dir + '/' + x
-    Augmentation(currentdir,LocalizationNonMaturesave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Master') 
+    Augmentation(currentdir,LocalizationNonMaturesave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Bin2') 
     
 Subdir = next(os.walk(RawMaturesave_dir))
 
 for x in Subdir[1]:
     
     currentdir = RawMaturesave_dir + '/' + x
-    Augmentation(currentdir,LocalizationMaturesave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Master') 
+    Augmentation(currentdir,LocalizationMaturesave_dir +'/' + x, SizeX, SizeY, False,True,AppendName = 'Bin2') 
         
     
 
@@ -255,20 +272,27 @@ for x in Subdir[1]:
 # In[ ]:
 
 
-SaveName = 'MasterONEAT'
-SaveNameVal = 'MasterONEATValidation'
+SaveName = 'ONEATBin2'
+SaveNameVal = 'ONEATBin2Validation'
 
 
 MovieFrames = 7
 npzfileGenerator.generate_training_data(DirectoryList, LabelList,SaveNpzDirectory, SaveName, SaveNameVal,0, MovieFrames, SizeX, SizeY)
         
-SaveName = 'MasterONEATPrediction'
-SaveNameVal = 'MasterONEATPredictionValidation'
+SaveName = 'ONEATBin2Prediction'
+SaveNameVal = 'ONEATBin2PredictionValidation'
 
 
 MovieFrames = 4
 npzfileGenerator.generate_training_data(DirectoryList, LabelList,SaveNpzDirectory, SaveName, SaveNameVal,0, MovieFrames, SizeX, SizeY)
-            
+
+SaveName = 'ONEATBin2PrePrediction'
+SaveNameVal = 'ONEATBin2PrePredictionValidation'
+
+
+MovieFrames = 3
+npzfileGenerator.generate_training_data(DirectoryList, LabelList,SaveNpzDirectory, SaveName, SaveNameVal,0, MovieFrames, SizeX, SizeY)
+    
 
 
 # In[ ]:

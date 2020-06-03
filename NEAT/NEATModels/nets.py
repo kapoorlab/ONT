@@ -160,6 +160,99 @@ def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinality 
         
     return model
 
+def TDNONresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinality = 1,  input_weights = None):
+    """ResNet Version 2 Model builder [b]
+    Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
+    bottleneck layer
+     depth of 29 == max pooling of 28 for image patch of 55
+    depth of 56 == max pooling of 14 for image patch of 55
+    First shortcut connection per layer is 1 x 1 Conv2D.
+    Second and onwards shortcut connection is identity.
+    At the beginning of each stage, the feature map size is halved (downsampled)
+    by a convolutional layer with strides=2, while the number of filter maps is
+    doubled. Within each stage, the layers have the same number filters and the
+    same filter map sizes.
+    Features maps sizes:
+    conv1  : 32x32,  16
+    stage 0: 32x32,  64
+    stage 1: 16x16, 128
+    stage 2:  8x8,  256
+    # Arguments
+        input_shape (tensor): shape of input image tensor
+        depth (int): number of core convolutional layers
+        num_classes (int): number of classes (CIFAR10 has 10)
+    # Returns
+        model (Model): Keras model instance
+    """
+    img_input = layers.Input(shape = (input_shape[0], None, None, input_shape[3]))
+    if (depth - 2) % 9 != 0:
+        raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
+    # Start model definition.
+    num_filters_in = startfilter
+    num_res_blocks = int((depth - 2) / 9)
+
+    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
+    x = TDresnet_layer(inputs=img_input,
+                     num_filters=num_filters_in,
+                     conv_first=True)
+
+    # Instantiate the stack of residual units
+    for stage in range(3):
+        for res_block in range(num_res_blocks):
+            activation = 'relu'
+            batch_normalization = True
+            strides = 1
+            if stage == 0:
+                num_filters_out = num_filters_in * 4
+                if res_block == 0:  # first layer and first stage
+                    activation = None
+                    batch_normalization = False
+            else:
+                num_filters_out = num_filters_in * 2
+                if stage == 0:  # not first layer and not first stage
+                    strides = 2   # downsample
+
+            # bottleneck residual unit
+            
+            x = TDresnet_layer(inputs=x,
+                             num_filters=num_filters_in,
+                             conv_first=False,
+                             strides = strides,
+                             activation=activation,
+                             batch_normalization=batch_normalization)
+            
+              
+            #if res_block%3 == 0:
+              #x = TimeDistributed(layers.MaxPooling2D((2,2)))(x)
+        num_filters_in = num_filters_out
+
+    # Add classifier on top.
+    # v2 has BN-ReLU before Pooling
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
+
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+    
+    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+    
+    block = Concat(-1)
+    outputs = block([output_cat,output_box]) 
+    inputs = img_input
+   
+    # Create model.
+    model = models.Model(inputs, outputs)
+    
+    
+    if input_weights is not None:
+
+        model.load_weights(input_weights, by_name =True)
+        
+    return model
+
+
 
 def LSTMresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinality = 1,  input_weights = None):
     """ResNet Version 2 Model builder [b]
@@ -502,6 +595,88 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinal
         
     return model
 
+def ThreeDNonresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinality = 1,  input_weights = None):
+    """ResNet Version 2 Model builder [b]
+    depth of 29 == max pooling of 28 for image patch of 55
+    depth of 56 == max pooling of 14 for image patch of 55
+    """
+    img_input = layers.Input(shape = (input_shape[0], None, None, input_shape[3]))
+    if (depth - 2) % 9 != 0:
+        raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
+    # Start model definition.
+    num_filters_in = startfilter
+    num_res_blocks = int((depth - 2) / 9)
+
+    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
+    x = ThreeDresnet_layer(inputs=img_input,
+                     num_filters=num_filters_in,
+                     conv_first=True)
+
+    # Instantiate the stack of residual units
+    for stage in range(3):
+        for res_block in range(num_res_blocks):
+            activation = 'relu'
+            batch_normalization = True
+            strides = 1
+            if stage == 0:
+                num_filters_out = num_filters_in * 4
+                if res_block == 0:  # first layer and first stage
+                    activation = None
+                    batch_normalization = False
+            else:
+                num_filters_out = num_filters_in * 2
+                if res_block == 0:  # not first layer and not first stage
+                    strides = 2   # downsample
+
+            # bottleneck residual unit
+      
+            x = ThreeDresnet_layer(inputs=x,
+                             num_filters=num_filters_in,
+                             conv_first=False,
+                             strides = strides,
+                             activation=activation,
+                             batch_normalization=batch_normalization)
+         
+
+              
+            #if res_block%3 == 0:
+              #x = (layers.MaxPooling3D((1,2,2)))(x)
+        num_filters_in = num_filters_out
+
+    # Add classifier on top.
+    # v2 has BN-ReLU before Pooling
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    
+
+    
+    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
+
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+
+        
+    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+
+
+
+
+    block = Concat(-1)
+    outputs = block([output_cat,output_box]) 
+    inputs = img_input
+   
+    # Create model.
+    model = models.Model(inputs, outputs)
+
+    
+    if input_weights is not None:
+
+        model.load_weights(input_weights, by_name =True)
+        
+    return model
+
+
 
 def ONETresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinality = 1, input_weights = None):
     """ResNet Version 2 Model builder [b]
@@ -617,6 +792,133 @@ def ONETresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinali
                                  batch_normalization=False)
               
             z = K.layers.add([z, yz])
+        num_filters_in_TD = num_filters_out
+
+    # Add classifier on top.
+    # v2 has BN-ReLU before Pooling
+    z = BatchNormalization()(z)
+    z = Activation('relu')(z)
+    
+    
+    
+    branchAdd = layers.add([z, x])
+    
+
+    
+    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
+
+
+
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+
+        
+    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+
+
+
+
+    block = Concat(-1)
+    outputs = block([output_cat,output_box]) 
+    inputs = img_input
+   
+    # Create model.
+    model = models.Model(inputs, outputs)
+
+
+    if input_weights is not None:
+
+       model.load_weights(input_weights, by_name =True)
+    
+    return model
+
+
+
+def ONETNonresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinality = 1, input_weights = None):
+    """ResNet Version 2 Model builder [b]
+    depth of 29 == max pooling of 28 for image patch of 55
+    depth of 56 == max pooling of 14 for image patch of 55
+    """
+    img_input = layers.Input(shape = (input_shape[0], None, None, input_shape[3]))
+    if (depth - 2) % 9 != 0:
+        raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
+    # Start model definition.
+    num_filters_in = startfilter
+    num_res_blocks = int((depth - 2) / 9)
+
+    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
+    x = ThreeDresnet_layer(inputs=img_input,
+                     num_filters=num_filters_in,
+                     conv_first=True)
+
+    # Instantiate the stack of residual units
+    for stage in range(3):
+        for res_block in range(num_res_blocks):
+            activation = 'relu'
+            batch_normalization = True
+            strides = 1
+            if stage == 0:
+                num_filters_out = num_filters_in * 4
+                if res_block == 0:  # first layer and first stage
+                    activation = None
+                    batch_normalization = False
+            else:
+                num_filters_out = num_filters_in * 2
+                if res_block == 0:  # not first layer and not first stage
+                    strides = 2   # downsample
+
+            # bottleneck residual unit
+  
+            x = ThreeDresnet_layer(inputs=x,
+                             num_filters=num_filters_in,
+                             conv_first=False,
+                             strides=strides,
+                             activation=activation,
+                             batch_normalization=batch_normalization)
+
+
+              
+        num_filters_in = num_filters_out
+
+    # Add classifier on top.
+    # v2 has BN-ReLU before Pooling
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    num_filters_in_TD = startfilter
+    num_res_blocks = int((depth - 2) / 9)
+    
+    z = TDresnet_layer(inputs=img_input,
+                     num_filters=num_filters_in_TD,
+                     conv_first=True)
+
+    # Instantiate the stack of residual units
+    for stage in range(3):
+        for res_block in range(num_res_blocks):
+            activation = 'relu'
+            batch_normalization = True
+            strides = 1
+            if stage == 0:
+                num_filters_out = num_filters_in_TD * 4
+                if res_block == 0:  # first layer and first stage
+                    activation = None
+                    batch_normalization = False
+            else:
+                num_filters_out = num_filters_in_TD * 2
+                if res_block == 0:  # not first layer and not first stage
+                    strides = 2   # downsample
+
+            # bottleneck residual unit
+      
+            z = TDresnet_layer(inputs=z,
+                             num_filters=num_filters_in_TD,
+                             conv_first=False,
+                             strides=strides,
+                             activation=activation,
+                             batch_normalization=batch_normalization)
+
+
+              
         num_filters_in_TD = num_filters_out
 
     # Add classifier on top.
@@ -1405,6 +1707,105 @@ def resnet_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1, 
         
     return model
   
+def Nonresnet_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1, input_weights = None):
+    """ResNet Version 2 Model builder [b]
+    Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
+    bottleneck layer
+    First shortcut connection per layer is 1 x 1 Conv2D.
+    Second and onwards shortcut connection is identity.
+    At the beginning of each stage, the feature map size is halved (downsampled)
+    by a convolutional layer with strides=2, while the number of filter maps is
+    doubled. Within each stage, the layers have the same number filters and the
+    same filter map sizes.
+    Features maps sizes:
+    conv1  : 32x32,  16
+    stage 0: 32x32,  64
+    stage 1: 16x16, 128
+    stage 2:  8x8,  256
+    # Arguments
+        input_shape (tensor): shape of input image tensor
+        depth (int): number of core convolutional layers
+        num_classes (int): number of classes (CIFAR10 has 10)
+    # Returns
+        model (Model): Keras model instance
+    """
+    img_input = layers.Input(shape = (None, None, input_shape[2]))
+    if (depth - 2) % 9 != 0:
+        raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
+    # Start model definition.
+    num_filters_in = startfilter
+    num_res_blocks = int((depth - 2) / 9)
+
+    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
+    x = resnet_layer(inputs=img_input,
+                     num_filters=num_filters_in,
+                     conv_first=True)
+
+    # Instantiate the stack of residual units
+    for stage in range(3):
+        for res_block in range(num_res_blocks):
+            activation = 'relu'
+            batch_normalization = True
+            strides = 1
+            if stage == 0:
+                num_filters_out = num_filters_in * 4
+                if res_block == 0:  # first layer and first stage
+                    activation = None
+                    batch_normalization = False
+            else:
+                num_filters_out = num_filters_in * 2
+                if res_block == 0:  # not first layer and not first stage
+                    strides = 2  # downsample
+
+            # bottleneck residual unit
+
+            x = resnet_layer(inputs=x,
+                             num_filters=num_filters_in,
+                             conv_first=False,
+                             strides = strides,
+                             activation=activation,
+                             batch_normalization=batch_normalization)
+           
+ 
+              
+        
+        num_filters_in = num_filters_out
+
+    # Add classifier on top.
+    # v2 has BN-ReLU before Pooling
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    
+
+    
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+    
+      
+    
+
+    output_cat = (Conv2D(categories, (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+    
+
+    block = Concat(-1)
+    outputs = block([output_cat,output_box])
+
+    inputs = img_input
+   
+     
+    # Create model.
+    model = models.Model(inputs, outputs)
+    
+    
+    if input_weights is not None:
+
+        model.load_weights(input_weights, by_name =True)
+        
+    return model
+      
+
+
 def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1, input_weights = None):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
