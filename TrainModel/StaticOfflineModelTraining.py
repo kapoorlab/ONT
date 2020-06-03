@@ -25,7 +25,7 @@ ValidationModelName = 'StaticONEATBin2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'StaticONEXTd29cl48ca16.h5'
+Model_Name = 'StaticBin2ONETd29cl48.h5'
 
 
 # In[3]:
@@ -35,19 +35,19 @@ Model_Name = 'StaticONEXTd29cl48ca16.h5'
 
 #Normal Events = 0, Apoptosis = 1, Division = 2
 categories = 6
-batch_size = 80
+batch_size = 100
 
 epochs = 150
 depth = 29
 cardinality = 16
 
 show = False
-TrainModel = nets.resnext_v2
+TrainModel = nets.resnet_v2
 model_weights = Model_dir + Model_Name
 
 if os.path.exists(model_weights):
 
-    model_weights = None
+    model_weights = model_weights
     print('loading weights')
 else:
    
@@ -55,11 +55,11 @@ else:
 
 Categories_Name = []
 Categories_Name.append(['Normal', 0])
-Categories_Name.append(['Apoptosis', 4])
-Categories_Name.append(['Divisions', 5])
 Categories_Name.append(['MacroKitty', 1])
 Categories_Name.append(['NonMatureP1', 2])
 Categories_Name.append(['MatureP1', 3])
+Categories_Name.append(['Apoptosis', 4])
+Categories_Name.append(['Divisions', 5])
 
 
 # In[ ]:

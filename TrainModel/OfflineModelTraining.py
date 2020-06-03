@@ -25,7 +25,7 @@ ValidationModelName = 'ONEATBin2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'ONEXTd29ls16ca16.h5'
+Model_Name = 'ONETd29ls16cl48.h5'
 
 
 # In[3]:
@@ -42,12 +42,12 @@ depth = 29
 cardinality = 16
 
 show = False
-TrainModel = nets.ONETresnext_v2
+TrainModel = nets.ONETresnet_v2
 model_weights = Model_dir + Model_Name
 
 if os.path.exists(model_weights):
 
-    model_weights = None
+    model_weights = model_weights
     print('loading weights')
 else:
    
