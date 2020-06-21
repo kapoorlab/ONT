@@ -12,9 +12,9 @@ from tifffile import imread
 import sys
 import os
 from glob import glob
-sys.path.append("../NEAT")
+sys.path.append("../../NEAT")
 from  NEATUtils import Augmentation
-from NEATUtils import MovieCreator, npzfileGenerator, UpSample
+from NEATUtils import MovieCreator, npzfileGenerator, Upsample
 try:
     from pathlib import Path
     Path().expanduser()
@@ -110,8 +110,8 @@ TotalCategories = 6
 RawBin1Divisionsave_dir = '/home/sancere/VarunNewton/TrainingDataONEATBin1/' + 'DynamicDivisionEventTrainingDataBin1'
 RawBin1Apoptosissave_dir = '/home/sancere/VarunNewton/TrainingDataONEATBin1/' + 'DynamicApoptosisEventTrainingDataBin1'
 #Target and Source , upsample all movies
-Upsample.DownsampleMovies(RawDivisionsave_dir, RawBin1Divisionsave_dir,SizeX, SizeY)
-Upsample.DownsampleMovies(RawMaturesave_dir, RawBin1Maturesave_dir,SizeX, SizeY)
+Upsample.DownsampleMovies(RawDivisionsave_dir, RawBin1Divisionsave_dir,SizeX, SizeY, "Bin1DS")
+Upsample.DownsampleMovies(RawApoptosissave_dir, RawBin1Apoptosissave_dir,SizeX, SizeY, "Bin1DS")
 
 
 # In[ ]:

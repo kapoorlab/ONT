@@ -21,12 +21,12 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 #Specify the location and name of the npz file for training and validation data
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'MasterONEAT.npz'
-ValidationModelName = 'MasterONEATValidation.npz'
+TrainModelName = 'ONEATBin2.npz'
+ValidationModelName = 'ONEATBin2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'MidONEATd38cl48.h5'
+Model_Name = 'RFORNETd29cl48ls16.h5'
 
 
 # In[3]:
@@ -39,15 +39,15 @@ categories = 6
 batch_size = 10
 lstm_hidden_units = 16
 epochs = 150
-depth = 38
+depth = 29
 cardinality = 16
 show = False
-TrainModel = nets.ONETresnet_v2
+TrainModel = nets.ONETNonresnet_v2
 model_weights = Model_dir + Model_Name
 
 if os.path.exists(model_weights):
 
-    model_weights = None
+    model_weights = model_weights
     print('loading weights')
 else:
    

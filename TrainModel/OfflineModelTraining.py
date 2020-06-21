@@ -25,7 +25,7 @@ ValidationModelName = 'ONEATBin2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'ONETd29ls16cl48.h5'
+Model_Name = 'RFONETd29ls16cl48.h5'
 
 
 # In[3]:

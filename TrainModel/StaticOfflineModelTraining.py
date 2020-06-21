@@ -24,7 +24,7 @@ TrainModelName = 'StaticONEATBin2.npz'
 ValidationModelName = 'StaticONEATBin2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
-Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
+Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/SuperModels/'
 Model_Name = 'StaticBin2ONETd29cl48.h5'
 
 

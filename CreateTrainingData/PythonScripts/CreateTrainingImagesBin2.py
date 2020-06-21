@@ -12,7 +12,7 @@ import os
 from glob import glob
 from tifffile import imread 
 import sys
-sys.path.append("../NEAT")
+sys.path.append("../../NEAT")
 from  NEATUtils import Augmentation2D
 from NEATUtils import MovieCreator,npzfileGenerator, Upsample
 try:
@@ -111,8 +111,8 @@ SizeY = crop_size[1]
 RawBin1Divisionsave_dir = '/home/sancere/VarunNewton/TrainingDataONEATBin1/' + 'StaticDivisionEventTrainingDataBin1'
 RawBin1Apoptosissave_dir = '/home/sancere/VarunNewton/TrainingDataONEATBin1/' + 'StaticApoptosisEventTrainingDataBin1'
 #Target and Source , upsample all movies
-Upsample.DownsampleImages(RawDivisionsave_dir, RawBin1Divisionsave_dir,SizeX, SizeY)
-Upsample.DownsampleImages(RawMaturesave_dir, RawBin1Maturesave_dir,SizeX, SizeY)
+Upsample.DownsampleImages(RawDivisionsave_dir, RawBin1Divisionsave_dir,SizeX, SizeY, "Bin1DS")
+Upsample.DownsampleImages(RawApoptosissave_dir, RawBin1Apoptosissave_dir,SizeX, SizeY, "Bin1DS")
 
 
 # In[ ]:
