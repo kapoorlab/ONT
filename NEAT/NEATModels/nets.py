@@ -114,6 +114,8 @@ def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinality 
                              conv_first=False)
             y = TDresnet_layer(inputs=y,
                              num_filters=num_filters_in,
+                             kernel_size=3,
+
                              conv_first=False)
             y = TDresnet_layer(inputs=y,
                              num_filters=num_filters_out,
@@ -216,6 +218,8 @@ def TDNONresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinali
             
             x = TDresnet_layer(inputs=x,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False,
                              strides = strides,
                              activation=activation,
@@ -320,6 +324,8 @@ def LSTMresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinalit
                              conv_first=False)
             y = TDLSTMresnet_layer(inputs=y,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False)
             y = TDLSTMresnet_layer(inputs=y,
                              num_filters=num_filters_out,
@@ -370,7 +376,7 @@ def LSTMresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinalit
 
 def TDresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=3,
+                 kernel_size=7,
                  strides=1,
                  activation='relu',
                  batch_normalization=True,
@@ -413,7 +419,7 @@ def TDresnet_layer(inputs,
 
 def TDresnext_layer(inputs,
                  num_filters=64,
-                 kernel_size=3,
+                 kernel_size=7,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -460,7 +466,7 @@ def TDresnext_layer(inputs,
    
 def TDLSTMresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=3,
+                 kernel_size=7,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -542,6 +548,8 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinal
                              conv_first=False)
             y = ThreeDresnet_layer(inputs=y,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False)
             y = ThreeDresnet_layer(inputs=y,
                              num_filters=num_filters_out,
@@ -632,6 +640,8 @@ def ThreeDNonresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardi
       
             x = ThreeDresnet_layer(inputs=x,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False,
                              strides = strides,
                              activation=activation,
@@ -721,6 +731,8 @@ def ONETresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinali
                              conv_first=False)
             y = ThreeDresnet_layer(inputs=y,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False)
             y = ThreeDresnet_layer(inputs=y,
                              num_filters=num_filters_out,
@@ -776,6 +788,8 @@ def ONETresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinali
                              conv_first=False)
             yz = TDresnet_layer(inputs=yz,
                              num_filters=num_filters_in_TD,
+                               kernel_size=3,
+
                              conv_first=False)
             yz = TDresnet_layer(inputs=yz,
                              num_filters=num_filters_out,
@@ -872,6 +886,8 @@ def ONETNonresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardin
   
             x = ThreeDresnet_layer(inputs=x,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False,
                              strides=strides,
                              activation=activation,
@@ -912,6 +928,8 @@ def ONETNonresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardin
       
             z = TDresnet_layer(inputs=z,
                              num_filters=num_filters_in_TD,
+                               kernel_size=3,
+
                              conv_first=False,
                              strides=strides,
                              activation=activation,
@@ -1007,6 +1025,8 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                              conv_first=False)
             y = ThreeDresnext_layer(inputs=y,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              cardinality = cardinality,
                              conv_first=False)
             y = ThreeDresnext_layer(inputs=y,
@@ -1067,6 +1087,8 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
                              conv_first=False)
             yz = TDresnext_layer(inputs=yz,
                              num_filters=num_filters_in_TD,
+                               kernel_size=3,
+
                              cardinality = cardinality,
                              conv_first=False)
             yz = TDresnext_layer(inputs=yz,
@@ -1170,6 +1192,8 @@ def CNNresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinalit
                              conv_first=False)
             y = ThreeDresnet_layer(inputs=y,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False)
             y = ThreeDresnet_layer(inputs=y,
                              num_filters=num_filters_out,
@@ -1225,6 +1249,8 @@ def CNNresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinalit
                              conv_first=False)
             yz = TDresnet_layer(inputs=yz,
                              num_filters=num_filters_in_TD,
+                               kernel_size=3,
+
                              conv_first=False)
             yz = TDresnet_layer(inputs=yz,
                              num_filters=num_filters_out,
@@ -1286,7 +1312,7 @@ def CNNresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinalit
     
 def ThreeDresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=3,
+                 kernel_size=7,
                  strides=1,
                  activation='relu',
                  batch_normalization=True,
@@ -1328,7 +1354,7 @@ def ThreeDresnet_layer(inputs,
     
 def ThreeDresnext_layer(inputs,
                  num_filters=64,
-                 kernel_size=3,
+                 kernel_size=7,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -1655,6 +1681,8 @@ def resnet_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1, 
                              conv_first=False)
             y = resnet_layer(inputs=y,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False)
             y = resnet_layer(inputs=y,
                              num_filters=num_filters_out,
@@ -1761,6 +1789,8 @@ def Nonresnet_v2(input_shape, categories, box_vector, depth = 38, cardinality = 
 
             x = resnet_layer(inputs=x,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              conv_first=False,
                              strides = strides,
                              activation=activation,
@@ -1869,6 +1899,8 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
                              conv_first=False)
             y = resnext_layer(inputs=y,
                              num_filters=num_filters_in,
+                               kernel_size=3,
+
                              cardinality = cardinality,
                              conv_first=False)
             y = resnext_layer(inputs=y,
@@ -1923,7 +1955,7 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
    
 def resnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=3,
+                 kernel_size=7,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -1966,7 +1998,7 @@ def resnet_layer(inputs,
     
 def resnext_layer(inputs,
                  num_filters=64,
-                 kernel_size=3,
+                 kernel_size=7,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
