@@ -20,13 +20,13 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 #Specify the location and name of the npz file for training and validation data
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'ONEATBin2.npz'
-ValidationModelName = 'ONEATBin2Validation.npz'
+TrainModelName = 'ONEATBinA.npz'
+ValidationModelName = 'ONEATBinAValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'RFONETd29ls16cl48.h5'
-
+Model_Name = 'OSNETd29K3.h5'
+Copy_Model_Name = 'ORNETd29cl48ls16.h5'
 
 # In[3]:
 
@@ -42,8 +42,8 @@ depth = 29
 cardinality = 16
 
 show = False
-TrainModel = nets.ONETresnet_v2
-model_weights = Model_dir + Model_Name
+TrainModel = nets.OSNET
+model_weights = Model_dir + Copy_Model_Name
 
 if os.path.exists(model_weights):
 

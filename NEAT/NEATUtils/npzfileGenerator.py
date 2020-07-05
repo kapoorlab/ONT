@@ -18,7 +18,7 @@ def generate_training_data(Masteroutputdir, Masterlabel,SaveNpzDirectory, SaveNa
                 for i in range(0,len(Masteroutputdir)):
 
                        outputdir =  Masteroutputdir[i]
-
+                       print(outputdir)
                        Images = sorted(glob(outputdir + '/' +'*.tif'))
                        Images = list(map(imread, Images))
                        #Normalize everything before it goes inside the training
@@ -26,7 +26,7 @@ def generate_training_data(Masteroutputdir, Masterlabel,SaveNpzDirectory, SaveNa
                     
                        for n in NormalizeImages:
                       
-                           blankX = n[starttime:endtime,:,:]
+                           blankX = n[starttime:endtime,:TrainshapeX,:TrainshapeY]
                           
 
                            blankY = Masterlabel[i]

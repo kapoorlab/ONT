@@ -26,7 +26,7 @@ ValidationModelName = 'ONEATBin2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'RFORNETd29cl48ls16.h5'
+Model_Name = 'RFORNETd38cl48ls16.h5'
 
 
 # In[3]:
@@ -39,7 +39,7 @@ categories = 6
 batch_size = 10
 lstm_hidden_units = 16
 epochs = 150
-depth = 29
+depth = 38
 cardinality = 16
 show = False
 TrainModel = nets.ONETNonresnet_v2

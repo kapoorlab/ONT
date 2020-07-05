@@ -16,7 +16,7 @@ from keras.layers.merge import concatenate, add
 
 reg_weight = 1.e-4
 Kernel_shallow_big_size = 7
-Kernel_small_size = 3
+Kernel_size = 3
 Pool_size = 2
 Big_Pool_size = 3
 startfilter = 48
@@ -140,7 +140,7 @@ def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinality 
     # v2 has BN-ReLU before Pooling
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
 
     input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
     input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
@@ -234,7 +234,7 @@ def TDNONresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinali
     # v2 has BN-ReLU before Pooling
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
 
     input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
     input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
@@ -376,7 +376,7 @@ def LSTMresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinalit
 
 def TDresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=7,
+                 kernel_size= Kernel_size,
                  strides=1,
                  activation='relu',
                  batch_normalization=True,
@@ -419,7 +419,7 @@ def TDresnet_layer(inputs,
 
 def TDresnext_layer(inputs,
                  num_filters=64,
-                 kernel_size=7,
+                 kernel_size= Kernel_size,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -466,7 +466,7 @@ def TDresnext_layer(inputs,
    
 def TDLSTMresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=7,
+                 kernel_size= Kernel_size,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -577,7 +577,7 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardinal
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
 
     input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
     input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
@@ -660,7 +660,7 @@ def ThreeDNonresnet_v2(input_shape, categories,unit, box_vector,depth = 29,cardi
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstm')(x)
 
     input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
     input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
@@ -819,7 +819,7 @@ def ONETresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinali
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
 
 
 
@@ -950,7 +950,7 @@ def ONETNonresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardin
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
 
 
 
@@ -1080,7 +1080,7 @@ def OSNET(input_shape, categories,unit, box_vector,depth = 38, cardinality = 1, 
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (7, 7),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
 
 
 
@@ -1240,7 +1240,7 @@ def ORNET(input_shape, categories,unit, box_vector,depth = 38, cardinality = 1, 
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (7, 7),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
 
 
 
@@ -1411,7 +1411,7 @@ def ONETresnext_v2(input_shape, categories,unit, box_vector,depth = 38,cardinali
     
     branchAdd = layers.add([z, x])
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (3, 3),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
+    x = ConvLSTM2D(filters = unit, kernel_size = (Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = 'lstmdeep')(branchAdd)
     
     
     
@@ -1572,7 +1572,7 @@ def CNNresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinalit
     
    
     
-    x = Conv3D(filters = unit, kernel_size = (input_shape[0], 3, 3),  activation='relu', data_format = 'channels_last',  padding = "same", name = 'cnndeep')(branchAdd)
+    x = Conv3D(filters = unit, kernel_size = (input_shape[0], Kernel_size, Kernel_size),  activation='relu', data_format = 'channels_last',  padding = "same", name = 'cnndeep')(branchAdd)
     x = Lambda(lambda x:x[:,0,:,:,:])(x)     
     
     input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
@@ -1604,7 +1604,7 @@ def CNNresnet_v2(input_shape, categories,unit, box_vector,depth = 38, cardinalit
     
 def ThreeDresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=7,
+                 kernel_size=Kernel_size,
                  strides=1,
                  activation='relu',
                  batch_normalization=True,
@@ -1646,7 +1646,7 @@ def ThreeDresnet_layer(inputs,
     
 def ThreeDresnext_layer(inputs,
                  num_filters=64,
-                 kernel_size=7,
+                 kernel_size=Kernel_size,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -2247,7 +2247,7 @@ def resnext_v2(input_shape, categories, box_vector, depth = 38, cardinality = 1,
    
 def resnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=7,
+                 kernel_size=Kernel_size,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
@@ -2290,7 +2290,7 @@ def resnet_layer(inputs,
     
 def resnext_layer(inputs,
                  num_filters=64,
-                 kernel_size=7,
+                 kernel_size= Kernel_size,
                  strides=1,
                  cardinality = 1,
                  activation='relu',
