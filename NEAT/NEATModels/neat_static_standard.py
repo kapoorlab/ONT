@@ -72,7 +72,7 @@ class NEATStaticDetection(object):
     
     
     
-    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, cardinality = 1,  epochs = 55, batch_size = 20,  show = False):        
+    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, start_kernel = 7, mid_kernel = 3,  epochs = 100, batch_size = 20,  show = False):        
      
         self.NpzDirectory = NpzDirectory
         self.TrainModelName = TrainModelName
@@ -83,7 +83,8 @@ class NEATStaticDetection(object):
         self.model_name = model_name
         self.model_keras = model_keras
         self.model_weights = model_weights
-        self.cardinality = cardinality
+        self.start_kernel = start_kernel
+        self.mid_kernel = mid_kernel
         self.epochs = epochs
         self.batch_size = batch_size
         
@@ -148,7 +149,11 @@ class NEATStaticDetection(object):
         d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
         d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
-        self.Trainingmodel = self.model_keras(input_shape, self.categories, box_vector = Y_rest.shape[-1] , depth = self.depth, input_weights  =  self.model_weights, cardinality = self.cardinality)
+        
+        
+        
+        
+        self.Trainingmodel = self.model_keras(input_shape, self.categories,   box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, input_weights  =  self.model_weights)
         
         learning_rate = 1.0E-4
             
@@ -158,7 +163,7 @@ class NEATStaticDetection(object):
         
         
         #Keras callbacks
-        lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)#, min_delta=0.0000001)
+        lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
         prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show)

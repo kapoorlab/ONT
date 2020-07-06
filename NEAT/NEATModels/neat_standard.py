@@ -63,8 +63,7 @@ class NEATDetection(object):
     
     
     
-    
-    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, cardinality = 1,  lstm_hidden_unit1 = 4, epochs = 55, batch_size = 20,  show = False):        
+    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None,  start_kernel = 7, mid_kernel = 3, lstm_hidden_unit1 = 4, epochs = 100, batch_size = 20,  show = False):        
      
         self.NpzDirectory = NpzDirectory
         self.TrainModelName = TrainModelName
@@ -76,7 +75,8 @@ class NEATDetection(object):
         self.model_keras = model_keras
         self.model_weights = model_weights
         self.lstm_hidden_unit1 = lstm_hidden_unit1
-        self.cardinality = cardinality
+        self.start_kernel = start_kernel
+        self.mid_kernel = mid_kernel
         self.epochs = epochs
         self.batch_size = batch_size
         
@@ -141,7 +141,7 @@ class NEATDetection(object):
         d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
         d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
-        self.Trainingmodel = self.model_keras(input_shape, self.categories, box_vector = Y_rest.shape[-1] , depth = self.depth, input_weights  =  self.model_weights,  unit = self.lstm_hidden_unit1, cardinality = self.cardinality)
+        self.Trainingmodel = self.model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit1 , box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, input_weights  =  self.model_weights)
         
         learning_rate = 1.0E-4
             
