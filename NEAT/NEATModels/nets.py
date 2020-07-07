@@ -14,8 +14,6 @@ from keras.layers import  TimeDistributed
 
 
 reg_weight = 1.e-4
-Kernel_size = 7
-startfilter = 48
 
 """
 Using RESNET and stacked layer style architechtures to define NEAT architecture
@@ -41,7 +39,7 @@ class Concat(layers.Layer):
     
 
     
-def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel = 7, mid_kernel = 3,  input_weights = None):
+def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
    
     # Returns
@@ -132,7 +130,7 @@ def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel
         
     return model
 
-def TDSeqnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel = 7, mid_kernel = 3,  input_weights = None):
+def TDSeqnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
 
     # Returns
@@ -211,7 +209,7 @@ def TDSeqnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel
 
 def TDresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size= Kernel_size,
+                 kernel_size= 3,
                  strides=1,
                  activation='relu',
                  batch_normalization=True,
@@ -255,7 +253,7 @@ def TDresnet_layer(inputs,
 
 
 
-def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29, start_kernel = 7, mid_kernel = 3,input_weights = None):
+def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29, start_kernel = 7, mid_kernel = 3,startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -359,7 +357,7 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29, start_k
 
 
 
-def OSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, input_weights = None):
+def OSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -489,7 +487,7 @@ def OSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7,
     return model
 
 
-def ORNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, input_weights = None):
+def ORNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -659,7 +657,7 @@ def ORNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7,
     
 def ThreeDresnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=Kernel_size,
+                 kernel_size= 3,
                  strides=1,
                  activation='relu',
                  batch_normalization=True,
@@ -704,7 +702,7 @@ def ThreeDresnet_layer(inputs,
 
 
 
-def resnet_v2(input_shape, categories, box_vector, depth = 38,  start_kernel = 7, mid_kernel = 3, input_weights = None):
+def resnet_v2(input_shape, categories, box_vector, depth = 38,  start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
     bottleneck layer
@@ -818,7 +816,7 @@ def resnet_v2(input_shape, categories, box_vector, depth = 38,  start_kernel = 7
         
     return model
   
-def Seqnet_v2(input_shape, categories, box_vector, depth = 38, start_kernel = 7, mid_kernel = 3, input_weights = None):
+def Seqnet_v2(input_shape, categories, box_vector, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
     bottleneck layer
@@ -924,7 +922,7 @@ def Seqnet_v2(input_shape, categories, box_vector, depth = 38, start_kernel = 7,
    
 def resnet_layer(inputs,
                  num_filters=64,
-                 kernel_size=Kernel_size,
+                 kernel_size=3,
                  strides=1,
                  activation='relu',
                  batch_normalization=True,

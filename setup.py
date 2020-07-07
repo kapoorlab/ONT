@@ -59,11 +59,5 @@ setup(name='ONT',
           "elasticdeform"
           "pathlib2; python_version<'3'",
           "backports.tempfile; python_version<'3.4'",
-      ],
-
-      entry_points={
-          'console_scripts': [
-              'care_predict = csbdeep.scripts.care_predict:main'
-          ]
-      }
+      ]
       )

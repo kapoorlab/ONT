@@ -72,7 +72,7 @@ class NEATStaticDetection(object):
     
     
     
-    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, start_kernel = 7, mid_kernel = 3,  epochs = 100, batch_size = 20,  show = False):        
+    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, start_kernel = 7, mid_kernel = 3,startfilter = 48, epochs = 100, batch_size = 20,  show = False):        
      
         self.NpzDirectory = NpzDirectory
         self.TrainModelName = TrainModelName
@@ -87,7 +87,7 @@ class NEATStaticDetection(object):
         self.mid_kernel = mid_kernel
         self.epochs = epochs
         self.batch_size = batch_size
-        
+        self.startfilter = startfilter
         self.show = show
         
     
@@ -153,7 +153,7 @@ class NEATStaticDetection(object):
         
         
         
-        self.Trainingmodel = self.model_keras(input_shape, self.categories,   box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, input_weights  =  self.model_weights)
+        self.Trainingmodel = self.model_keras(input_shape, self.categories,   box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
         
         learning_rate = 1.0E-4
             

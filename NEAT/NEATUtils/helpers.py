@@ -5,6 +5,7 @@ import os
 import collections
 import warnings
 import csv
+import json
 import cv2
 from matplotlib import cm
 from tifffile import imsave
@@ -30,6 +31,15 @@ except (ImportError,AttributeError):
 """    
   ##Save image data as a tiff file, function defination taken from CARE csbdeep python package  
     
+  
+def load_json(fpath):
+    with open(fpath, 'r') as f:
+        return json.load(f)
+    
+def save_json(data,fpath,**kwargs):
+    with open(fpath,'w') as f:
+        f.write(json.dumps(data,**kwargs))    
+  
 def save_tiff_imagej_compatible(file, img, axes, **imsave_kwargs):
     """Save image in ImageJ-compatible TIFF format.
 
