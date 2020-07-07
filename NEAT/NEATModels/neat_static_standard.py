@@ -10,15 +10,12 @@ from NEATUtils import plotters
 import numpy as np
 from NEATUtils import helpers
 from keras import callbacks
-from keras.layers import Flatten
 import os
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
-from skimage import img_as_ubyte
-from sklearn.utils import class_weight
-from keras.preprocessing.image import ImageDataGenerator
 from sklearn.utils.class_weight import compute_class_weight
+import nets
 try:
     from pathlib import Path
     Path().expanduser()
@@ -69,7 +66,39 @@ class NEATStaticDetection(object):
     """
     
     
-    
+    def __init__(self, staticconfig, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, model_dir, model_name, model_weights = None,  show = False ):
+
+        self.NpzDirectory = NpzDirectory
+        self.TrainModelName = TrainModelName
+        self.ValidationModelName = ValidationModelName
+        self.model_dir = model_dir
+        self.model_name = model_name
+        self.Categories_Name = Categories_Name
+        self.model_weights = model_weights
+        self.show = show
+        
+        self.categories = staticconfig.categories
+        self.depth = staticconfig.depth
+        self.start_kernel = staticconfig.start_kernel
+        self.mid_kernel = staticconfig.mid_kernel
+        self.learning_rate = staticconfig.learning_rate
+        self.epochs = staticconfig.epochs
+        self.residual = staticconfig.residual
+        self.box_vector = staticconfig.box_vector
+        self.startfilter = staticconfig.startfilter
+        
+        self.X = None
+        self.Y = None
+        self.axes = None
+        self.X_val = None
+        self.Y_val = None
+        self.Trainingmodel = None
+        self.Xoriginal = None
+        self.Xoriginal_val = None
+        #Load training and validation data
+        self.loadData()
+        #Start model training       
+        self.TrainModel()
     
     
     def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, start_kernel = 7, mid_kernel = 3,startfilter = 48, epochs = 100, batch_size = 20,  show = False):        
@@ -151,13 +180,15 @@ class NEATStaticDetection(object):
         
         
         
+        if self.residual:
+            model_keras = nets.resnet_v2
+        else:
+            model_keras = nets.seqnet_v2
         
+        self.Trainingmodel = model_keras(input_shape, self.categories,   box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
         
-        self.Trainingmodel = self.model_keras(input_shape, self.categories,   box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
-        
-        learning_rate = 1.0E-4
             
-        sgd = optimizers.SGD(lr=learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
+        sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         self.Trainingmodel.compile(optimizer=sgd, loss=yolo_loss(Ncat = self.categories), metrics=['accuracy'])
         self.Trainingmodel.summary()
         

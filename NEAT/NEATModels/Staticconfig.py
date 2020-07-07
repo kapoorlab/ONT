@@ -73,6 +73,7 @@ class Config(StaticNeatConfig):
            
            super(Config, self).__init__()
            
+           self.residual = True
            self.depth = 29
            self.start_kernel = 3
            self.mid_kernel = 3
@@ -100,6 +101,7 @@ class Config(StaticNeatConfig):
               )
 
             ok = {}
+            ok['residual'] = isinstance(self.residual,bool)
             ok['depth']         = _is_int(self.depth,1)
             ok['start_kernel']       = _is_int(self.start_kernel,1)
             ok['mid_kernel']         = _is_int(self.mid_kernel,1)

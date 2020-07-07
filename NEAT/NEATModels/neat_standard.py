@@ -2,14 +2,11 @@ from NEATUtils import plotters
 import numpy as np
 from NEATUtils import helpers
 from keras import callbacks
-from keras.layers import Flatten
 import os
+import nets
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
-from skimage import img_as_ubyte
-from sklearn.utils import class_weight
-from keras.preprocessing.image import ImageDataGenerator
 from sklearn.utils.class_weight import compute_class_weight
 try:
     from pathlib import Path
@@ -61,15 +58,50 @@ class NEATDetection(object):
     """
     
     
+    def __init__(self, config, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, model_dir, model_name, model_weights = None,  show = False ):
+
+        self.NpzDirectory = NpzDirectory
+        self.TrainModelName = TrainModelName
+        self.ValidationModelName = ValidationModelName
+        self.model_dir = model_dir
+        self.model_name = model_name
+        self.Categories_Name = Categories_Name
+        self.model_weights = model_weights
+        self.show = show
+        
+        self.categories = config.categories
+        self.depth = config.depth
+        self.lstm_hidden_unit = config.lstm
+        self.start_kernel = config.start_kernel
+        self.mid_kernel = config.mid_kernel
+        self.learning_rate = config.learning_rate
+        self.epochs = config.epochs
+        self.residual = config.residual
+        self.box_vector = config.box_vector
+        self.startfilter = config.startfilter
+        
+        self.X = None
+        self.Y = None
+        self.axes = None
+        self.X_val = None
+        self.Y_val = None
+        self.Trainingmodel = None
+        self.Xoriginal = None
+        self.Xoriginal_val = None
+        #Load training and validation data
+        self.loadData()
+        #Start model training       
+        self.TrainModel()
+        
     
-    
-    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None,  start_kernel = 7, mid_kernel = 3, startfilter = 48,  lstm_hidden_unit1 = 4, epochs = 100, batch_size = 20,  show = False):        
+    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None,  start_kernel = 7, mid_kernel = 3, startfilter = 48,  lstm_hidden_unit1 = 4, epochs = 100, batch_size = 20,  show = False):        
      
         self.NpzDirectory = NpzDirectory
         self.TrainModelName = TrainModelName
         self.ValidationModelName = ValidationModelName
-        self.categories = categories
+        
         self.Categories_Name = Categories_Name 
+        self.categories = len(Categories_Name)
         self.model_dir = model_dir
         self.model_name = model_name
         self.model_keras = model_keras
@@ -141,17 +173,21 @@ class NEATDetection(object):
         d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
         d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
-        self.Trainingmodel = self.model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit1 , box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
+        if self.residual:
+            model_keras = nets.ORNET
+        else:
+            model_keras = nets.OSNET
         
-        learning_rate = 1.0E-4
+        self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
+        
             
-        sgd = optimizers.SGD(lr=learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
+        sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         self.Trainingmodel.compile(optimizer=sgd, loss=yolo_loss(Ncat = self.categories), metrics=['accuracy'])
         self.Trainingmodel.summary()
         
         
         #Keras callbacks
-        lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)#, min_delta=0.0000001)
+        lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
         prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show)
@@ -159,7 +195,6 @@ class NEATDetection(object):
         
         #Train the model and save as a h5 file
         self.Trainingmodel.fit(self.X,self.Y, class_weight = d_class_weights , batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
-        #clear_output(wait=True) 
 
      
         # Removes the old model to be replaced with new model, if old one exists
