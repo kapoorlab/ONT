@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Tue Jul  7 15:53:01 2020
+
+@author: aimachine
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Tue Jul  7 15:25:10 2020
 
 @author: aimachine
 """
 import argparse
 import np
-class NeatConfig(argparse.Namespace):
+class StaticNeatConfig(argparse.Namespace):
     
     def __init__(self, allow_new_parameters = False, **kwargs):
         
@@ -35,7 +43,7 @@ class NeatConfig(argparse.Namespace):
             
             
             
-class Config(NeatConfig):
+class Config(StaticNeatConfig):
         
         
         """ Default configuration of action classification model.
@@ -70,11 +78,9 @@ class Config(NeatConfig):
            self.mid_kernel = 3
            self.startfilter = 48
            self.categories = 6
-           self.box_vector = 3
-           self.lstm = 16
+           self.box_vector = 2
            self.epochs = 100
            self.learning_rate = 1.0E-4
-           
            self.update_parameters(allow_new_parameters, **kwargs)
            
            
@@ -100,9 +106,10 @@ class Config(NeatConfig):
             ok['startfilter']        = _is_int(self.startfilter, 1)
             ok['categories']         = _is_int(self.categories,1)
             ok['box_vector']        = _is_int(self.box_vector, 1)
-            ok['lstm']        = _is_int(self.lstm, 1)
             ok['epochs']        = _is_int(self.epochs, 1)
             ok['learning_rate'] = np.isscalar(self.train_learning_rate) and self.train_learning_rate > 0
+    
+            
     
             if return_invalid:
                 return all(ok.values()), tuple(k for (k,v) in ok.items() if not v)
