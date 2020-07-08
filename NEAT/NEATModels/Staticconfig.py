@@ -14,7 +14,7 @@ Created on Tue Jul  7 15:25:10 2020
 @author: aimachine
 """
 import argparse
-import np
+import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
     def __init__(self, allow_new_parameters = False, **kwargs):
@@ -78,9 +78,8 @@ class Config(StaticNeatConfig):
            self.start_kernel = 3
            self.mid_kernel = 3
            self.startfilter = 48
-           self.categories = 6
-           self.box_vector = 2
            self.epochs = 100
+           self.batch_size = 10
            self.learning_rate = 1.0E-4
            self.update_parameters(allow_new_parameters, **kwargs)
            

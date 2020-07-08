@@ -11,11 +11,11 @@ import numpy as np
 from NEATUtils import helpers
 from keras import callbacks
 import os
+from NEATModels import nets
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
 from sklearn.utils.class_weight import compute_class_weight
-import nets
 try:
     from pathlib import Path
     Path().expanduser()
@@ -77,16 +77,16 @@ class NEATStaticDetection(object):
         self.model_weights = model_weights
         self.show = show
         
-        self.categories = staticconfig.categories
+        self.categories = len(Categories_Name)
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel
         self.mid_kernel = staticconfig.mid_kernel
-        self.learning_rate = staticconfig.learning_rate
+        self.learning_rate = staticconfig.learning_ratedr
         self.epochs = staticconfig.epochs
         self.residual = staticconfig.residual
         self.box_vector = staticconfig.box_vector
         self.startfilter = staticconfig.startfilter
-        
+        self.batch_size = staticconfig.batch_size
         self.X = None
         self.Y = None
         self.axes = None
@@ -95,45 +95,9 @@ class NEATStaticDetection(object):
         self.Trainingmodel = None
         self.Xoriginal = None
         self.Xoriginal_val = None
-        #Load training and validation data
-        self.loadData()
-        #Start model training       
-        self.TrainModel()
     
     
-    def __init__(self, NpzDirectory, TrainModelName, ValidationModelName, categories, Categories_Name, model_dir, model_name, model_keras, depth = 29, model_weights = None, start_kernel = 7, mid_kernel = 3,startfilter = 48, epochs = 100, batch_size = 20,  show = False):        
-     
-        self.NpzDirectory = NpzDirectory
-        self.TrainModelName = TrainModelName
-        self.ValidationModelName = ValidationModelName
-        self.categories = categories
-        self.Categories_Name = Categories_Name 
-        self.model_dir = model_dir
-        self.model_name = model_name
-        self.model_keras = model_keras
-        self.model_weights = model_weights
-        self.start_kernel = start_kernel
-        self.mid_kernel = mid_kernel
-        self.epochs = epochs
-        self.batch_size = batch_size
-        self.startfilter = startfilter
-        self.show = show
-        
-    
-        self.depth = depth
-        #Attributes to be filled later
-        self.X = None
-        self.Y = None
-        self.axes = None
-        self.X_val = None
-        self.Y_val = None
-        self.Trainingmodel = None
-        self.Xoriginal = None
-        self.Xoriginal_val = None
-        #Load training and validation data
-        self.loadData()
-        #Start model training       
-        self.TrainModel()
+   
         
 
     def loadData(self):

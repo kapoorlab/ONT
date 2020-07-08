@@ -6,7 +6,7 @@ Created on Tue Jul  7 15:25:10 2020
 @author: aimachine
 """
 import argparse
-import np
+import numpy as np
 class NeatConfig(argparse.Namespace):
     
     def __init__(self, allow_new_parameters = False, **kwargs):
@@ -70,11 +70,10 @@ class Config(NeatConfig):
            self.start_kernel = 3
            self.mid_kernel = 3
            self.startfilter = 48
-           self.categories = 6
-           self.box_vector = 3
            self.lstm = 16
            self.epochs = 100
            self.learning_rate = 1.0E-4
+           self.batch_size = 10
            
            self.update_parameters(allow_new_parameters, **kwargs)
            
