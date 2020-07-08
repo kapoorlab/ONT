@@ -17,7 +17,7 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self,  **kwargs):
+    def __init__(self, ModelName,  **kwargs):
         
         
            
@@ -29,13 +29,14 @@ class StaticNeatConfig(argparse.Namespace):
            self.epochs = 100
            self.learning_rate = 1.0E-4
            self.batch_size = 10
+           self.ModelName = ModelName
            self.is_valid()
            
            
     def to_json(self):
 
          config = {
-                 
+                 'ModelName' : self.ModelName,
                  'residual' : self.residual,
                  'depth' : self.depth,
                  'start_kernel' : self.start_kernel,
@@ -44,9 +45,6 @@ class StaticNeatConfig(argparse.Namespace):
                  'epochs' : self.epochs,
                  'learning_rate' : self.learning_rate,
                  'batch_size' : self.batch_size
-                 
-                 
-                 
                  }
          return config
                 
