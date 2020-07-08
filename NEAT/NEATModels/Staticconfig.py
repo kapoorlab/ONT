@@ -17,61 +17,9 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, allow_new_parameters = False, **kwargs):
+    def __init__(self,  **kwargs):
         
         
-        self.update_parameters(allow_new_parameters, **kwargs)
-        
-        
-        
-    def is_valid(self, return_invalid=False):
-        return (True, tuple()) if return_invalid else True
-
-
-    def update_parameters(self, allow_new=False, **kwargs):
-        if not allow_new:
-            attr_new = []
-            for k in kwargs:
-                try:
-                    getattr(self, k)
-                except AttributeError:
-                    attr_new.append(k)
-            if len(attr_new) > 0:
-                raise AttributeError("Not allowed to add new parameters (%s)" % ', '.join(attr_new))
-        for k in kwargs:
-            setattr(self, k, kwargs[k])
-            
-            
-            
-class Config(StaticNeatConfig):
-        
-        
-        """ Default configuration of action classification model.
-        
-            Parameters
-            ----------
-            
-            config = Config(startfilter = 48, start_kernel = 7, mid_kernel = 3, depth = 38 )
-            
-            
-           Attributes
-           ----------
-           
-           depth = depth of the network
-           start_kernel = starting kernel size for the CNN and for the LSTM layer at the end
-           mid_kernel = kernel size for the mid layers of the CNN
-           batch_size = batch size for training
-           lstm = number of hidden units for lstm
-           categories = training categories
-           box_vector = number of other yolo vectors used
-           epochs = number of training epochs
-           learning_rate = learning rate
-
-        """
-        
-        def __init__(self, allow_new_parameters = False, **kwargs):
-           
-           super(Config, self).__init__()
            
            self.residual = True
            self.depth = 29
@@ -79,13 +27,33 @@ class Config(StaticNeatConfig):
            self.mid_kernel = 3
            self.startfilter = 48
            self.epochs = 100
-           self.batch_size = 10
            self.learning_rate = 1.0E-4
-           self.update_parameters(allow_new_parameters, **kwargs)
+           self.batch_size = 10
+           self.is_valid()
            
            
-           
-        def is_valid(self, return_invalid=False):
+    def to_json(self):
+
+         config = {
+                 
+                 'residual' : self.residual,
+                 'depth' : self.depth,
+                 'start_kernel' : self.start_kernel,
+                 'mid_kernel' : self.mid_kernel,
+                 'startfilter' : self.startfilter,
+                 'epochs' : self.epochs,
+                 'learning_rate' : self.learning_rate,
+                 'batch_size' : self.batch_size
+                 
+                 
+                 
+                 }
+         return config
+                
+    
+
+              
+    def is_valid(self, return_invalid=False):
             """Check if configuration is valid.
             Returns
             -------
@@ -105,10 +73,8 @@ class Config(StaticNeatConfig):
             ok['start_kernel']       = _is_int(self.start_kernel,1)
             ok['mid_kernel']         = _is_int(self.mid_kernel,1)
             ok['startfilter']        = _is_int(self.startfilter, 1)
-            ok['categories']         = _is_int(self.categories,1)
-            ok['box_vector']        = _is_int(self.box_vector, 1)
             ok['epochs']        = _is_int(self.epochs, 1)
-            ok['learning_rate'] = np.isscalar(self.train_learning_rate) and self.train_learning_rate > 0
+            ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
     
             
     
@@ -116,9 +82,6 @@ class Config(StaticNeatConfig):
                 return all(ok.values()), tuple(k for (k,v) in ok.items() if not v)
             else:
                 return all(ok.values())
-               
-           
-           
-           
+                   
 
         

@@ -42,8 +42,9 @@ batch_size = 10
 
 config = Config(startfilter = startfliter, start_kernel = start_kernel, mid_kernel = mid_kernel,
                 depth = depth, learning_rate = learning_rate, batch_size = batch_size, epochs = epochs)
-show = False
+config_json = config.to_json()
 
+show = True
 model_weights = Model_dir + Model_Name
 
 if os.path.exists(model_weights):
@@ -57,12 +58,14 @@ else:
 Categories_Name = []
 Categories_Name = {
     0:"Normal",
-    1:"Apoptosis",
-    2:"Divisions",
-    3:"MacroCheate",
-    4:"NonMatureP1",
-    5:"MatureP1"
+    1:"MacroCheate",
+    2:"NonMatureP1",
+    3:"MatureP1",
+    4:"SmallCells",
+    5:"BigCells"
 }
+print(config)
+save_json(config_json, Model_dir + 'CellTypeModelParameterFile.json')
 
 
 # In[ ]:

@@ -8,13 +8,15 @@ import sys
 import os
 from glob import glob
 sys.path.append("../NEAT")
-from NEATModels import NEATDetection, nets, config
+from NEATModels import NEATDetection, nets
+from NEATModels.config import NeatConfig
 from NEATUtils import helpers
+from NEATUtils.helpers import save_json
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
-# In[ ]:
+# In[2]:
 
 
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
@@ -38,12 +40,14 @@ batch_size = 10
 lstm = 16
 
 
-# In[ ]:
+# In[4]:
 
 
-config = Config(startfilter = startfliter, start_kernel = start_kernel, mid_kernel = mid_kernel,
+config = NeatConfig(startfilter = startfilter, start_kernel = start_kernel, mid_kernel = mid_kernel,
                 depth = depth, lstm = lstm, learning_rate = learning_rate, batch_size = batch_size, epochs = epochs)
-show = False
+
+config_json = config.to_json()
+show = True
 
 model_weights = Model_dir + Model_Name
 
@@ -64,6 +68,8 @@ Categories_Name = {
     4:"NonMatureP1",
     5:"MatureP1"
 }
+print(config)
+save_json(config_json, Model_dir + 'ActionModelParameterFile.json')
 
 
 # In[ ]:

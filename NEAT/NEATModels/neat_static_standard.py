@@ -84,7 +84,6 @@ class NEATStaticDetection(object):
         self.learning_rate = staticconfig.learning_ratedr
         self.epochs = staticconfig.epochs
         self.residual = staticconfig.residual
-        self.box_vector = staticconfig.box_vector
         self.startfilter = staticconfig.startfilter
         self.batch_size = staticconfig.batch_size
         self.X = None

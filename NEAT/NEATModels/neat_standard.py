@@ -77,7 +77,6 @@ class NEATDetection(object):
         self.learning_rate = config.learning_rate
         self.epochs = config.epochs
         self.residual = config.residual
-        self.box_vector = config.box_vector
         self.startfilter = config.startfilter
         self.batch_size = config.batch_size
         
@@ -89,7 +88,7 @@ class NEATDetection(object):
         self.Trainingmodel = None
         self.Xoriginal = None
         self.Xoriginal_val = None
-
+        print(self.startfilter)
     def loadData(self):
         
         (X,Y),  axes = helpers.load_full_training_data(self.NpzDirectory, self.TrainModelName, verbose= True)
