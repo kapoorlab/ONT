@@ -60,14 +60,12 @@ else:
     model_weights = None
 
 Categories_Name = []
-Categories_Name = {
-    0:"Normal",
-    1:"Apoptosis",
-    2:"Divisions",
-    3:"MacroCheate",
-    4:"NonMatureP1",
-    5:"MatureP1"
-}
+Categories_Name.append(['Normal', 0])
+Categories_Name.append(['Apoptosis', 1])
+Categories_Name.append(['Divisions', 2])
+Categories_Name.append(['MacroKitty', 3])
+Categories_Name.append(['NonMatureP1', 4])
+Categories_Name.append(['MatureP1', 5])
 print(config)
 save_json(config_json, Modeldir + 'ActionModelParameterFile.json')
 
