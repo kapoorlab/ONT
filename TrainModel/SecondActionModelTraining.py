@@ -12,7 +12,7 @@ from NEATModels import NEATDetection, nets
 from NEATModels.config import NeatConfig
 from NEATUtils import helpers
 from NEATUtils.helpers import save_json
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
@@ -25,11 +25,11 @@ ValidationModelName = 'ONEATBinAValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Modeldir = '/data/u934/service_imagerie/v_kapoor/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'ORNETd38K7.h5'
+ModelName = 'OSNETd38K7.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = True
+residual = False
 startfilter = 48
 start_kernel = 7
 mid_kernel = 3
@@ -69,7 +69,7 @@ Categories_Name = {
     5:"MatureP1"
 }
 print(config)
-save_json(config_json, Modeldir + ModelName + 'ParameterFile.json')
+save_json(config_json, Modeldir + 'ActionModelParameterFile.json')
 
 
 # In[ ]:

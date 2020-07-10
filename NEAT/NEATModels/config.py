@@ -10,19 +10,19 @@ import numpy as np
 
 class NeatConfig(argparse.Namespace):
     
-    def __init__(self, ModelName,  **kwargs):
+    def __init__(self, residual = True, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
         
         
            
-           self.residual = True
-           self.depth = 29
-           self.start_kernel = 3
-           self.mid_kernel = 3
-           self.startfilter = 48
-           self.lstm = 16
-           self.epochs = 100
-           self.learning_rate = 1.0E-4
-           self.batch_size = 10
+           self.residual = residual
+           self.depth = depth
+           self.start_kernel = start_kernel
+           self.mid_kernel = mid_kernel
+           self.startfilter = startfilter
+           self.lstm = lstm
+           self.epochs = epochs
+           self.learning_rate = learning_rate
+           self.batch_size = batch_size
            self.ModelName = ModelName
            self.is_valid()
     
