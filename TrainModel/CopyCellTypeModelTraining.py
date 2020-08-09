@@ -9,7 +9,7 @@ import os
 from glob import glob
 sys.path.append("../NEAT")
 from NEATModels import NEATStaticDetection, nets
-from NEATModels.config import StaticNeatConfig
+from NEATModels.Staticconfig import StaticNeatConfig
 from NEATUtils import helpers
 from NEATUtils.helpers import save_json
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
