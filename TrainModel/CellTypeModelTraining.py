@@ -42,8 +42,8 @@ batch_size = 50
 # In[ ]:
 
 
-config = StaticNeatConfig(startfilter = startfilter, start_kernel = start_kernel, mid_kernel = mid_kernel,
-                depth = depth, learning_rate = learning_rate, batch_size = batch_size, epochs = epochs)
+config = StaticNeatConfig(startfilter = startfilter, start_kernel = start_kernel, mid_kernel = mid_kernel, ModelName = Model_Name, residual = residual,
+                depth = depth,  learning_rate = learning_rate, batch_size = batch_size, epochs = epochs)
 config_json = config.to_json()
 
 show = False
