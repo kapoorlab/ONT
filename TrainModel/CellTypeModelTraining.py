@@ -8,7 +8,7 @@ import sys
 import os
 from glob import glob
 sys.path.append("../NEAT")
-from NEATModels import NEATStaticDetection, nets, staticconfig
+from NEATModels import NEATStaticDetection, nets, StaticNeatConfig
 from NEATUtils import helpers
 from NEATUtils.helpers import save_json
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -41,7 +41,7 @@ batch_size = 50
 # In[ ]:
 
 
-config = staticconfig(startfilter = startfilter, start_kernel = start_kernel, mid_kernel = mid_kernel,
+config = StaticNeatConfig(startfilter = startfilter, start_kernel = start_kernel, mid_kernel = mid_kernel,
                 depth = depth, learning_rate = learning_rate, batch_size = batch_size, epochs = epochs)
 config_json = config.to_json()
 
