@@ -19,18 +19,16 @@ class StaticNeatConfig(argparse.Namespace):
     
     def __init__(self, ModelName,  **kwargs):
         
-        
+           self.residual = residual
+           self.depth = depth
+           self.start_kernel = start_kernel
+           self.mid_kernel = mid_kernel
+           self.startfilter = startfilter
            
-           self.residual = True
-           self.depth = 29
-           self.start_kernel = 3
-           self.mid_kernel = 3
-           self.startfilter = 48
-           self.epochs = 100
-           self.learning_rate = 1.0E-4
-           self.batch_size = 10
+           self.epochs = epochs
+           self.learning_rate = learning_rate
+           self.batch_size = batch_size
            self.ModelName = ModelName
-           self.is_valid()
            
            
     def to_json(self):
