@@ -19,19 +19,19 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 # In[2]:
 
 
-NpzDirectory = '/data/u934/service_imagerie/v_kapoor/CurieTrainingDatasets/O-NEAT/'
+NpzDirectory = '/media/sancere/Newton_Volume_1/'
 TrainModelName = 'ONEATBinA.npz'
 ValidationModelName = 'ONEATBinAValidation.npz'
 
 #Read and Write the h5 file, directory location and name
-Modeldir = '/data/u934/service_imagerie/v_kapoor/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'OSNETd38K7.h5'
+Modeldir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
+ModelName = 'OSNETd38K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
 residual = False
 startfilter = 48
-start_kernel = 7
+start_kernel = 3
 mid_kernel = 3
 depth = 38
 epochs = 150

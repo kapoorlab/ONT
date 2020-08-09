@@ -24,11 +24,11 @@ ValidationModelName = 'MNMDetectionValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'StaticORNetd29K3.h5'
+Model_Name = 'StaticOSNetd29K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = True
+residual = False
 startfilter = 32
 start_kernel = 3
 mid_kernel = 3
