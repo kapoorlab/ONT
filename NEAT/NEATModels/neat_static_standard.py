@@ -81,7 +81,7 @@ class NEATStaticDetection(object):
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel
         self.mid_kernel = staticconfig.mid_kernel
-        self.learning_rate = staticconfig.learning_ratedr
+        self.learning_rate = staticconfig.learning_rate
         self.epochs = staticconfig.epochs
         self.residual = staticconfig.residual
         self.startfilter = staticconfig.startfilter
