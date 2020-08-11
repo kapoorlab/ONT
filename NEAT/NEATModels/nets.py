@@ -816,7 +816,7 @@ def resnet_v2(input_shape, categories, box_vector, depth = 38,  start_kernel = 7
         
     return model
   
-def Seqnet_v2(input_shape, categories, box_vector, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
+def seqnet_v2(input_shape, categories, box_vector, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
     bottleneck layer

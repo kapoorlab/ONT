@@ -36,7 +36,7 @@ mid_kernel = 3
 depth = 38
 epochs = 150
 learning_rate = 1.0E-4
-batch_size = 20
+batch_size = 10
 lstm = 16
 
 

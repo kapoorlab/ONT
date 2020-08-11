@@ -12,24 +12,24 @@ from NEATModels import NEATStaticDetection, nets
 from NEATModels.Staticconfig import StaticNeatConfig
 from NEATUtils import helpers
 from NEATUtils.helpers import save_json
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]=""
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
 # In[ ]:
 
 
-NpzDirectory = '/home/vkapoor/'
+NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
 TrainModelName = 'MNMDetection.npz'
 ValidationModelName = 'MNMDetectionValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Model_dir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-Model_Name = 'StaticORNetd29K3.h5'
+Model_Name = 'StaticOSNetd29K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = True
+residual = False
 startfilter = 32
 start_kernel = 3
 mid_kernel = 3
