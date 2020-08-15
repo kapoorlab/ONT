@@ -207,6 +207,32 @@ def yolo_loss(Ncat):
         
 
 
+def mid_yolo_loss(Ncat):
     
+    def loss(y_true, y_pred):
+        
+       
+        y_true_class = y_true[...,0:Ncat]
+        y_pred_class = y_pred[...,0:Ncat]
+        
+        
+        y_pred_xyt = y_pred[...,Ncat:Ncat + 2] 
+        
+        y_true_xyt = y_true[...,Ncat:Ncat + 2] 
+        
+        y_pred_hw = y_pred[...,Ncat + 2:]
+        
+        y_true_hw = y_true[...,Ncat + 2:]
+        
+        
+        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1), axis = -1)
+        hw_loss =     K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis = -1))
+      
+
+        d =  class_loss + xy_loss + hw_loss
+        return d 
+    return loss
+        
     
         
