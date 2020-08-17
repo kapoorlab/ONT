@@ -422,9 +422,9 @@ def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshol
   
                    
             if DualModel:  
-                 print('X Y T',prediction[i,:,:,int(Label)+1:int(Label)+4])
+                 print('X Y T H W',prediction[i,:,:,int(Label)+1:])
             else:
-                 print('X Y T',prediction[i,:,:,:,int(Label)+1:int(Label)+4])
+                 print('X Y T H W',prediction[i,:,:,:,int(Label)+1:])
             print('True Label : ', Truelabel)
             
          

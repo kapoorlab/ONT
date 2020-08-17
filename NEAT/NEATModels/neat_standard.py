@@ -140,7 +140,7 @@ class NEATDetection(object):
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
-        self.Trainingmodel.compile(optimizer=sgd, loss=yolo_loss(Ncat = self.categories), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss=mid_yolo_loss(Ncat = self.categories), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -216,7 +216,8 @@ def mid_yolo_loss(Ncat):
         hw_loss =     K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis = -1))
       
 
-        d =  class_loss + xy_loss + hw_loss
+        d =  class_loss + 2 * xy_loss + hw_loss
+        
         return d 
     return loss
     
