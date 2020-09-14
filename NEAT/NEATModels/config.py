@@ -10,11 +10,12 @@ import numpy as np
 
 class NeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
+    def __init__(self, residual = True, simple = False, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
         
         
            
            self.residual = residual
+           self.simple = simple
            self.depth = depth
            self.start_kernel = start_kernel
            self.mid_kernel = mid_kernel
@@ -32,6 +33,7 @@ class NeatConfig(argparse.Namespace):
          config = {
                  'ModelName' : self.ModelName,
                  'residual' : self.residual,
+                 'simple' : self.simple,
                  'depth' : self.depth,
                  'start_kernel' : self.start_kernel,
                  'mid_kernel' : self.mid_kernel,
@@ -62,6 +64,7 @@ class NeatConfig(argparse.Namespace):
 
             ok = {}
             ok['residual'] = isinstance(self.residual,bool)
+            ok['simple'] = isinstance(self.residual,bool)
             ok['depth']         = _is_int(self.depth,1)
             ok['start_kernel']       = _is_int(self.start_kernel,1)
             ok['mid_kernel']         = _is_int(self.mid_kernel,1)

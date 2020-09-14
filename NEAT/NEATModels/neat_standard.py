@@ -77,6 +77,7 @@ class NEATDetection(object):
         self.learning_rate = config.learning_rate
         self.epochs = config.epochs
         self.residual = config.residual
+        self.simple = config.simple
         self.startfilter = config.startfilter
         self.batch_size = config.batch_size
         
@@ -131,16 +132,25 @@ class NEATDetection(object):
         d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
         d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
-        if self.residual:
+        if self.residual == True and self.simple == False:
             model_keras = nets.ORNET
-        else:
+        if self.residual == False and self.simple == False: 
             model_keras = nets.OSNET
+        if self.residual == True and self.simple == True:
+            model_keras = nets.SimpleORNET
+        if self.residual == False and self.simple == True:
+            model_keras = nets.SimpleOSNET
+            
          
         self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
-        self.Trainingmodel.compile(optimizer=sgd, loss=mid_yolo_loss(Ncat = self.categories), metrics=['accuracy'])
+        if self.simple == False:
+          self.Trainingmodel.compile(optimizer=sgd, loss=mid_yolo_loss(Ncat = self.categories), metrics=['accuracy'])
+        if self.simple == True:
+          self.Trainingmodel.compile(optimizer=sgd, loss=simple_yolo_loss(Ncat = self.categories), metrics=['accuracy'])  
+            
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -148,7 +158,7 @@ class NEATDetection(object):
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show)
+        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show, simple = self.simple)
         
         
         #Train the model and save as a h5 file
@@ -190,7 +200,22 @@ def yolo_loss(Ncat):
         d =  class_loss + xy_loss
         return d 
     return loss
+ 
+def simple_yolo_loss(Ncat):
+
+    def loss(y_true, y_pred):
         
+       
+        y_true_class = y_true[...,0:Ncat]
+        y_pred_class = y_pred[...,0:Ncat]
+        
+        
+        class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
+      
+
+        d =  class_loss 
+        return d 
+    return loss       
         
 
 def mid_yolo_loss(Ncat):

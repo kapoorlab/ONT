@@ -6,11 +6,12 @@ from NEATUtils.helpers import Printpredict, PrintStaticpredict
 class PlotHistory(keras.callbacks.Callback):
     
     
-    def __init__(self, Trainingmodel, X, Y, Categories_Name, plot = False):
+    def __init__(self, Trainingmodel, X, Y, Categories_Name, plot = False, simple = False):
        self.Trainingmodel = Trainingmodel 
        self.X = X
        self.Y = Y
        self.plot = plot
+       self.simple = simple
       
        self.Categories_Name = Categories_Name
     def on_train_begin(self, logs={}):
@@ -51,7 +52,7 @@ class PlotHistory(keras.callbacks.Callback):
          plt.show()
          #clear_output(True)
         idx = random.randint(1,self.X.shape[0] - 1)
-        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, plot = self.plot)
+        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, plot = self.plot, simple = self.simple )
         
       
 class PlotStaticHistory(keras.callbacks.Callback):

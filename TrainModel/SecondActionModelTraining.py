@@ -20,30 +20,32 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'ONEATBinAPrediction.npz'
-ValidationModelName = 'ONEATBinAPredictionValidation.npz'
+TrainModelName = 'ONEATBinAV2.npz'
+ValidationModelName = 'ONEATBinAV2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Modeldir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'PredictionOSNETd38K3.h5'
+ModelName = 'SimpleORNETd29K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = False
+residual = True
+#Simple model only trains for classification
+simple = True
 startfilter = 48
 start_kernel = 3
 mid_kernel = 3
-depth = 38
+depth = 29
 epochs = 150
 learning_rate = 1.0E-4
-batch_size = 50
+batch_size = 10
 lstm = 16
 
 
 # In[4]:
 
 
-config = NeatConfig(startfilter = startfilter, start_kernel = start_kernel, mid_kernel = mid_kernel, ModelName = ModelName, residual = residual,
+config = NeatConfig(startfilter = startfilter, simple = simple, start_kernel = start_kernel, mid_kernel = mid_kernel, ModelName = ModelName, residual = residual,
                 depth = depth, lstm = lstm, learning_rate = learning_rate, batch_size = batch_size, epochs = epochs)
 
 config_json = config.to_json()
@@ -67,7 +69,7 @@ Categories_Name.append(['MacroKitty', 3])
 Categories_Name.append(['NonMatureP1', 4])
 Categories_Name.append(['MatureP1', 5])
 print(config)
-save_json(config_json, Modeldir + 'ActionModelParameterFile.json')
+save_json(config_json, Modeldir + ModelName + 'ParameterFile.json')
 
 
 # In[ ]:

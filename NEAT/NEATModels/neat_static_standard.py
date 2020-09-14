@@ -76,7 +76,7 @@ class NEATStaticDetection(object):
         self.Categories_Name = Categories_Name
         self.model_weights = model_weights
         self.show = show
-        
+        self.simple = staticconfig.simple
         self.categories = len(Categories_Name)
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel

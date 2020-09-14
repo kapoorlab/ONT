@@ -380,7 +380,7 @@ def chunk_list(image, patchshape, stride, pair):
             return patch, rowstart, colstart     
            
 
-def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshold=.8, plot = False,  DualModel = True):
+def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshold=.8, plot = False, simple = False):
     try:
         idx = list(idx)
     except:
@@ -415,17 +415,13 @@ def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshol
                
                Name, Label = Categories_name[k]
                
-               if DualModel:  
-                    print('Top predictions : ' , Name, 'Probability', ':' , prediction[i,:,:, int(Label)])
-               else:
-                    print('Top predictions : ' , Name, 'Probability', ':' , prediction[i,:,:,:, int(Label)])
-  
-                   
-            if DualModel:  
-                 print('X Y T H W',prediction[i,:,:,int(Label)+1:])
-            else:
-                 print('X Y T H W',prediction[i,:,:,:,int(Label)+1:])
-            print('True Label : ', Truelabel)
+               print('Top predictions : ' , Name, 'Probability', ':' , prediction[i,:,:, int(Label)])
+       
+               if simple == False:
+                   print('X Y T H W',prediction[i,:,:,int(Label)+1:])
+           
+            
+               print('True Label : ', Truelabel)
             
          
 
@@ -437,7 +433,7 @@ def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshol
                   break
               
                 
-def PrintStaticpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshold=.8, plot = False,  DualModel = True):
+def PrintStaticpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshold=.8, plot = False, simple = False):
 
     try:
         idx = list(idx)
@@ -474,8 +470,10 @@ def PrintStaticpredict(idx, model, data, Truelabel, Categories_name,  cols=5, th
                
                print('Top predictions : ' , Name, 'Probability', ':' , prediction[i,:,:, int(Label)])
   
-                   
-            print('X Y',prediction[i,:,:,int(Label)+1:int(Label)+3])
+               if simple == False:
+                    print('X Y',prediction[i,:,:,int(Label)+1:int(Label)+3])
+              
+           
             print('True Label : ', Truelabel)
             
          
