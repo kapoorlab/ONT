@@ -12,7 +12,7 @@ from NEATModels import NEATDetection, nets
 from NEATModels.config import NeatConfig
 from NEATUtils import helpers
 from NEATUtils.helpers import save_json
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
@@ -20,20 +20,20 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'ONEATBinAV2Prediction.npz'
-ValidationModelName = 'ONEATBinAV2PredictionValidation.npz'
+TrainModelName = 'ONEATBinAV2.npz'
+ValidationModelName = 'ONEATBinAV2Validation.npz'
 
 #Read and Write the h5 file, directory location and name
 Modeldir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'PredictionORNETd29K3.h5'
+ModelName = 'OSNETd38K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = True
+residual = False
 startfilter = 48
 start_kernel = 3
 mid_kernel = 3
-depth = 29
+depth = 38
 epochs = 150
 learning_rate = 1.0E-4
 batch_size = 10
