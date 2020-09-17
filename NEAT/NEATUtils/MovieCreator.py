@@ -76,9 +76,9 @@ def CreateImages(csv_file, image, crop_size, shift,TotalCategories, trainlabel, 
        
        ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)   
 
-def MovieMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
+def MovieMaker(x,y,time,z,image, crop_size, shift, TotalCategories, trainlabel, save_dir, name):
     
-       sizeX, sizeY, sizeT = crop_size
+       sizeX, sizeY, sizeTminus, sizeTplus = crop_size
        shiftNone = [0,0] 
        shiftLX = [-1.0 * shift, 0] 
        shiftRX = [shift, 0]
@@ -93,7 +93,7 @@ def MovieMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, s
 
        AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY  ]
        
-       MovieSaver(x,y,time,image,sizeX,sizeY,sizeT,shift,TotalCategories, trainlabel, name, AllShifts, save_dir)
+       MovieSaver(x,y,time,image,sizeX,sizeY,sizeTplus, sizeTminus, shift, TotalCategories, trainlabel, name, AllShifts, save_dir)
        
 def ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
     
@@ -115,7 +115,7 @@ def ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, s
        ImageSaver(x,y,time,image,sizeX,sizeY,sizeT,shift,TotalCategories, trainlabel, name, AllShifts, save_dir)   
 
        
-def MovieSaver(x,y,time,image,sizeX,sizeY,sizeT,shift,TotalCategories, trainlabel, name, AllShifts, save_dir):
+def MovieSaver(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus, shift, TotalCategories, trainlabel, name, AllShifts, save_dir):
     
        shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY  = AllShifts
        offset = shift      
@@ -133,7 +133,7 @@ def MovieSaver(x,y,time,image,sizeX,sizeY,sizeT,shift,TotalCategories, trainlabe
 
        Path(NoShiftsave_dir).mkdir(exist_ok = True)
        
-       SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftNone,NoShiftsave_dir,TotalCategories, trainlabel, 'NoShift', name) 
+       SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftNone,NoShiftsave_dir,TotalCategories, trainlabel, 'NoShift', name) 
        if shift > 0:
          Path(N10LXShiftsave_dir).mkdir(exist_ok = True)
          Path(N10RXShiftsave_dir).mkdir(exist_ok = True)
@@ -144,22 +144,22 @@ def MovieSaver(x,y,time,image,sizeX,sizeY,sizeT,shift,TotalCategories, trainlabe
          Path(N10UYShiftsave_dir).mkdir(exist_ok = True)
          Path(N10DYShiftsave_dir).mkdir(exist_ok = True)
             
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftLX,N10LXShiftsave_dir,TotalCategories, trainlabel, 'ShiftLX', name) 
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftLX,N10LXShiftsave_dir,TotalCategories, trainlabel, 'ShiftLX', name) 
        
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftRX,N10RXShiftsave_dir,TotalCategories, trainlabel, 'ShiftRX', name) 
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftRX,N10RXShiftsave_dir,TotalCategories, trainlabel, 'ShiftRX', name) 
        
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftLXY,N10LXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftLXY', name) 
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftLXY,N10LXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftLXY', name) 
        
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftRXY,N10RXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftRXY', name) 
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftRXY,N10RXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftRXY', name) 
        
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftDLXY,N10DLXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftDLXY', name) 
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftDLXY,N10DLXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftDLXY', name) 
        
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftDRXY,N10DRXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftDRXY', name) 
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftDRXY,N10DRXYShiftsave_dir,TotalCategories, trainlabel, 'ShiftDRXY', name) 
        
        
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftUY,N10UYShiftsave_dir,TotalCategories, trainlabel, 'ShiftUY', name) 
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftUY,N10UYShiftsave_dir,TotalCategories, trainlabel, 'ShiftUY', name) 
        
-         SaveMovies(x,y,time,image,sizeX,sizeY,sizeT,offset,shiftDY,N10DYShiftsave_dir,TotalCategories, trainlabel, 'ShiftDY', name)
+         SaveMovies(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus,offset,shiftDY,N10DYShiftsave_dir,TotalCategories, trainlabel, 'ShiftDY', name)
    
 def ImageSaver(x,y,time,image,sizeX,sizeY,sizeT,shift,TotalCategories, trainlabel, name, AllShifts, save_dir):
     
@@ -270,13 +270,17 @@ def CreateImageMovies(csv_file, image, crop_size, shift,TotalCategories, trainla
 
 
 
-def SaveMovies(x,y,time, image, sizeX, sizeY, sizeT,offset, shift, savedir, TotalCategories, trainlabel, name, appendname):
+def SaveMovies(x,y,time, image, sizeX, sizeY, sizeTplus,sizeTminus,offset, shift, savedir, TotalCategories, trainlabel, name, appendname):
+    
+    
+ 
+       
     
    count = 0
    axes = 'TYX'
    Label = np.zeros([TotalCategories + 3])
    Label[trainlabel] = 1
-   Label[TotalCategories + 2] = 0.5
+   Label[TotalCategories + 2] = (sizeTminus + 0.5) / (sizeTminus + sizeTplus + 1)
    
    if name == 'NoShift':
        Label[TotalCategories] = 0.5
@@ -323,20 +327,20 @@ def SaveMovies(x,y,time, image, sizeX, sizeY, sizeT,offset, shift, savedir, Tota
    for t in range(0, len(time)):
       if math.isnan(x[t]): 
          continue 
-      if x[t] - shift[0]> sizeX/2 and y[t] - shift[0] > sizeY/2 and time[t] > sizeT and time[t] + sizeT + 1 < image.shape[0]:
+      if x[t] - shift[0]> sizeX/2 and y[t] - shift[0] > sizeY/2 and time[t] > sizeTminus and time[t] + sizeTplus + 1 < image.shape[0]:
        crop_Xminus = x[t] - shift[0] - int(sizeX/2)
        crop_Xplus = x[t] - shift[0] + int(sizeX/2)
        crop_Yminus = y[t] - shift[1] - int(sizeY/2)
        crop_Yplus = y[t] - shift[1] + int(sizeY/2)
       
-       region =(slice(int(time[t] - sizeT - 1),int(time[t] + sizeT )),slice(int(crop_Yminus), int(crop_Yplus)),
+       region =(slice(int(time[t] - sizeTminus - 1),int(time[t] + sizeTplus )),slice(int(crop_Yminus), int(crop_Yplus)),
                       slice(int(crop_Xminus), int(crop_Xplus)))
        crop_image = image[region]      
        
       
        count = count + 1
               
-       if(crop_image.shape[0] == 2 * sizeT + 1 and crop_image.shape[1]== sizeX and crop_image.shape[2]== sizeY):
+       if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== sizeX and crop_image.shape[2]== sizeY):
         save_tiff_imagej_compatible((savedir + '/' + name + str(count) + appendname + '.tif'  ) , crop_image, axes)
         
     

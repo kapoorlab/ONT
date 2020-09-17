@@ -9,7 +9,7 @@ import json
 import cv2
 from matplotlib import cm
 from tifffile import imsave
-
+from skimage import measure
 try:
     from pathlib import Path
     Path().expanduser()
@@ -30,6 +30,16 @@ except (ImportError,AttributeError):
 
 """    
   ##Save image data as a tiff file, function defination taken from CARE csbdeep python package  
+    
+def MarkerToCSV(MarkerImage):
+    
+    MarkerImage = MarkerImage.astype('uint16')
+    MarkerList = []
+    for i in range(0, MarkerImage.shape[0]):
+          waterproperties = measure.regionprops(MarkerImage, MarkerImage)
+          indices = [prop.centroid for prop in waterproperties]
+          MarkerList.append([i, indices[0], indices[1]])
+    return  MarkerList
     
   
 def load_json(fpath):
@@ -421,11 +431,11 @@ def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshol
                    print('X Y T H W',prediction[i,:,:,int(Label)+1:])
            
             
-               print('True Label : ', Truelabel)
+           print('True Label : ', Truelabel)
             
          
 
-            if plot:
+           if plot:
               plt.show()     
           
            i += 1
