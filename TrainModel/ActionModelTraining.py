@@ -25,11 +25,11 @@ ValidationModelName = 'CenterONEATPrePredictionValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Modeldir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'CenterPrePredORNETd29K3.h5'
+ModelName = 'CenterPrePredOSNETd29K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = True
+residual = False
 #Simple model only trains for classification
 simple = True
 startfilter = 48

@@ -759,7 +759,7 @@ def SimpleOSNET(input_shape, categories,unit, box_vector,depth = 38, start_kerne
    
 
         
-    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolosoft'))(input_cat)
+    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolosig'))(input_cat)
     
 
 
