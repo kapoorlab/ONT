@@ -210,7 +210,7 @@ def simple_yolo_loss(Ncat):
         y_pred_class = y_pred[...,0:Ncat]
         
         
-        class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
+        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
       
 
         d =  class_loss 
