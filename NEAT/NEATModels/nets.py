@@ -759,7 +759,7 @@ def SimpleOSNET(input_shape, categories,unit, box_vector,depth = 38, start_kerne
    
 
         
-    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
+    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolosoft'))(input_cat)
     
 
 
@@ -917,7 +917,7 @@ def SimpleORNET(input_shape, categories,unit, box_vector,depth = 38, start_kerne
     input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
 
         
-    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
+    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolosoft'))(input_cat)
 
 
 

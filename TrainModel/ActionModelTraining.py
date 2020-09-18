@@ -20,16 +20,16 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'ONEATBinAV2.npz'
-ValidationModelName = 'ONEATBinAV2Validation.npz'
+TrainModelName = 'CenterONEATPrePrediction.npz'
+ValidationModelName = 'CenterONEATPrePredictionValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Modeldir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'SimpleOSNETd29K3.h5'
+ModelName = 'CenterPrePredORNETd29K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = False
+residual = True
 #Simple model only trains for classification
 simple = True
 startfilter = 48
