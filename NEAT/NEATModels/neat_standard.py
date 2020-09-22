@@ -78,6 +78,7 @@ class NEATDetection(object):
         self.epochs = config.epochs
         self.residual = config.residual
         self.simple = config.simple
+        self.catsimple = config.catsimple
         self.startfilter = config.startfilter
         self.batch_size = config.batch_size
         

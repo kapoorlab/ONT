@@ -12,7 +12,7 @@ from NEATModels import NEATDetection, nets
 from NEATModels.config import NeatConfig
 from NEATUtils import helpers
 from NEATUtils.helpers import save_json
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
@@ -20,18 +20,19 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'CenterONEATPrePrediction.npz'
-ValidationModelName = 'CenterONEATPrePredictionValidation.npz'
+TrainModelName = 'CenterONEAT.npz'
+ValidationModelName = 'CenterONEATValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Modeldir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'CenterPrePredOSNETd29K3.h5'
+ModelName = 'CatCenterOSNETd29K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
 residual = False
 #Simple model only trains for classification
-simple = True
+simple = False
+catsimple = True
 startfilter = 48
 start_kernel = 3
 mid_kernel = 3
@@ -45,7 +46,7 @@ lstm = 16
 # In[4]:
 
 
-config = NeatConfig(startfilter = startfilter, simple = simple, start_kernel = start_kernel, mid_kernel = mid_kernel, ModelName = ModelName, residual = residual,
+config = NeatConfig(startfilter = startfilter, simple = simple, catsimple = catsimple,  start_kernel = start_kernel, mid_kernel = mid_kernel, ModelName = ModelName, residual = residual,
                 depth = depth, lstm = lstm, learning_rate = learning_rate, batch_size = batch_size, epochs = epochs)
 
 config_json = config.to_json()
