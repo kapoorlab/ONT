@@ -140,6 +140,10 @@ class NEATDetection(object):
             model_keras = nets.SimpleORNET
         if self.residual == False and self.simple == True:
             model_keras = nets.SimpleOSNET
+        if self.residual == False and self.catsimple == True:
+            model_keras = nets.CatSimpleOSNET
+        if self.residual == True and self.catsimple == True:
+            model_keras = nets.CatSimpleORNET
             
          
         self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
@@ -148,9 +152,12 @@ class NEATDetection(object):
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         if self.simple == False:
           self.Trainingmodel.compile(optimizer=sgd, loss=mid_yolo_loss(Ncat = self.categories), metrics=['accuracy'])
-        if self.simple == True:
+        if self.simple == True and self.catsimple == False:
           self.Trainingmodel.compile(optimizer=sgd, loss=simple_yolo_loss(Ncat = self.categories), metrics=['accuracy'])  
-            
+        if self.simple == False and self.catsimple == True:
+          self.Trainingmodel.compile(optimizer=sgd, loss=cat_simple_yolo_loss(Ncat = self.categories), metrics=['accuracy'])    
+
+        
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -216,7 +223,20 @@ def simple_yolo_loss(Ncat):
         d =  class_loss 
         return d 
     return loss       
-        
+      
+def cat_simple_yolo_loss(Ncat):
+
+    def loss(y_true, y_pred):
+         
+
+           y_true_class = y_true[...,0:Ncat]
+           y_pred_class = y_pred[...,0:Ncat]
+
+           class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis = -1)
+
+           d = class_loss
+           return d
+    return loss   
 
 def mid_yolo_loss(Ncat):
     
