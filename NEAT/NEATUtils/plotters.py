@@ -12,6 +12,7 @@ class PlotHistory(keras.callbacks.Callback):
        self.Y = Y
        self.plot = plot
        self.simple = simple
+       self.catsimple = self.catsimple
       
        self.Categories_Name = Categories_Name
     def on_train_begin(self, logs={}):
