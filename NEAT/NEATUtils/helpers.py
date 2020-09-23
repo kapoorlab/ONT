@@ -443,7 +443,7 @@ def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshol
                   break
               
                 
-def PrintStaticpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshold=.8, plot = False, simple = False):
+def PrintStaticpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshold=.8, plot = False, simple = False, catsimple = False):
 
     try:
         idx = list(idx)
@@ -480,7 +480,7 @@ def PrintStaticpredict(idx, model, data, Truelabel, Categories_name,  cols=5, th
                
                print('Top predictions : ' , Name, 'Probability', ':' , prediction[i,:,:, int(Label)])
   
-               if simple == False:
+               if simple == False or catsimple == False:
                     print('X Y',prediction[i,:,:,int(Label)+1:int(Label)+3])
               
            
