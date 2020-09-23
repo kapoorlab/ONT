@@ -427,7 +427,7 @@ def Printpredict(idx, model, data, Truelabel, Categories_name,  cols=5, threshol
                
                print('Top predictions : ' , Name, 'Probability', ':' , prediction[i,:,:, int(Label)])
        
-               if simple == False or catsimple == False:
+            if simple == False and catsimple == False:
                    print('X Y T H W',prediction[i,:,:,int(Label)+1:])
            
             
