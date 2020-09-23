@@ -12,7 +12,7 @@ from NEATModels import NEATDetection, nets
 from NEATModels.config import NeatConfig
 from NEATUtils import helpers
 from NEATUtils.helpers import save_json
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
@@ -20,16 +20,16 @@ os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 
 NpzDirectory = '/home/sancere/VarunNewton/CurieTrainingDatasets/O-NEAT/'
-TrainModelName = 'CenterONEAT.npz'
-ValidationModelName = 'CenterONEATValidation.npz'
+TrainModelName = 'BigCenterONEATPrediction.npz'
+ValidationModelName = 'BigCenterONEATPredictionValidation.npz'
 
 #Read and Write the h5 file, directory location and name
 Modeldir = '/home/sancere/VarunNewton/CurieDeepLearningModels/O-NEATweights/'
-ModelName = 'CatCenterOSNETd29K3.h5'
+ModelName = 'BigCenterPredORNETd29K3.h5'
 
 #Neural network parameters
 #For ORNET use residual = True and for OSNET use residual = False
-residual = False
+residual = True
 #Simple model only trains for classification
 simple = False
 catsimple = True
