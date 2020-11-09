@@ -357,7 +357,7 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29, start_k
 
 
 
-def OSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
+def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 5,  depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -467,7 +467,7 @@ def OSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7,
 
         
     output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'softmax' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
-    output_box = (Conv2D((box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
+    output_box = (Conv2D((gridX * gridY * anchors * box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
 
 
 
@@ -487,7 +487,7 @@ def OSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7,
     return model
 
 
-def ORNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
+def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -650,7 +650,7 @@ def ORNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7,
 
 
 
-def SimpleOSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
+def SimpleOSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -779,7 +779,7 @@ def SimpleOSNET(input_shape, categories,unit, box_vector,depth = 38, start_kerne
     return model
 
 
-def SimpleORNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
+def SimpleORNET(input_shape, categories,unit, box_vector, gridX =  1, gridY = 1, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -938,7 +938,7 @@ def SimpleORNET(input_shape, categories,unit, box_vector,depth = 38, start_kerne
 
 
 
-def CatSimpleOSNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
+def CatSimpleOSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -1067,7 +1067,7 @@ def CatSimpleOSNET(input_shape, categories,unit, box_vector,depth = 38, start_ke
     return model
 
 
-def CatSimpleORNET(input_shape, categories,unit, box_vector,depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
+def CatSimpleORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55

@@ -205,7 +205,7 @@ def static_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
         pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, 1, anchors))
         true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, 1, anchors))
         
-        y_pred_xy = pred_boxes[...,0:2] +  K.variable(grid)
+        y_pred_xy = pred_boxes[...,0:2] +  (grid)
         y_true_xy = true_boxes[...,0:2]
         
         y_pred_hw = pred_boxes[...,2:4]

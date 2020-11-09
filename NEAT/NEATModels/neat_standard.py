@@ -58,7 +58,7 @@ class NEATDetection(object):
     """
     
     
-    def __init__(self, config, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, model_dir, model_name, model_weights = None,  show = False ):
+    def __init__(self, config, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
 
         self.NpzDirectory = NpzDirectory
         self.TrainModelName = TrainModelName
@@ -68,7 +68,7 @@ class NEATDetection(object):
         self.Categories_Name = Categories_Name
         self.model_weights = model_weights
         self.show = show
-        
+        self.box_vector = box_vector
         self.categories = len(Categories_Name)
         self.depth = config.depth
         self.lstm_hidden_unit = config.lstm
@@ -151,7 +151,7 @@ class NEATDetection(object):
             model_keras = nets.CatSimpleORNET
             
          
-        self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
+        self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = self.box_vector, gridX = self.gridX, gridY = self.gridY, depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
@@ -202,7 +202,7 @@ def time_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
         pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, 1, anchors))
         true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, 1, anchors))
         
-        y_pred_xyt = pred_boxes[...,0:3] +  K.variable(grid)
+        y_pred_xyt = pred_boxes[...,0:3] +  (grid)
         y_true_xyt = true_boxes[...,0:3]
         
         y_pred_hw = pred_boxes[...,3:5]
