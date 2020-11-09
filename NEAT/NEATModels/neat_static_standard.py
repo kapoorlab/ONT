@@ -160,7 +160,7 @@ class NEATStaticDetection(object):
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.lambdacord), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord), metrics=['accuracy'])
         self.Trainingmodel.summary()
         
         
@@ -191,7 +191,7 @@ class NEATStaticDetection(object):
 
 
 
-def static_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
+def static_yolo_loss(Ncat, gridX, gridY, anchors, box_vector, lambdacord):
     
     def loss(y_true, y_pred):
         
@@ -202,8 +202,8 @@ def static_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
         y_pred_class = y_pred[...,0:Ncat]
         
         
-        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, 1, anchors))
-        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, 1, anchors))
+        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
+        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
         
         y_pred_xy = pred_boxes[...,0:2] +  (grid)
         y_true_xy = true_boxes[...,0:2]

@@ -159,7 +159,7 @@ class NEATDetection(object):
         
         
         if self.simple == False:
-          self.Trainingmodel.compile(optimizer=sgd, loss = time_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.lambdacord), metrics=['accuracy'])
+          self.Trainingmodel.compile(optimizer=sgd, loss = time_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord), metrics=['accuracy'])
         
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
@@ -188,7 +188,7 @@ class NEATDetection(object):
         helpers.Printpredict(idx, self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name)
 
    
-def time_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
+def time_yolo_loss(Ncat, gridX, gridY, anchors, box_vector, lambdacord):
     
     def loss(y_true, y_pred):
         
@@ -199,8 +199,8 @@ def time_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
         y_pred_class = y_pred[...,0:Ncat]
         
         
-        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, 1, anchors))
-        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, 1, anchors))
+        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
+        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
         
         y_pred_xyt = pred_boxes[...,0:3] +  (grid)
         y_true_xyt = true_boxes[...,0:3]
