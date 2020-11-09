@@ -82,6 +82,10 @@ class NEATDetection(object):
         self.startfilter = config.startfilter
         self.batch_size = config.batch_size
         
+        self.anchors = config.anchors
+        self.gridX = config.gridX
+        self.gridY = config.gridY
+        
         self.X = None
         self.Y = None
         self.axes = None
@@ -185,7 +189,55 @@ class NEATDetection(object):
         
         helpers.Printpredict(idx, self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name)
 
+   
+def time_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
     
+    def loss(y_true, y_pred):
+        
+       
+        grid = np.array([ [[float(x),float(y), float(t)]]   for y in range(gridY) for x in range(gridX) for t in range(1)])
+        
+        y_true_class = y_true[...,0:Ncat]
+        y_pred_class = y_pred[...,0:Ncat]
+        
+        
+        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, 1, anchors))
+        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, 1, anchors))
+        
+        y_pred_xyt = pred_boxes[...,0:3] +  K.variable(grid)
+        y_true_xyt = true_boxes[...,0:3]
+        
+        y_pred_hw = pred_boxes[...,3:5]
+        y_true_hw = true_boxes[...,3:5]
+        
+        y_pred_conf = pred_boxes[...,5]
+        y_true_conf = true_boxes[...,5]
+        
+        
+        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1) * y_true_conf, axis = -1)
+        hw_loss =     K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
+      
+        #IOU computation for increasing localization accuracy
+       
+        intersect_wh = K.maximum(K.zeros_like(y_pred_hw), (y_pred_hw + y_true_hw)/2 - K.square(y_pred_xyt - y_true_xyt) )
+        intersect_area = intersect_wh[...,0] * intersect_wh[...,1]
+        true_area = y_true_hw[...,0] * y_true_hw[...,1]
+        pred_area = y_pred_hw[...,0] * y_pred_hw[...,1]
+        union_area = pred_area + true_area - intersect_area
+        iou = intersect_area / union_area
+
+        conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
+
+
+        combinedloss =  class_loss + lambdacord * xy_loss + hw_loss + conf_loss
+        
+        return combinedloss
+    
+    
+    return loss
+    
+
 def yolo_loss(Ncat):
 
     def loss(y_true, y_pred):
