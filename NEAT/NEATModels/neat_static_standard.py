@@ -86,6 +86,13 @@ class NEATStaticDetection(object):
         self.residual = staticconfig.residual
         self.startfilter = staticconfig.startfilter
         self.batch_size = staticconfig.batch_size
+        
+        
+        self.anchors = staticconfig.anchors
+        self.gridX = staticconfig.gridX
+        self.gridY = staticconfig.gridY
+        self.lambdacord = staticconfig.lambdacord
+        
         self.X = None
         self.Y = None
         self.axes = None
@@ -152,7 +159,8 @@ class NEATStaticDetection(object):
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
-        self.Trainingmodel.compile(optimizer=sgd, loss=yolo_loss(Ncat = self.categories), metrics=['accuracy'])
+        
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.lambdacord), metrics=['accuracy'])
         self.Trainingmodel.summary()
         
         
@@ -180,61 +188,52 @@ class NEATStaticDetection(object):
         
         helpers.Printpredict(idx, self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name)
 
-    
-def yolo_loss(Ncat):
-
-    def loss(y_true, y_pred):
-        
-       
-        y_true_class = y_true[...,0:Ncat]
-        y_pred_class = y_pred[...,0:Ncat]
-        
-        
-        y_pred_xyt = y_pred[...,Ncat:] 
-        
-        y_true_xyt = y_true[...,Ncat:] 
-        
-        
-        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
-        xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1), axis = -1)
-        
-      
-
-        d =  class_loss + xy_loss
-        return d 
-    return loss
-        
-        
 
 
-def mid_yolo_loss(Ncat):
+
+def static_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
     
     def loss(y_true, y_pred):
         
        
+        grid = np.array([ [[float(x),float(y)]]   for y in range(gridY) for x in range(gridX)])
+        
         y_true_class = y_true[...,0:Ncat]
         y_pred_class = y_pred[...,0:Ncat]
         
         
-        y_pred_xyt = y_pred[...,Ncat:Ncat + 2] 
+        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, 1, anchors))
+        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, 1, anchors))
         
-        y_true_xyt = y_true[...,Ncat:Ncat + 2] 
+        y_pred_xy = pred_boxes[...,0:2] +  K.variable(grid)
+        y_true_xy = true_boxes[...,0:2]
         
-        y_pred_hw = y_pred[...,Ncat + 2:]
+        y_pred_hw = pred_boxes[...,2:4]
+        y_true_hw = true_boxes[...,2:4]
         
-        y_true_hw = y_true[...,Ncat + 2:]
+        y_pred_conf = pred_boxes[...,4]
+        y_true_conf = true_boxes[...,4]
         
         
         class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
-        xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1), axis = -1)
-        hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis = -1))
+        xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1) * y_true_conf, axis = -1)
+        hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
       
+        #IOU computation for increasing localization accuracy
+       
+        intersect_wh = K.maximum(K.zeros_like(y_pred_hw), (y_pred_hw + y_true_hw)/2 - K.square(y_pred_xy - y_true_xy) )
+        intersect_area = intersect_wh[...,0] * intersect_wh[...,1]
+        true_area = y_true_hw[...,0] * y_true_hw[...,1]
+        pred_area = y_pred_hw[...,0] * y_pred_hw[...,1]
+        union_area = pred_area + true_area - intersect_area
+        iou = intersect_area / union_area
+        conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
 
-        d =  class_loss + 2 * xy_loss + hw_loss
+        combinedloss =  class_loss + lambdacord * xy_loss + hw_loss + conf_loss
         
-        
-        return d 
-    return loss
-        
+        return combinedloss
     
-        
+    
+    return loss
+
+    

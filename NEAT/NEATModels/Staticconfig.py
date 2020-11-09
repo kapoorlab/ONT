@@ -17,7 +17,7 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, simple = False, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48,  epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
+    def __init__(self, residual = True, simple = False, gridX = 3, gridY = 3, anchors = 5, lambdacord = 1, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48,  epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
         
            self.residual = residual
            self.simple = simple
@@ -25,7 +25,10 @@ class StaticNeatConfig(argparse.Namespace):
            self.start_kernel = start_kernel
            self.mid_kernel = mid_kernel
            self.startfilter = startfilter
-           
+           self.gridX = gridX
+           self.gridY = gridY
+           self.anchors = anchors
+           self.lambdacord = lambdacord
            self.epochs = epochs
            self.learning_rate = learning_rate
            self.batch_size = batch_size
@@ -44,6 +47,10 @@ class StaticNeatConfig(argparse.Namespace):
                  'startfilter' : self.startfilter,
                  'epochs' : self.epochs,
                  'learning_rate' : self.learning_rate,
+                 'anchors' : self.anchors,
+                 'gridX' : self.gridX,
+                 'gridY' : self.gridY,
+                 'lambdacord' : self.lambdacord,
                  'batch_size' : self.batch_size
                  }
          return config
@@ -73,6 +80,10 @@ class StaticNeatConfig(argparse.Namespace):
             ok['mid_kernel']         = _is_int(self.mid_kernel,1)
             ok['startfilter']        = _is_int(self.startfilter, 1)
             ok['epochs']        = _is_int(self.epochs, 1)
+            ok['anchors']       = _is_int(self.anchors, 1)
+            ok['gridX'] = _is_int(self.gridX, 1)
+            ok['gridY'] = _is_int(self.gridY, 1)
+            ok['lambdacord'] = _is_int(self.lambdacord, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
     
             

@@ -85,7 +85,7 @@ class NEATDetection(object):
         self.anchors = config.anchors
         self.gridX = config.gridX
         self.gridY = config.gridY
-        
+        self.lambdacord = config.lambdacord
         self.X = None
         self.Y = None
         self.axes = None
@@ -155,13 +155,11 @@ class NEATDetection(object):
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
+        
+        
+        
         if self.simple == False:
-          self.Trainingmodel.compile(optimizer=sgd, loss=mid_yolo_loss(Ncat = self.categories), metrics=['accuracy'])
-        if self.simple == True and self.catsimple == False:
-          self.Trainingmodel.compile(optimizer=sgd, loss=simple_yolo_loss(Ncat = self.categories), metrics=['accuracy'])  
-        if self.simple == False and self.catsimple == True:
-          self.Trainingmodel.compile(optimizer=sgd, loss=cat_simple_yolo_loss(Ncat = self.categories), metrics=['accuracy'])    
-
+          self.Trainingmodel.compile(optimizer=sgd, loss = time_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.lambdacord), metrics=['accuracy'])
         
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
@@ -216,7 +214,7 @@ def time_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
         
         class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
         xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1) * y_true_conf, axis = -1)
-        hw_loss =     K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
+        hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
       
         #IOU computation for increasing localization accuracy
        
@@ -226,9 +224,7 @@ def time_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
         pred_area = y_pred_hw[...,0] * y_pred_hw[...,1]
         union_area = pred_area + true_area - intersect_area
         iou = intersect_area / union_area
-
         conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
-
 
         combinedloss =  class_loss + lambdacord * xy_loss + hw_loss + conf_loss
         
@@ -238,85 +234,5 @@ def time_yolo_loss(Ncat, gridX, gridY, anchors, lambdacord):
     return loss
     
 
-def yolo_loss(Ncat):
 
-    def loss(y_true, y_pred):
-        
-       
-        y_true_class = y_true[...,0:Ncat]
-        y_pred_class = y_pred[...,0:Ncat]
-        
-        
-        y_pred_xyt = y_pred[...,Ncat:] 
-        
-        y_true_xyt = y_true[...,Ncat:] 
-        
-        
-        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
-        xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1), axis = -1)
-        
-      
-
-        d =  class_loss + xy_loss
-        return d 
-    return loss
- 
-def simple_yolo_loss(Ncat):
-
-    def loss(y_true, y_pred):
-        
-       
-        y_true_class = y_true[...,0:Ncat]
-        y_pred_class = y_pred[...,0:Ncat]
-        
-        
-        class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
-      
-
-        d =  class_loss 
-        return d 
-    return loss       
-      
-def cat_simple_yolo_loss(Ncat):
-
-    def loss(y_true, y_pred):
-         
-
-           y_true_class = y_true[...,0:Ncat]
-           y_pred_class = y_pred[...,0:Ncat]
-
-           class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis = -1)
-
-           d = class_loss
-           return d
-    return loss   
-
-def mid_yolo_loss(Ncat):
-    
-    def loss(y_true, y_pred):
-        
-       
-        y_true_class = y_true[...,0:Ncat]
-        y_pred_class = y_pred[...,0:Ncat]
-        
-        
-        y_pred_xyt = y_pred[...,Ncat:Ncat + 3] 
-        
-        y_true_xyt = y_true[...,Ncat:Ncat + 3] 
-        
-        y_pred_hw = y_pred[...,Ncat + 3:]
-        
-        y_true_hw = y_true[...,Ncat + 3:]
-        
-        
-        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
-        xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1), axis = -1)
-        hw_loss =     K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis = -1))
-      
-
-        d =  class_loss + 2 * xy_loss + hw_loss
-        
-        return d 
-    return loss
-    
         

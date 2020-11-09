@@ -10,7 +10,7 @@ import numpy as np
 
 class NeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, simple = False, catsimple = False, gridX = 3, gridY = 3, anchors = 5, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
+    def __init__(self, residual = True, simple = False, catsimple = False, gridX = 3, gridY = 3, anchors = 5, lambdacord = 1, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
         
         
            
@@ -26,6 +26,7 @@ class NeatConfig(argparse.Namespace):
            self.learning_rate = learning_rate
            self.batch_size = batch_size
            self.ModelName = ModelName
+           self.lambdacord = lambdacord
            self.gridX = gridX
            self.gridY = gridY
            self.anchors = anchors
@@ -49,6 +50,7 @@ class NeatConfig(argparse.Namespace):
                  'anchors' : self.anchors,
                  'gridX' : self.gridX,
                  'gridY' : self.gridY,
+                 'lambdacord': self.lambdacord,
                  'batch_size' : self.batch_size
                  }
          return config
@@ -83,6 +85,7 @@ class NeatConfig(argparse.Namespace):
             ok['anchors']       = _is_int(self.anchors, 1)
             ok['gridX'] = _is_int(self.gridX, 1)
             ok['gridY'] = _is_int(self.gridY, 1)
+            ok['lambdacord'] = _is_int(self.lambdacord, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
     
             
