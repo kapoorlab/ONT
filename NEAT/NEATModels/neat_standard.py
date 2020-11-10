@@ -182,7 +182,7 @@ def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
     def loss(y_true, y_pred):
         
        
-        grid = np.array([ [[float(x),float(y), float(t)]]   for y in range(gridY) for x in range(gridX) for t in range(1)])
+        grid = np.array([ [[float(x),float(y), float(t)]]*anchors   for y in range(gridY) for x in range(gridX) for t in range(1)])
         
         y_true_class = y_true[...,0:categories]
         y_pred_class = y_pred[...,0:categories]

@@ -66,7 +66,7 @@ class NEATStaticDetection(object):
     """
     
     
-    def __init__(self, staticconfig, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, model_dir, model_name, model_weights = None,  show = False ):
+    def __init__(self, staticconfig, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
 
         self.NpzDirectory = NpzDirectory
         self.TrainModelName = TrainModelName
@@ -74,6 +74,7 @@ class NEATStaticDetection(object):
         self.model_dir = model_dir
         self.model_name = model_name
         self.Categories_Name = Categories_Name
+        self.box_vector = box_vector
         self.model_weights = model_weights
         self.show = show
         self.simple = staticconfig.simple
@@ -137,16 +138,7 @@ class NEATStaticDetection(object):
         Path(self.model_dir).mkdir(exist_ok=True)
         
        
-        Y_rest = self.Y[:,:,:,self.categories:]
-        Y_main = self.Y[:,:,:,0:self.categories-1]
- 
-        y_integers = np.argmax(Y_main, axis = -1)
-        y_integers = y_integers[:,0,0]
 
-        
-        
-        d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
-        d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
         
         
@@ -155,7 +147,7 @@ class NEATStaticDetection(object):
         else:
             model_keras = nets.seqnet_v2
         
-        self.Trainingmodel = model_keras(input_shape, self.categories,   box_vector = Y_rest.shape[-1] , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
+        self.Trainingmodel = model_keras(input_shape, self.categories,   box_vector = self.box_vector , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
@@ -172,7 +164,7 @@ class NEATStaticDetection(object):
         
         
         #Train the model and save as a h5 file
-        self.Trainingmodel.fit(self.X,self.Y, class_weight = d_class_weights , batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
+        self.Trainingmodel.fit(self.X,self.Y, batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
         #clear_output(wait=True) 
 
      
@@ -196,7 +188,7 @@ def static_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
     def loss(y_true, y_pred):
         
        
-        grid = np.array([ [[float(x),float(y)]]   for y in range(gridY) for x in range(gridX)])
+        grid = np.array([ [[float(x),float(y)]]*anchors   for y in range(gridY) for x in range(gridX)])
         
         y_true_class = y_true[...,0:categories]
         y_pred_class = y_pred[...,0:categories]
