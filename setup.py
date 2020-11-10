@@ -56,7 +56,6 @@ setup(name='ONT',
           "imagecodecs-lite<=2020; python_version<'3.6'",
           "tifffile",
           "tqdm",
-          "elasticdeform"
           "pathlib2; python_version<'3'",
           "backports.tempfile; python_version<'3.4'",
       ]
