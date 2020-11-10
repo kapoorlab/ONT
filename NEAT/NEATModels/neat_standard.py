@@ -74,6 +74,7 @@ class NEATDetection(object):
         self.lstm_hidden_unit = config.lstm
         self.start_kernel = config.start_kernel
         self.mid_kernel = config.mid_kernel
+        self.lstm_kernel = config.lstm_kernel
         self.learning_rate = config.learning_rate
         self.epochs = config.epochs
         self.residual = config.residual
@@ -125,18 +126,6 @@ class NEATDetection(object):
         
         Path(self.model_dir).mkdir(exist_ok=True)
         
-       
-        Y_rest = self.Y[:,:,:,self.categories:]
-        Y_main = self.Y[:,:,:,0:self.categories-1]
- 
-        y_integers = np.argmax(Y_main, axis = -1)
-        y_integers = y_integers[:,0,0]
-
-        
-        
-        d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
-        d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
-        
         if self.residual == True and self.simple == False:
             model_keras = nets.ORNET
         if self.residual == False and self.simple == False: 
@@ -172,7 +161,7 @@ class NEATDetection(object):
         
         
         #Train the model and save as a h5 file
-        self.Trainingmodel.fit(self.X,self.Y, class_weight = d_class_weights , batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
+        self.Trainingmodel.fit(self.X,self.Y,batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
 
      
         # Removes the old model to be replaced with new model, if old one exists
@@ -188,19 +177,19 @@ class NEATDetection(object):
         helpers.Printpredict(idx, self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name)
 
    
-def time_yolo_loss(Ncat, gridX, gridY, anchors, box_vector, lambdacord):
+def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
     
     def loss(y_true, y_pred):
         
        
         grid = np.array([ [[float(x),float(y), float(t)]]   for y in range(gridY) for x in range(gridX) for t in range(1)])
         
-        y_true_class = y_true[...,0:Ncat]
-        y_pred_class = y_pred[...,0:Ncat]
+        y_true_class = y_true[...,0:categories]
+        y_pred_class = y_pred[...,0:categories]
         
         
-        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
-        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
+        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, anchors, box_vector))
+        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, anchors, box_vector))
         
         y_pred_xyt = pred_boxes[...,0:3] +  (grid)
         y_true_xyt = true_boxes[...,0:3]

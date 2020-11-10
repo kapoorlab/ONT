@@ -191,19 +191,19 @@ class NEATStaticDetection(object):
 
 
 
-def static_yolo_loss(Ncat, gridX, gridY, anchors, box_vector, lambdacord):
+def static_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
     
     def loss(y_true, y_pred):
         
        
         grid = np.array([ [[float(x),float(y)]]   for y in range(gridY) for x in range(gridX)])
         
-        y_true_class = y_true[...,0:Ncat]
-        y_pred_class = y_pred[...,0:Ncat]
+        y_true_class = y_true[...,0:categories]
+        y_pred_class = y_pred[...,0:categories]
         
         
-        pred_boxes = K.reshape(y_pred[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
-        true_boxes = K.reshape(y_true[...,Ncat:], (-1, gridY * gridX, anchors, box_vector))
+        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, anchors, box_vector))
+        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, anchors, box_vector))
         
         y_pred_xy = pred_boxes[...,0:2] +  (grid)
         y_true_xy = true_boxes[...,0:2]
