@@ -1,11 +1,8 @@
-import sys
-sys.path.insert(0,"../NEATUtils")
 import csv
-import os
 from glob import glob
 import numpy as np
-from tifffile import imread 
-from NEATUtils.helpers import save_tiff_imagej_compatible
+from tifffile import imread, imwrite 
+import pandas as pd
 import math
 try:
     from pathlib import Path
@@ -21,62 +18,36 @@ except (ImportError,AttributeError):
     
     
     
+def CreateTrainingMovies(csv_file, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
+
+            Path(save_dir).mkdir(exist_ok=True)
+            
+            dataset = pd.read_csv(csv_file)
+            if len(dataset.keys() >= 3):
+                
+                time = dataset[dataset.keys()[0]][1:]
+                y = dataset[dataset.keys()[1]][1:]
+                x = dataset[dataset.keys()[2]][1:]
+                angle = np.zeros_like(time)                        
+            if len(dataset.keys() > 3):
+                
+                angle = dataset[dataset.keys()[3]][1:]      
+            
+            MovieMaker(time, y, x, angle, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir)    
     
-    
-def CreateMoviesXYTZ(csv_file, image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       x, y, time, z =   np.loadtxt(csv_file, delimiter = ',', skiprows = 1, unpack=True)   
-       
-       MovieMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)
-       
-       
-    
-def CreateMoviesTXYZ(csv_file, image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       time, x, y, z =   np.loadtxt(csv_file, delimiter = ',', skiprows = 1, unpack=True)   
-       
-       MovieMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)
-              
-    
-def CreateTMovies(csv_file, image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       x, y, time =   np.loadtxt(csv_file, delimiter = ',', skiprows = 0, unpack=True)   
+def CreateTrainingImages(csv_file, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
+
+            Path(save_dir).mkdir(exist_ok=True)
+            
+            dataset = pd.read_csv(csv_file)
+            y = dataset[dataset.keys()[0]][1:]
+            x = dataset[dataset.keys()[1]][1:]                        
+            
+            ImageMaker(y, x, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir)    
 
 
-       MovieMaker(x,y,time,0,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)    
-    
-  
-    
-def CreateImagesXYTZ(csv_file, image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       x, y, time, z =   np.loadtxt(csv_file, delimiter = ',', skiprows = 1, unpack=True)   
-       
-       ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)
-       
-       
-    
-def CreateImagesTXYZ(csv_file, image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       time, x, y, z =   np.loadtxt(csv_file, delimiter = ',', skiprows = 1, unpack=True)   
-       
-       ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)
-              
-    
-def CreateTImages(csv_file, image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       x, y, time =   np.loadtxt(csv_file, delimiter = ',', skiprows = 0, unpack=True)   
 
-
-       ImageMaker(x,y,time,0,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)    
-    
-def CreateImages(csv_file, image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       time, z, x, y =   np.loadtxt(csv_file, delimiter = ',', skiprows = 1, unpack=True)   
-       
-       
-       ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name)   
-
-def MovieMaker(x,y,time,z,image, crop_size, shift, TotalCategories, trainlabel, save_dir, name):
+def MovieMaker(time, y, x, angle, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
     
        sizeX, sizeY, sizeTminus, sizeTplus = crop_size
        shiftNone = [0,0] 
@@ -88,16 +59,15 @@ def MovieMaker(x,y,time,z,image, crop_size, shift, TotalCategories, trainlabel, 
        shiftDRXY = [shift, shift]
        shiftUY = [0, -1.0 * shift]
        shiftDY = [0, shift]
-     
+       AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
 
 
-       AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY  ]
+
+
        
-       MovieSaver(x,y,time,image,sizeX,sizeY,sizeTplus, sizeTminus, shift, TotalCategories, trainlabel, name, AllShifts, save_dir)
-       
-def ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, save_dir, name):
-    
-       sizeX, sizeY, sizeT = crop_size
+def  ImageMaker(y, x, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
+
+       sizeX, sizeY = crop_size
        shiftNone = [0,0] 
        shiftLX = [-1.0 * shift, 0] 
        shiftRX = [shift, 0]
@@ -107,12 +77,11 @@ def ImageMaker(x,y,time,z,image, crop_size, shift,TotalCategories, trainlabel, s
        shiftDRXY = [shift, shift]
        shiftUY = [0, -1.0 * shift]
        shiftDY = [0, shift]
-     
+       AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
 
 
-       AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY  ]
-       
-       ImageSaver(x,y,time,image,sizeX,sizeY,sizeT,shift,TotalCategories, trainlabel, name, AllShifts, save_dir)   
+
+
 
        
 def MovieSaver(x,y,time,image,sizeX,sizeY,sizeTplus,sizeTminus, shift, TotalCategories, trainlabel, name, AllShifts, save_dir):

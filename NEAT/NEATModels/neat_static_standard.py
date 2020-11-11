@@ -15,7 +15,6 @@ from NEATModels import nets
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
-from sklearn.utils.class_weight import compute_class_weight
 try:
     from pathlib import Path
     Path().expanduser()
