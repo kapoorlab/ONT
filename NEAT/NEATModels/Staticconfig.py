@@ -17,7 +17,7 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, simple = False, gridX = 3, gridY = 3, anchors = 5, lambdacord = 1, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48,  epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel',  **kwargs):
+    def __init__(self, residual = True, simple = False, gridX = 3, gridY = 3, anchors = 5, lambdacord = 1, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48,  epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', last_activation = 'softmax', **kwargs):
         
            self.residual = residual
            self.simple = simple
@@ -33,6 +33,7 @@ class StaticNeatConfig(argparse.Namespace):
            self.learning_rate = learning_rate
            self.batch_size = batch_size
            self.ModelName = ModelName
+           self.last_activation = last_activation
            
            
     def to_json(self):
@@ -51,7 +52,8 @@ class StaticNeatConfig(argparse.Namespace):
                  'gridX' : self.gridX,
                  'gridY' : self.gridY,
                  'lambdacord' : self.lambdacord,
-                 'batch_size' : self.batch_size
+                 'batch_size' : self.batch_size,
+                 'last_activation' : self.activation
                  }
          return config
                 
@@ -85,7 +87,7 @@ class StaticNeatConfig(argparse.Namespace):
             ok['gridY'] = _is_int(self.gridY, 1)
             ok['lambdacord'] = _is_int(self.lambdacord, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
-    
+            ok['last_activation'] = self.last_activation in ('softmax', 'sigmoid')
             
     
             if return_invalid:

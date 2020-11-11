@@ -221,7 +221,7 @@ def static_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
         iou = intersect_area / union_area
         conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
 
-        combinedloss =  class_loss + lambdacord * xy_loss + hw_loss + conf_loss
+        combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
         return combinedloss
     

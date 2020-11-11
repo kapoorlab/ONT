@@ -5,9 +5,7 @@ from keras import callbacks
 import os
 from NEATModels import nets
 from keras import backend as K
-#from IPython.display import clear_output
 from keras import optimizers
-from sklearn.utils.class_weight import compute_class_weight
 try:
     from pathlib import Path
     Path().expanduser()
@@ -215,7 +213,7 @@ def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
         iou = intersect_area / union_area
         conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
 
-        combinedloss =  class_loss + lambdacord * xy_loss + hw_loss + conf_loss
+        combinedloss =  class_loss + lambdacord * (xy_loss + hw_loss) + conf_loss
         
         return combinedloss
     

@@ -49,31 +49,6 @@ def load_json(fpath):
 def save_json(data,fpath,**kwargs):
     with open(fpath,'w') as f:
         f.write(json.dumps(data,**kwargs))    
-  
-def save_tiff_imagej_compatible(file, img, axes, **imsave_kwargs):
-    """Save image in ImageJ-compatible TIFF format.
-
-    Parameters
-    ----------
-    file : str
-        File name
-    img : numpy.ndarray
-        Image
-    axes: str
-        Axes of ``img``
-    imsave_kwargs : dict, optional
-        Keyword arguments for :func:`tifffile.imsave`
-
-    """
-    t = np.uint8
-    # convert to imagej-compatible data type
-    t_new = t
-    img = img.astype(t_new, copy=False)
-    if t != t_new:
-        warnings.warn("Converting data type from '%s' to ImageJ-compatible '%s'." % (t, np.dtype(t_new)))
-
-    imsave_kwargs['imagej'] = True
-    imsave(file, img, **imsave_kwargs)
 
 
    ##CARE csbdeep modification of implemented function
@@ -189,66 +164,6 @@ def normalizeZeroOne(x):
      
      return x
     
-       
-    
-
-def load_training_data(directory, filename,axes=None, verbose= True):
-    """ Load training data in .npz format.
-    The data file is expected to have the keys 'data' and 'label'     
-    """
-    if directory is not None:
-      npzdata=np.load(directory + filename)
-    else : 
-      npzdata=np.load(filename)
-   
-    
-    X = npzdata['data']
-    Y = npzdata['label']
-    Z = npzdata['label2']
-    
-        
-    
-    if axes is None:
-        axes = npzdata['axes']
-    axes = axes_check_and_normalize(axes)
-    assert 'C' in axes
-    n_images = X.shape[0]
-    assert X.shape[0] == Y.shape[0]
-    assert 0 < n_images <= X.shape[0]
-  
-    
-    X, Y = X[:n_images], Y[:n_images]
-    channel = axes_dict(axes)['C']
-    
-
-       
-
-    X = move_channel_for_backend(X,channel=channel)
-    
-    axes = axes.replace('C','') # remove channel
-    if backend_channels_last():
-        axes = axes+'C'
-    else:
-        axes = axes[:1]+'C'+axes[1:]
-
-   
-
-    if verbose:
-        ax = axes_dict(axes)
-        n_train = len(X)
-        image_size = tuple( X.shape[ax[a]] for a in 'TZYX' if a in axes )
-        n_dim = len(image_size)
-        n_channel_in = X.shape[ax['C']]
-
-        print('number of  images:\t', n_train)
-       
-        print('image size (%dD):\t\t'%n_dim, image_size)
-        print('axes:\t\t\t\t', axes)
-        print('channels in / out:\t\t', n_channel_in)
-
-    return (X,Y,Z), axes
-  
-    
 def _raise(e):
     raise e
 
@@ -291,9 +206,6 @@ def load_full_training_data(directory, filename,axes=None, verbose= True):
     X = npzdata['data']
     Y = npzdata['label']
     
-    
-        
-    
     if axes is None:
         axes = npzdata['axes']
     axes = axes_check_and_normalize(axes)
@@ -306,9 +218,6 @@ def load_full_training_data(directory, filename,axes=None, verbose= True):
     X, Y = X[:n_images], Y[:n_images]
     channel = axes_dict(axes)['C']
     
-
-       
-
     X = move_channel_for_backend(X,channel=channel)
     
     axes = axes.replace('C','') # remove channel
@@ -316,9 +225,7 @@ def load_full_training_data(directory, filename,axes=None, verbose= True):
         axes = axes+'C'
     else:
         axes = axes[:1]+'C'+axes[1:]
-
-   
-
+        
     if verbose:
         ax = axes_dict(axes)
         n_train = len(X)
