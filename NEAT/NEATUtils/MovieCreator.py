@@ -4,6 +4,7 @@ import numpy as np
 from tifffile import imread, imwrite 
 import pandas as pd
 import math
+from skimage.measure import regionprops
 try:
     from pathlib import Path
     Path().expanduser()
@@ -18,7 +19,7 @@ except (ImportError,AttributeError):
     
     
     
-def CreateTrainingMovies(csv_file, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
+def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0 ):
 
             Path(save_dir).mkdir(exist_ok=True)
             
@@ -33,9 +34,13 @@ def CreateTrainingMovies(csv_file, image, segimage, crop_size, shift, TotalCateg
                 
                 angle = dataset[dataset.keys()[3]][1:]      
             
-            MovieMaker(time, y, x, angle, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir)    
+            #Categories + XYTHW + Confidence + Angle
+            
+            MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, save_dir)    
+            
+            
     
-def CreateTrainingImages(csv_file, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
+def CreateTrainingImages(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0):
 
             Path(save_dir).mkdir(exist_ok=True)
             
@@ -43,31 +48,71 @@ def CreateTrainingImages(csv_file, image, segimage, crop_size, shift, TotalCateg
             y = dataset[dataset.keys()[0]][1:]
             x = dataset[dataset.keys()[1]][1:]                        
             
-            ImageMaker(y, x, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir)    
+            #Categories + XYHW + Confidence 
+            
+            ImageMaker(y, x, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, save_dir)    
 
 
 
-def MovieMaker(time, y, x, angle, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
+def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, save_dir):
     
        sizeX, sizeY, sizeTminus, sizeTplus = crop_size
+       
+       ImagesizeX = sizeX * gridX
+       ImagesizeY = sizeY * gridY
+       
        shiftNone = [0,0] 
-       shiftLX = [-1.0 * shift, 0] 
-       shiftRX = [shift, 0]
-       shiftLXY = [-1.0 * shift, -1.0 * shift]
-       shiftRXY = [shift, -1.0 * shift]
-       shiftDLXY = [-1.0 * shift,shift]
-       shiftDRXY = [shift, shift]
-       shiftUY = [0, -1.0 * shift]
-       shiftDY = [0, shift]
+       shiftLX = [-1.0 * offset, 0] 
+       shiftRX = [offset, 0]
+       shiftLXY = [-1.0 * offset, -1.0 * offset]
+       shiftRXY = [offset, -1.0 * offset]
+       shiftDLXY = [-1.0 * offset, offset]
+       shiftDRXY = [offset, offset]
+       shiftUY = [0, -1.0 * offset]
+       shiftDY = [0, offset]
        AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
 
+       Label = np.zeros([TotalCategories + 7])
+       Label[trainlabel] = 1
+       #T co ordinate
+       Label[TotalCategories + 2] = (sizeTminus) / (sizeTminus + sizeTplus)
+       
+       currentsegimage = segimage[time,:].astype('uint16')
+       for shift in AllShifts:
+           
+               defaultX = int((sizeX//2 + shift[0])/sizeX)  
+               defaultY = int((sizeY//2 + shift[1])/sizeY)
+               imageLabel = currentsegimage[defaultY, defaultX]
+               for region in regionprops(currentsegimage):
+           
+                       if region.label == imageLabel and imageLabel > 0:
+                                minr, minc, maxr, maxc = region.bbox
+              
+                                center = region.centroid
+                                height =  abs(maxc - minc)
+                                width =  abs(maxr - minr)
+               
 
-
+               Label[TotalCategories] =  center[1]/sizeX
+               Label[TotalCategories + 1] = center[0]/sizeY
+               Label[TotalCategories + 3] = height/ImagesizeY
+               Label[TotalCategories + 4] = width/ImagesizeX
+               
+               #Object confidence is 0 for background label else it is 1
+               if trainlabel > 0:
+                  Label[TotalCategories + 5] = 1
+               else:
+                  Label[TotalCategories + 5] = 0 
+                   
 
        
-def  ImageMaker(y, x, image, segimage, crop_size, shift, TotalCategories, trainlabel, save_dir):
+def  ImageMaker(y, x, image, segimage, crop_size, gridX, gridY, shift, TotalCategories, trainlabel, save_dir):
 
        sizeX, sizeY = crop_size
+       
+       ImagesizeX = sizeX * gridX
+       ImagesizeY = sizeY * gridY
+       
        shiftNone = [0,0] 
        shiftLX = [-1.0 * shift, 0] 
        shiftRX = [shift, 0]
@@ -79,6 +124,7 @@ def  ImageMaker(y, x, image, segimage, crop_size, shift, TotalCategories, trainl
        shiftDY = [0, shift]
        AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
 
+      
 
 
 
@@ -249,7 +295,7 @@ def SaveMovies(x,y,time, image, sizeX, sizeY, sizeTplus,sizeTminus,offset, shift
    axes = 'TYX'
    Label = np.zeros([TotalCategories + 3])
    Label[trainlabel] = 1
-   Label[TotalCategories + 2] = (sizeTminus + 0.5) / (sizeTminus + sizeTplus + 1)
+   Label[TotalCategories + 2] = (sizeTminus) / (sizeTminus + sizeTplus)
    
    if name == 'NoShift':
        Label[TotalCategories] = 0.5
@@ -310,7 +356,7 @@ def SaveMovies(x,y,time, image, sizeX, sizeY, sizeTplus,sizeTminus,offset, shift
        count = count + 1
               
        if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== sizeX and crop_image.shape[2]== sizeY):
-        save_tiff_imagej_compatible((savedir + '/' + name + str(count) + appendname + '.tif'  ) , crop_image, axes)
+        imwrite((savedir + '/' + name + str(count) + appendname + '.tif'  ) , crop_image.astype('float32'))
         
     
 def SaveImages(x,y,time, image, sizeX, sizeY, sizeT,offset, shift, savedir, TotalCategories, trainlabel, name, appendname):
@@ -379,7 +425,7 @@ def SaveImages(x,y,time, image, sizeX, sizeY, sizeT,offset, shift, savedir, Tota
        count = count + 1
        if(crop_image.shape[1]== sizeX and crop_image.shape[2]== sizeY):
         try:
-          save_tiff_imagej_compatible((savedir + '/' + name + str(count) + appendname + '.tif'  ) , crop_image, axes)
+          imwrite((savedir + '/' + name + str(count) + appendname + '.tif'  ) , crop_image.astype('float32'))
         except:
             print('zero array')
       
@@ -451,7 +497,7 @@ def SaveMovieImages(x,y,time, image, sizeX, sizeY, sizeT,offset, shift, savedir,
            count = count + 1
               
            if(crop_image.shape[1]== sizeX and crop_image.shape[2]== sizeY):
-             save_tiff_imagej_compatible((savedir + '/' + name + str(count) + 'Slice' + str(i)   + appendname + '.tif'  ) , crop_image[0,:], axes)
+               imwrite((savedir + '/' + name + str(count) + 'Slice' + str(i)   + appendname + '.tif'  ) , crop_image[0,:].astype('float32'))
         
 
  
