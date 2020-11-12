@@ -22,7 +22,7 @@ except (ImportError,AttributeError):
 def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0 ):
 
             Path(save_dir).mkdir(exist_ok=True)
-            
+            name = 1
             dataset = pd.read_csv(csv_file)
             if len(dataset.keys() >= 3):
                 
@@ -35,42 +35,48 @@ def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, 
                 angle = dataset[dataset.keys()[3]][1:]      
             
             #Categories + XYTHW + Confidence + Angle
-            
-            MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, save_dir)    
+            for t in time:
+               MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, str(name), save_dir)
+               name = name + 1
             
             
     
 def CreateTrainingImages(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0):
 
             Path(save_dir).mkdir(exist_ok=True)
-            
+            name = 1
             dataset = pd.read_csv(csv_file)
             y = dataset[dataset.keys()[0]][1:]
             x = dataset[dataset.keys()[1]][1:]                        
             
             #Categories + XYHW + Confidence 
-            
-            ImageMaker(y, x, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, save_dir)    
+            for t in x:
+               ImageMaker(y[t], x[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, str(name) save_dir)    
+               name = name + 1
 
 
-
-def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, save_dir):
+def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, name, save_dir):
     
        sizeX, sizeY, sizeTminus, sizeTplus = crop_size
        
        ImagesizeX = sizeX * gridX
        ImagesizeY = sizeY * gridY
        
-       shiftNone = [0,0] 
-       shiftLX = [-1.0 * offset, 0] 
-       shiftRX = [offset, 0]
-       shiftLXY = [-1.0 * offset, -1.0 * offset]
-       shiftRXY = [offset, -1.0 * offset]
-       shiftDLXY = [-1.0 * offset, offset]
-       shiftDRXY = [offset, offset]
-       shiftUY = [0, -1.0 * offset]
-       shiftDY = [0, offset]
-       AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
+       shiftNone = [0,0]
+       if offset > 0:
+         shiftLX = [-1.0 * offset, 0] 
+         shiftRX = [offset, 0]
+         shiftLXY = [-1.0 * offset, -1.0 * offset]
+         shiftRXY = [offset, -1.0 * offset]
+         shiftDLXY = [-1.0 * offset, offset]
+         shiftDRXY = [offset, offset]
+         shiftUY = [0, -1.0 * offset]
+         shiftDY = [0, offset]
+         AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
+
+       else:
+           
+          AllShifts = [shiftNone]
 
        Label = np.zeros([TotalCategories + 7])
        Label[trainlabel] = 1
@@ -98,15 +104,34 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                Label[TotalCategories + 3] = height/ImagesizeY
                Label[TotalCategories + 4] = width/ImagesizeX
                
+               
                #Object confidence is 0 for background label else it is 1
                if trainlabel > 0:
                   Label[TotalCategories + 5] = 1
                else:
                   Label[TotalCategories + 5] = 0 
-                   
+                  
+               Label[TotalCategories + 6] = angle    
+               writer = csv.writer(open(savedir + '/' + (name) + ".csv", "w"))
+           for l in Label : writer.writerow ([l])
 
        
-def  ImageMaker(y, x, image, segimage, crop_size, gridX, gridY, shift, TotalCategories, trainlabel, save_dir):
+           if x - shift[0]> sizeX/2 and y - shift[1] > sizeY/2 and time > sizeTminus and time + sizeTplus + 1 < image.shape[0]:
+                          crop_Xminus = x[t] + shift[0] - int(ImagesizeX/2)
+                          crop_Xplus = x[t] + shift[0] + int(ImagesizeX/2)
+                          crop_Yminus = y[t] + shift[1] - int(ImagesizeY/2)
+                          crop_Yplus = y[t] + shift[1] + int(ImagesizeY/2)
+      
+           region =(slice(int(time - sizeTminus - 1),int(time + sizeTplus )),slice(int(crop_Yminus), int(crop_Yplus)),
+                      slice(int(crop_Xminus), int(crop_Xplus)))
+           crop_image = image[region]      
+       
+      
+              
+           if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
+                         imwrite((savedir + '/' + name + '.tif'  ) , crop_image.astype('float32'))       
+       
+def  ImageMaker(y, x, image, segimage, crop_size, gridX, gridY, shift, TotalCategories, trainlabel, name, save_dir):
 
        sizeX, sizeY = crop_size
        
