@@ -10,7 +10,7 @@ import numpy as np
 
 class NeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, simple = False, catsimple = False, gridX = 3, gridY = 3, anchors = 5, lambdacord = 1, depth = 29, start_kernel = 7, mid_kernel = 3, lstm_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', last_activation = 'softmax',  **kwargs):
+    def __init__(self, residual = True, simple = False, catsimple = False, gridX = 1, gridY = 1, anchors = 5, lambdacord = 1, depth = 29, start_kernel = 7, mid_kernel = 3, lstm_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', last_activation = 'softmax',  **kwargs):
         
         
            

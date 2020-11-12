@@ -7,8 +7,10 @@ import warnings
 import csv
 import json
 import cv2
+import glob
+from sklearn.model_selection import train_test_split
 from matplotlib import cm
-from tifffile import imsave
+from tifffile import imread, imwrite
 from skimage import measure
 try:
     from pathlib import Path
@@ -192,68 +194,58 @@ def axes_dict(axes):
     return { a: None if axes.find(a) == -1 else axes.find(a) for a in allowed }
     # return collections.namedt      
     
-def load_full_training_data(directory, filename,axes=None, verbose= True):
-    """ Load training data in .npz format.
-    The data file is expected to have the keys 'data' and 'label'     
-    """
+def load_full_training_data(directory, categories, nb_boxes):
     
-    if directory is not None:
-      npzdata=np.load(directory + filename)
-    else:
-      npzdata=np.load(filename)  
+     #Generate npz file with data and label attributes   
+     Raw_path = os.path.join(directory, '*tif')
+     X = glob.glob(Raw_path)
+     
+     Xtrain = []
+     Ytrain = []
+     
+     for fname in X:
+         
+         image = imread(fname)
+         
+         Name = os.path.basename(os.path.splitext(fname)[0])
     
+         csvfile = directory + Name + '.csv'
+         try:
+             
+             y_t = []
+             reader = csv.reader(csvfile, delimiter = ',')
+         
+             for train_vec in reader:
+                   catarr = [float(s) for s in train_vec[0:categories]]
+                   xarr = [float(s) for s in train_vec[categories:]]
+                   newxarr = []
+                   for b in range(nb_boxes):
+                       newxarr+= [xarr[s] for s in range(len(xarr))]
+                       
+                   trainarr = catarr + newxarr    
+                   y_t.append(trainarr)
+             
+                
+             Ytrain.append(y_t)     
+             Xtrain.append(image)
     
-    X = npzdata['data']
-    Y = npzdata['label']
+         except:
+             
+             print('Matching label not found for:', Name ,  '.tif')
     
-    if axes is None:
-        axes = npzdata['axes']
-    axes = axes_check_and_normalize(axes)
-    assert 'C' in axes
-    n_images = X.shape[0]
-    assert X.shape[0] == Y.shape[0]
-    assert 0 < n_images <= X.shape[0]
+     Xtrain = np.array(Xtrain)
+     Ytrain = np.array(Ytrain)
   
-    
-    X, Y = X[:n_images], Y[:n_images]
-    channel = axes_dict(axes)['C']
-    
-    X = move_channel_for_backend(X,channel=channel)
-    
-    axes = axes.replace('C','') # remove channel
-    if backend_channels_last():
-        axes = axes+'C'
-    else:
-        axes = axes[:1]+'C'+axes[1:]
-        
-    if verbose:
-        ax = axes_dict(axes)
-        n_train = len(X)
-        image_size = tuple( X.shape[ax[a]] for a in 'TZYX' if a in axes )
-        n_dim = len(image_size)
-        n_channel_in = X.shape[ax['C']]
 
-        print('number of  images:\t', n_train)
-       
-        print('image size (%dD):\t\t'%n_dim, image_size)
-        print('axes:\t\t\t\t', axes)
-        print('channels in / out:\t\t', n_channel_in)
-
-    return (X,Y), axes
+     print('number of  images:\t', Xtrain.shape[0])
+     print('image size (%dD):\t\t',Xtrain.shape)
+     print('Labels:\t\t\t\t', Ytrain.shape)
+     traindata, validdata, trainlabel, validlabel = train_test_split(Xtrain, Ytrain, train_size=0.95,test_size=0.05, shuffle= True)
+     
+     return (traindata,trainlabel) , (validdata, validlabel)
         
     
-    
-def backend_channels_last():
-    import keras.backend as K
-    assert K.image_data_format() in ('channels_first','channels_last')
-    return K.image_data_format() == 'channels_last'
-
-
-def move_channel_for_backend(X,channel):
-    if backend_channels_last():
-        return np.moveaxis(X, channel, -1)
-    else:
-        return np.moveaxis(X, channel,  1)    
+  
     
 def time_pad(image, TimeFrames):
 
@@ -447,7 +439,6 @@ def X_right_prediction(image,sY, sX, time_prediction, stride, inputtime, Categor
 def draw_labelimages(image, location, time, timelocation ):
 
      cv2.circle(image, location, 2,(255,0,0), thickness = -1 )
-     
 
      return image 
 
@@ -482,10 +473,10 @@ def extra_pad(image, patchX, patchY):
           
           return extendimage
  
-def save_labelimages(save_dir, image, axes, fname, Name):
+def save_labelimages(save_dir, image, fname, Name):
 
     
-             save_tiff_imagej_compatible((save_dir + Name + os.path.basename(fname) ) , image, axes)
+             imwrite((save_dir + Name + os.path.basename(fname) ) , image.astype('uint16'))
         
     
                 

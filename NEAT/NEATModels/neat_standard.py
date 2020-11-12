@@ -87,7 +87,6 @@ class NEATDetection(object):
         self.lambdacord = config.lambdacord
         self.X = None
         self.Y = None
-        self.axes = None
         self.X_val = None
         self.Y_val = None
         self.Trainingmodel = None
@@ -96,10 +95,8 @@ class NEATDetection(object):
         print(self.startfilter)
     def loadData(self):
         
-        (X,Y),  axes = helpers.load_full_training_data(self.NpzDirectory, self.TrainModelName, verbose= True)
+        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.NpzDirectory, self.categories, self.anchors)
 
-        (X_val,Y_val), axes = helpers.load_full_training_data(self.NpzDirectory, self.ValidationModelName,  verbose= True)
-        
         
         self.Xoriginal = X
         self.Xoriginal_val = X_val
@@ -111,7 +108,6 @@ class NEATDetection(object):
         self.Y = Y[:,:,0]
         self.X_val = X_val
         self.Y_val = Y_val[:,:,0]
-        self.axes = axes
         self.Y = self.Y.reshape( (self.Y.shape[0],1,1,self.Y.shape[1]))
         self.Y_val = self.Y_val.reshape( (self.Y_val.shape[0],1,1,self.Y_val.shape[1]))
           
@@ -198,11 +194,14 @@ def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
         y_pred_conf = pred_boxes[...,5]
         y_true_conf = true_boxes[...,5]
         
+        y_pred_angle = pred_boxes[...,6]
+        y_true_angle = pred_boxes[...,6]
         
         class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
         xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1) * y_true_conf, axis = -1)
         hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
-      
+        angle_loss = K.sum(K.square(y_true_angle - y_pred_angle), axis=-1)
+        
         #IOU computation for increasing localization accuracy
        
         intersect_wh = K.maximum(K.zeros_like(y_pred_hw), (y_pred_hw + y_true_hw)/2 - K.square(y_pred_xyt - y_true_xyt) )
@@ -213,7 +212,7 @@ def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
         iou = intersect_area / union_area
         conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
 
-        combinedloss =  class_loss + lambdacord * (xy_loss + hw_loss) + conf_loss
+        combinedloss =  class_loss + lambdacord * (xy_loss + hw_loss) + conf_loss + angle_loss
         
         return combinedloss
     

@@ -68,6 +68,8 @@ def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, 
             for t in time:
                MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, str(name), save_dir)
                name = name + 1
+               
+
             
 def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, name, save_dir):
     
@@ -126,6 +128,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                   Label[TotalCategories + 5] = 0 
                   
                Label[TotalCategories + 6] = angle    
+               
                writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
                for l in Label : writer.writerow ([l])
 
