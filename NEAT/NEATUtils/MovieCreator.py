@@ -112,11 +112,12 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         crop_Yminus = y + shift[1] - int(ImagesizeY/2)
                         crop_Yplus = y + shift[1] + int(ImagesizeY/2)
                   
-                        region =(slice(int(time - sizeTminus - 1),int(time + sizeTplus )),slice(int(crop_Yminus), int(crop_Yplus)),
+                        region =(slice(int(time - sizeTminus),int(time + sizeTplus  + 1)),slice(int(crop_Yminus), int(crop_Yplus)),
                               slice(int(crop_Xminus), int(crop_Xplus)))
                         crop_image = image[region]      
                         crop_seg_image = segimage[region]      
-      
+                        crop_seg_image = crop_seg_image[sizeTminus + 1,:]
+                        
                         for region in regionprops(crop_seg_image):
            
                                         if region.label == imageLabel and imageLabel > 0:
