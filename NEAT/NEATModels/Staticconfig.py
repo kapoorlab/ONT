@@ -17,10 +17,9 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, simple = False, gridX = 3, gridY = 3, anchors = 5, lambdacord = 1, depth = 29, start_kernel = 7, mid_kernel = 3, startfilter = 48,  epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', last_activation = 'softmax', **kwargs):
+    def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
         
            self.residual = residual
-           self.simple = simple
            self.depth = depth
            self.start_kernel = start_kernel
            self.mid_kernel = mid_kernel
@@ -33,8 +32,8 @@ class StaticNeatConfig(argparse.Namespace):
            self.learning_rate = learning_rate
            self.batch_size = batch_size
            self.ModelName = ModelName
-           self.last_activation = last_activation
-           
+           self.multievent = multievent
+           self.is_valid()      
            
     def to_json(self):
 
@@ -53,7 +52,7 @@ class StaticNeatConfig(argparse.Namespace):
                  'gridY' : self.gridY,
                  'lambdacord' : self.lambdacord,
                  'batch_size' : self.batch_size,
-                 'last_activation' : self.activation
+                 'multievent' : self.multievent
                  }
          return config
                 
@@ -76,7 +75,6 @@ class StaticNeatConfig(argparse.Namespace):
 
             ok = {}
             ok['residual'] = isinstance(self.residual,bool)
-            ok['simple'] = isinstance(self.residual,bool)
             ok['depth']         = _is_int(self.depth,1)
             ok['start_kernel']       = _is_int(self.start_kernel,1)
             ok['mid_kernel']         = _is_int(self.mid_kernel,1)
@@ -87,7 +85,7 @@ class StaticNeatConfig(argparse.Namespace):
             ok['gridY'] = _is_int(self.gridY, 1)
             ok['lambdacord'] = _is_int(self.lambdacord, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
-            ok['last_activation'] = self.last_activation in ('softmax', 'sigmoid')
+            ok['multievent'] = isinstance(self.multievent,bool)
             
     
             if return_invalid:

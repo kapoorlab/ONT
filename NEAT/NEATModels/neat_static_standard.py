@@ -65,11 +65,9 @@ class NEATStaticDetection(object):
     """
     
     
-    def __init__(self, staticconfig, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
+    def __init__(self, staticconfig, TrainDirectory, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
 
-        self.NpzDirectory = NpzDirectory
-        self.TrainModelName = TrainModelName
-        self.ValidationModelName = ValidationModelName
+        self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
         self.model_name = model_name
         self.Categories_Name = Categories_Name
@@ -86,58 +84,38 @@ class NEATStaticDetection(object):
         self.residual = staticconfig.residual
         self.startfilter = staticconfig.startfilter
         self.batch_size = staticconfig.batch_size
-        
+        self.multievent = staticconfig.multievent
         
         self.anchors = staticconfig.anchors
         self.gridX = staticconfig.gridX
         self.gridY = staticconfig.gridY
         self.lambdacord = staticconfig.lambdacord
-        
+        self.last_activation = None
+        self.entropy = None
         self.X = None
         self.Y = None
         self.axes = None
         self.X_val = None
         self.Y_val = None
         self.Trainingmodel = None
-        self.Xoriginal = None
-        self.Xoriginal_val = None
-    
-    
-   
-        
 
     def loadData(self):
         
-        (X,Y),  axes = helpers.load_full_training_data(self.NpzDirectory, self.TrainModelName, verbose= True)
-
-        (X_val,Y_val), axes = helpers.load_full_training_data(self.NpzDirectory, self.ValidationModelName,  verbose= True)
-        
-        
-        self.Xoriginal = X
-        self.Xoriginal_val = X_val
-        
-
-                     
+        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.anchors)
 
         self.X = X
-        self.Y = Y[:,:,0]
+        self.Y = Y
         self.X_val = X_val
-        self.Y_val = Y_val[:,:,0]
-        self.axes = axes
-        self.Y = self.Y.reshape( (self.Y.shape[0],1,1,self.Y.shape[1]))
-        self.Y_val = self.Y_val.reshape( (self.Y_val.shape[0],1,1,self.Y_val.shape[1]))
+        self.Y_val = Y_val
           
 
               
     def TrainModel(self):
         
+        # input shape is T H W C
         input_shape = (self.X.shape[1], self.X.shape[2], self.X.shape[3])
         
-        
         Path(self.model_dir).mkdir(exist_ok=True)
-        
-       
-
         
         
         
@@ -146,12 +124,22 @@ class NEATStaticDetection(object):
         else:
             model_keras = nets.seqnet_v2
         
-        self.Trainingmodel = model_keras(input_shape, self.categories,   box_vector = self.box_vector , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
+        if self.multievent == True:
+           self.last_activation = 'sigmoid'
+           self.entropy = 'binary'
+           
+           
+        if self.multievent == False:
+           self.last_activation = 'softmax'              
+           self.entropy = 'notbinary' 
+        
+        self.Trainingmodel = model_keras(input_shape, self.categories, box_vector = self.box_vector , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter, 
+                                         gridX = self.gridX, gridY = self.gridY, anchors = self.anchors,  last_activation = self.last_activation, input_weights  =  self.model_weights)
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
         
         
@@ -164,8 +152,6 @@ class NEATStaticDetection(object):
         
         #Train the model and save as a h5 file
         self.Trainingmodel.fit(self.X,self.Y, batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
-        #clear_output(wait=True) 
-
      
         # Removes the old model to be replaced with new model, if old one exists
         if os.path.exists(self.model_dir + self.model_name ):
@@ -182,7 +168,7 @@ class NEATStaticDetection(object):
 
 
 
-def static_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
+def static_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, entropy):
     
     def loss(y_true, y_pred):
         
@@ -206,7 +192,12 @@ def static_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
         y_true_conf = true_boxes[...,4]
         
         
-        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        if entropy == 'notbinary':
+            class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        if entropy == 'binary':
+            class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
+        else:
+            class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
         xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1) * y_true_conf, axis = -1)
         hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
       
