@@ -49,7 +49,7 @@ config = StaticNeatConfig(startfilter = startfilter, start_kernel = start_kernel
                 depth = depth, learning_rate = learning_rate, batch_size = batch_size, epochs = epochs, ModelName = Model_Name )
 config_json = config.to_json()
 
-show = True
+show = False
 model_weights = Model_dir + Model_Name
 
 if os.path.exists(model_weights):

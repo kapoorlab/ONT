@@ -67,7 +67,7 @@ config = NeatConfig(residual = residual, startfilter = startfilter, start_kernel
                     gridX = gridX, gridY = gridY, anchors = anchors, lambdacord = lambdacord, last_activation = last_activation)
 
 config_json = config.to_json()
-show = True
+show = False
 
 model_weights = Model_dir + Model_Name
 
