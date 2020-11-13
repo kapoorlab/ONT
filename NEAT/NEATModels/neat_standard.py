@@ -186,7 +186,7 @@ def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, en
         
         #IOU computation for increasing localization accuracy
        
-        intersect_wh = K.maximum(K.zeros_like(y_pred_hw), (y_pred_hw + y_true_hw)/2 - K.square(y_pred_xyt - y_true_xyt) )
+        intersect_wh = K.maximum(K.zeros_like(y_pred_hw), (y_pred_hw + y_true_hw)/2 - K.square(y_pred_xyt - y_true_xyt))
         intersect_area = intersect_wh[...,0] * intersect_wh[...,1]
         true_area = y_true_hw[...,0] * y_true_hw[...,1]
         pred_area = y_pred_hw[...,0] * y_pred_hw[...,1]

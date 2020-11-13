@@ -59,7 +59,7 @@ def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, 
                 time = dataset[dataset.keys()[0]][1:]
                 y = dataset[dataset.keys()[1]][1:]
                 x = dataset[dataset.keys()[2]][1:]
-                angle = np.zeros_like(time)                        
+                angle = np.full(time.shape, 2)                        
             if len(dataset.keys() > 3):
                 
                 angle = dataset[dataset.keys()[3]][1:]      

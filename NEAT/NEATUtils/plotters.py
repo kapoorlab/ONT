@@ -6,13 +6,13 @@ import random
 class PlotHistory(keras.callbacks.Callback):
     
     
-    def __init__(self, Trainingmodel, X, Y, Categories_Name, plot = False, simple = False, catsimple = False):
+    def __init__(self, Trainingmodel, X, Y, Categories_Name, gridX, gridY, plot = False):
        self.Trainingmodel = Trainingmodel 
        self.X = X
        self.Y = Y
        self.plot = plot
-       self.simple = simple
-       self.catsimple = catsimple
+       self.gridX = gridX
+       self.gridY = gridY
       
        self.Categories_Name = Categories_Name
     def on_train_begin(self, logs={}):
@@ -53,9 +53,9 @@ class PlotHistory(keras.callbacks.Callback):
          plt.show()
          #clear_output(True)
         idx = random.randint(1,self.X.shape[0] - 1)
-        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, plot = self.plot, simple = self.simple, catsimple = self.catsimple )
+        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, self.gridX, self.gridY, plot = self.plot)
         
-def Printpredict(idx, model, data, Truelabel, Categories_name, box_vector, gridX, gridY, plot = False):
+def Printpredict(idx, model, data, Truelabel, Categories_name, gridX, gridY, plot = False):
 
     Image = data[idx]
     Truelabel = Truelabel[idx]

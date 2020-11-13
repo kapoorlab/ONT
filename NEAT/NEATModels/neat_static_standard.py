@@ -94,7 +94,6 @@ class NEATStaticDetection(object):
         self.entropy = None
         self.X = None
         self.Y = None
-        self.axes = None
         self.X_val = None
         self.Y_val = None
         self.Trainingmodel = None
@@ -141,13 +140,13 @@ class NEATStaticDetection(object):
         
         self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
-        
+        print('Training Model:', model_keras)
         
         #Keras callbacks
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show)
+        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, self.gridX, self.gridY, plot = self.show)
         
         
         #Train the model and save as a h5 file
@@ -160,10 +159,7 @@ class NEATStaticDetection(object):
         
         self.Trainingmodel.save(self.model_dir + self.model_name )
         
-        
-    def plot_prediction(self, idx):
-        
-        helpers.Printpredict(idx, self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name)
+    
 
 
 
