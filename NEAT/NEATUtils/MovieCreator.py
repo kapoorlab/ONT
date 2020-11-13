@@ -204,41 +204,41 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                 Label[trainlabel] = 1
                 
                 if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
-                          crop_Xminus = x + shift[0] - int(ImagesizeX/2)
-                          crop_Xplus = x + shift[0] + int(ImagesizeX/2)
-                          crop_Yminus = y + shift[1] - int(ImagesizeY/2)
-                          crop_Yplus = y + shift[1] + int(ImagesizeY/2)
+                            crop_Xminus = x + shift[0] - int(ImagesizeX/2)
+                            crop_Xplus = x + shift[0] + int(ImagesizeX/2)
+                            crop_Yminus = y + shift[1] - int(ImagesizeY/2)
+                            crop_Yplus = y + shift[1] + int(ImagesizeY/2)
       
-                region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
-                      slice(int(crop_Xminus), int(crop_Xplus)))
-                crop_image = image[region]      
-                crop_seg_image = segimage[region]
-                for region in regionprops(crop_seg_image):
-           
-                       if region.label == imageLabel and imageLabel > 0:
-                                minr, minc, maxr, maxc = region.bbox
-                                center = region.centroid
-                                height =  abs(maxc - minc)
-                                width =  abs(maxr - minr)
-               
-
-                Label[TotalCategories] =  center[1]/sizeX
-                Label[TotalCategories + 1] = center[0]/sizeY
-                Label[TotalCategories + 2] = height/ImagesizeY
-                Label[TotalCategories + 3] = width/ImagesizeX
-                   
-               
-                #Object confidence is 0 for background label else it is 1
-                if trainlabel > 0:
-                  Label[TotalCategories + 4] = 1
-                else:
-                  Label[TotalCategories + 4] = 0 
-              
-                if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
-                         imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
-               
-                writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
-                for l in Label : writer.writerow ([l])
+                            region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
+                                   slice(int(crop_Xminus), int(crop_Xplus)))
+                            crop_image = image[region]      
+                            crop_seg_image = segimage[region]
+                            for region in regionprops(crop_seg_image):
+                       
+                                   if region.label == imageLabel and imageLabel > 0:
+                                            minr, minc, maxr, maxc = region.bbox
+                                            center = region.centroid
+                                            height =  abs(maxc - minc)
+                                            width =  abs(maxr - minr)
+                           
+            
+                            Label[TotalCategories] =  center[1]/sizeX
+                            Label[TotalCategories + 1] = center[0]/sizeY
+                            Label[TotalCategories + 2] = height/ImagesizeY
+                            Label[TotalCategories + 3] = width/ImagesizeX
+                               
+                           
+                            #Object confidence is 0 for background label else it is 1
+                            if trainlabel > 0:
+                              Label[TotalCategories + 4] = 1
+                            else:
+                              Label[TotalCategories + 4] = 0 
+                          
+                            if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
+                                     imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
+                           
+                            writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
+                            for l in Label : writer.writerow ([l])
 
        
 
