@@ -3,7 +3,7 @@ ONT (ONT =  ONEAT Training) contains the programs for training neural networks f
 
 
 # Installation Instructions
-In order to use this program tensorflow version 1.15 and keras library are required. 
+In order to use this program tensorflow version 1.15 and keras library are required. (We are looking into upgrading the program to be compatiable with the latest version)
 1. Download python3.7 version of [anaconda](https://www.anaconda.com/distribution/).
 2. After downloading it, open the anaconda terminal and set the proxy settings to enable pip and conda installation via terminal.
 3. Set up a virtual enviornment type this command at anaconda prompt: conda create -n tensorflowGPU pip python=3.6 tensorflow-gpu==1.15  
