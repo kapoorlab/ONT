@@ -94,59 +94,62 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
            
           AllShifts = [shiftNone]
 
-       Label = np.zeros([TotalCategories + 7])
-       Label[trainlabel] = 1
-       #T co ordinate
-       Label[TotalCategories + 2] = (sizeTminus) / (sizeTminus + sizeTplus)
+
        
        currentsegimage = segimage[time,:].astype('uint16')
        for shift in AllShifts:
            
-               defaultX = int((sizeX//2 + shift[0])/sizeX)  
-               defaultY = int((sizeY//2 + shift[1])/sizeY)
-               imageLabel = currentsegimage[defaultY, defaultX]
-               for region in regionprops(currentsegimage):
-           
-                       if region.label == imageLabel and imageLabel > 0:
-                                minr, minc, maxr, maxc = region.bbox
-              
-                                center = region.centroid
-                                height =  abs(maxc - minc)
-                                width =  abs(maxr - minr)
-               
-
-               Label[TotalCategories] =  center[1]/sizeX
-               Label[TotalCategories + 1] = center[0]/sizeY
-               Label[TotalCategories + 3] = height/ImagesizeY
-               Label[TotalCategories + 4] = width/ImagesizeX
-               
-               
-               #Object confidence is 0 for background label else it is 1
-               if trainlabel > 0:
-                  Label[TotalCategories + 5] = 1
-               else:
-                  Label[TotalCategories + 5] = 0 
+                defaultX = int(x + shift[0])  
+                defaultY = int(y + shift[1])
+                imageLabel = currentsegimage[defaultY, defaultX]
+                Label = np.zeros([TotalCategories + 7])
+                Label[trainlabel] = 1
+                #T co ordinate
+                Label[TotalCategories + 2] = (sizeTminus) / (sizeTminus + sizeTplus)
+                if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1] and time > sizeTminus and time + sizeTplus + 1 < image.shape[0]:
+                        crop_Xminus = x + shift[0] - int(ImagesizeX/2)
+                        crop_Xplus = x + shift[0] + int(ImagesizeX/2)
+                        crop_Yminus = y + shift[1] - int(ImagesizeY/2)
+                        crop_Yplus = y + shift[1] + int(ImagesizeY/2)
                   
-               Label[TotalCategories + 6] = angle    
+                        region =(slice(int(time - sizeTminus - 1),int(time + sizeTplus )),slice(int(crop_Yminus), int(crop_Yplus)),
+                              slice(int(crop_Xminus), int(crop_Xplus)))
+                        crop_image = image[region]      
+                        crop_seg_image = segimage[region]      
+      
+                        for region in regionprops(crop_seg_image):
+           
+                                        if region.label == imageLabel and imageLabel > 0:
+                                                minr, minc, maxr, maxc = region.bbox
+                                                center = region.centroid
+                                                height =  abs(maxc - minc)
+                                                width =  abs(maxr - minr)
                
-               writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
-               for l in Label : writer.writerow ([l])
+
+                        Label[TotalCategories] =  center[1]/sizeX
+                        Label[TotalCategories + 1] = center[0]/sizeY
+                        Label[TotalCategories + 3] = height/ImagesizeY
+                        Label[TotalCategories + 4] = width/ImagesizeX
+               
+               
+                        #Object confidence is 0 for background label else it is 1
+                        if trainlabel > 0:
+                            Label[TotalCategories + 5] = 1
+                        else:
+                            Label[TotalCategories + 5] = 0 
+                          
+                        Label[TotalCategories + 6] = angle  
+                      
+                        if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
+                                                                imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))    
+        
+          
+                       
+                        writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
+                        for l in Label : writer.writerow ([l])
 
        
-               if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1] and time > sizeTminus and time + sizeTplus + 1 < image.shape[0]:
-                          crop_Xminus = x + shift[0] - int(ImagesizeX/2)
-                          crop_Xplus = x + shift[0] + int(ImagesizeX/2)
-                          crop_Yminus = y + shift[1] - int(ImagesizeY/2)
-                          crop_Yplus = y + shift[1] + int(ImagesizeY/2)
-      
-               region =(slice(int(time - sizeTminus - 1),int(time + sizeTplus )),slice(int(crop_Yminus), int(crop_Yplus)),
-                      slice(int(crop_Xminus), int(crop_Xplus)))
-               crop_image = image[region]      
-       
-      
-              
-               if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
-                         imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))       
+   
                   
     
 def CreateTrainingImages(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0):
@@ -188,57 +191,56 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
            
           AllShifts = [shiftNone]
 
-       Label = np.zeros([TotalCategories + 5])
-       Label[trainlabel] = 1
        
        
        currentsegimage = segimage[time,:].astype('uint16')
        for shift in AllShifts:
            
-               defaultX = int((sizeX//2 + shift[0])/sizeX)  
-               defaultY = int((sizeY//2 + shift[1])/sizeY)
-               imageLabel = currentsegimage[defaultY, defaultX]
-               for region in regionprops(currentsegimage):
-           
-                       if region.label == imageLabel and imageLabel > 0:
-                                minr, minc, maxr, maxc = region.bbox
-              
-                                center = region.centroid
-                                height =  abs(maxc - minc)
-                                width =  abs(maxr - minr)
-               
-
-               Label[TotalCategories] =  center[1]/sizeX
-               Label[TotalCategories + 1] = center[0]/sizeY
-               Label[TotalCategories + 2] = height/ImagesizeY
-               Label[TotalCategories + 3] = width/ImagesizeX
-               
-               
-               #Object confidence is 0 for background label else it is 1
-               if trainlabel > 0:
-                  Label[TotalCategories + 4] = 1
-               else:
-                  Label[TotalCategories + 4] = 0 
-                  
-               
-               writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
-               for l in Label : writer.writerow ([l])
-
-       
-               if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
+                defaultX = int(x + shift[0])  
+                defaultY = int(y + shift[1])
+                imageLabel = currentsegimage[defaultY, defaultX]
+                Label = np.zeros([TotalCategories + 5])
+                Label[trainlabel] = 1
+                
+                if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
                           crop_Xminus = x + shift[0] - int(ImagesizeX/2)
                           crop_Xplus = x + shift[0] + int(ImagesizeX/2)
                           crop_Yminus = y + shift[1] - int(ImagesizeY/2)
                           crop_Yplus = y + shift[1] + int(ImagesizeY/2)
       
-               region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
+                region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
                       slice(int(crop_Xminus), int(crop_Xplus)))
-               crop_image = image[region]      
-       
-      
+                crop_image = image[region]      
+                crop_seg_image = segimage[region]
+                for region in regionprops(crop_seg_image):
+           
+                       if region.label == imageLabel and imageLabel > 0:
+                                minr, minc, maxr, maxc = region.bbox
+                                center = region.centroid
+                                height =  abs(maxc - minc)
+                                width =  abs(maxr - minr)
+               
+
+                Label[TotalCategories] =  center[1]/sizeX
+                Label[TotalCategories + 1] = center[0]/sizeY
+                Label[TotalCategories + 2] = height/ImagesizeY
+                Label[TotalCategories + 3] = width/ImagesizeX
+                   
+               
+                #Object confidence is 0 for background label else it is 1
+                if trainlabel > 0:
+                  Label[TotalCategories + 4] = 1
+                else:
+                  Label[TotalCategories + 4] = 0 
               
-               if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
+                if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                          imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
+               
+                writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
+                for l in Label : writer.writerow ([l])
+
+       
+
       
 
 
