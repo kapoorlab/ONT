@@ -16,6 +16,8 @@ from keras.layers import  TimeDistributed
 reg_weight = 1.e-4
 
 """
+@author: Varun Kapoor
+
 Using RESNET and stacked layer style architechtures to define NEAT architecture
 """
 

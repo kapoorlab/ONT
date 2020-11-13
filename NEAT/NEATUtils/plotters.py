@@ -2,6 +2,9 @@ import keras
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import random
+"""
+@author: Varun Kapoor
+"""
 
 class PlotHistory(keras.callbacks.Callback):
     
@@ -84,7 +87,7 @@ def Printpredict(idx, model, data, Truelabel, Categories_name, gridX, gridY, plo
                            print('X Y T H W Confidence Angle',prediction[0,:,:,int(Label) + 1:])
                        
             
-    print('True Label : ', Truelabel)
+    print('True Label : ',@author: aimachine Truelabel)
 
     if plot:
               plt.show()     

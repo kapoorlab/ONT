@@ -24,6 +24,8 @@ class NEATDetection(object):
     
 
     """
+    @author: Varun Kapoor
+    
     Parameters
     ----------
     

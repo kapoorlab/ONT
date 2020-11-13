@@ -24,9 +24,7 @@ except (ImportError,AttributeError):
     
 
 """
- 
-   Here we have added some of the useful functions taken from the csbdeep package which are a part of third party software called CARE
-   https://github.com/CSBDeep/CSBDeep
+ @author: Varun Kapoor
 
 """    
   ##Save image data as a tiff file, function defination taken from CARE csbdeep python package  

@@ -16,7 +16,7 @@ except (ImportError,AttributeError):
     from backports import tempfile
     
 """
-
+@author: Varun Kapoor
 In this program we create training movies and training images for ONEAT. The training data comprises of images and text labels attached to them.
 
 TrainingMovies: This program is for action recognition training data creation. The inputs are the training image, the corresponding integer labelled segmentation image,

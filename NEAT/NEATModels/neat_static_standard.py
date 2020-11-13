@@ -3,7 +3,7 @@
 """
 Created on Sat May 23 15:13:01 2020
 
-@author: aimachine
+@author: Varun Kapoor
 """
 
 from NEATUtils import plotters
