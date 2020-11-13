@@ -700,7 +700,7 @@ def ThreeDresnet_layer(inputs,
 
 
 
-def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 38,  start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 38,  start_kernel = 3, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
     bottleneck layer
@@ -814,7 +814,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors
         
     return model
   
-def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 3, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
     bottleneck layer

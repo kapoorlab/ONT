@@ -3,13 +3,11 @@ from __future__ import print_function, unicode_literals, absolute_import, divisi
 import numpy as np
 import os
 import collections
-import warnings
 import csv
 import json
 import cv2
 import glob
 from sklearn.model_selection import train_test_split
-from matplotlib import cm
 from tifffile import imread, imwrite
 from skimage import measure
 try:
@@ -44,6 +42,105 @@ def MarkerToCSV(MarkerImage):
     return  MarkerList
     
   
+
+    
+def load_full_training_data(directory, categories, nb_boxes):
+    
+     #Generate npz file with data and label attributes   
+     Raw_path = os.path.join(directory, '*tif')
+     X = glob.glob(Raw_path)
+     
+     Xtrain = []
+     Ytrain = []
+     
+     for fname in X:
+         
+         image = imread(fname)
+         
+         Name = os.path.basename(os.path.splitext(fname)[0])
+    
+         csvfile = directory + Name + '.csv'
+         try:
+             
+             y_t = []
+             reader = csv.reader(csvfile, delimiter = ',')
+         
+             for train_vec in reader:
+                   catarr = [float(s) for s in train_vec[0:categories]]
+                   xarr = [float(s) for s in train_vec[categories:]]
+                   newxarr = []
+                   for b in range(nb_boxes):
+                       newxarr+= [xarr[s] for s in range(len(xarr))]
+                       
+                   trainarr = catarr + newxarr    
+                   y_t.append(trainarr)
+             
+                
+             Ytrain.append(y_t)     
+             Xtrain.append(image)
+    
+         except:
+             
+             print('Matching label not found for:', Name ,  '.tif')
+    
+     Xtrain = np.array(Xtrain)
+     Ytrain = np.array(Ytrain)
+  
+
+     print('number of  images:\t', Xtrain.shape[0])
+     print('image size (%dD):\t\t',Xtrain.shape)
+     print('Labels:\t\t\t\t', Ytrain.shape)
+     traindata, validdata, trainlabel, validlabel = train_test_split(Xtrain, Ytrain, train_size=0.95,test_size=0.05, shuffle= True)
+     
+     return (traindata,trainlabel) , (validdata, validlabel)
+        
+    
+  
+    
+def time_pad(image, TimeFrames):
+
+         time = image.shape[0]
+         
+         timeextend = time
+         
+         while timeextend%TimeFrames!=0:
+              timeextend = timeextend + 1
+              
+         extendimage = np.zeros([timeextend, image.shape[1], image.shape[2]])
+              
+         extendimage[0:time,:,:] = image
+              
+         return extendimage      
+    
+def chunk_list(image, patchshape, stride, pair):
+            rowstart = pair[0]
+            colstart = pair[1]
+            
+            endrow = rowstart + patchshape[0]
+            endcol = colstart + patchshape[1]
+            
+            if endrow > image.shape[1]:
+                endrow = image.shape[1]
+            if endcol > image.shape[2]:
+                endcol = image.shape[2]    
+            
+            
+            region = (slice(0,image.shape[0]),slice(rowstart, endrow),
+                      slice(colstart, endcol))
+            
+            # The actual pixels in that region.
+            patch = image[region]
+                
+            # Always normalize patch that goes into the netowrk for getting a prediction score 
+            patch = normalizeFloatZeroOne(patch,1,99.8)
+            patch = zero_pad(patch, stride,stride)
+         
+        
+            return patch, rowstart, colstart     
+           
+
+              
+                
 def load_json(fpath):
     with open(fpath, 'r') as f:
         return json.load(f)
@@ -193,105 +290,6 @@ def axes_dict(axes):
     axes, allowed = axes_check_and_normalize(axes,return_allowed=True)
     return { a: None if axes.find(a) == -1 else axes.find(a) for a in allowed }
     # return collections.namedt      
-    
-def load_full_training_data(directory, categories, nb_boxes):
-    
-     #Generate npz file with data and label attributes   
-     Raw_path = os.path.join(directory, '*tif')
-     X = glob.glob(Raw_path)
-     
-     Xtrain = []
-     Ytrain = []
-     
-     for fname in X:
-         
-         image = imread(fname)
-         
-         Name = os.path.basename(os.path.splitext(fname)[0])
-    
-         csvfile = directory + Name + '.csv'
-         try:
-             
-             y_t = []
-             reader = csv.reader(csvfile, delimiter = ',')
-         
-             for train_vec in reader:
-                   catarr = [float(s) for s in train_vec[0:categories]]
-                   xarr = [float(s) for s in train_vec[categories:]]
-                   newxarr = []
-                   for b in range(nb_boxes):
-                       newxarr+= [xarr[s] for s in range(len(xarr))]
-                       
-                   trainarr = catarr + newxarr    
-                   y_t.append(trainarr)
-             
-                
-             Ytrain.append(y_t)     
-             Xtrain.append(image)
-    
-         except:
-             
-             print('Matching label not found for:', Name ,  '.tif')
-    
-     Xtrain = np.array(Xtrain)
-     Ytrain = np.array(Ytrain)
-  
-
-     print('number of  images:\t', Xtrain.shape[0])
-     print('image size (%dD):\t\t',Xtrain.shape)
-     print('Labels:\t\t\t\t', Ytrain.shape)
-     traindata, validdata, trainlabel, validlabel = train_test_split(Xtrain, Ytrain, train_size=0.95,test_size=0.05, shuffle= True)
-     
-     return (traindata,trainlabel) , (validdata, validlabel)
-        
-    
-  
-    
-def time_pad(image, TimeFrames):
-
-         time = image.shape[0]
-         
-         timeextend = time
-         
-         while timeextend%TimeFrames!=0:
-              timeextend = timeextend + 1
-              
-         extendimage = np.zeros([timeextend, image.shape[1], image.shape[2]])
-              
-         extendimage[0:time,:,:] = image
-              
-         return extendimage      
-    
-def chunk_list(image, patchshape, stride, pair):
-            rowstart = pair[0]
-            colstart = pair[1]
-            
-            endrow = rowstart + patchshape[0]
-            endcol = colstart + patchshape[1]
-            
-            if endrow > image.shape[1]:
-                endrow = image.shape[1]
-            if endcol > image.shape[2]:
-                endcol = image.shape[2]    
-            
-            
-            region = (slice(0,image.shape[0]),slice(rowstart, endrow),
-                      slice(colstart, endcol))
-            
-            # The actual pixels in that region.
-            patch = image[region]
-                
-            # Always normalize patch that goes into the netowrk for getting a prediction score 
-            patch = normalizeFloatZeroOne(patch,1,99.8)
-            patch = zero_pad(patch, stride,stride)
-         
-        
-            return patch, rowstart, colstart     
-           
-
-              
-                
-
 def X_right_prediction(image,sY, sX, time_prediction, stride, inputtime, Categories_Name, Categories_event_threshold, TrainshapeX, TrainshapeY, TimeFrames):
     
                          LocationBoxes = []
