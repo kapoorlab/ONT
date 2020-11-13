@@ -27,29 +27,22 @@ class NEATDetection(object):
     Parameters
     ----------
     
-    NpzDirectory : Specify the location of npz file containing the training data with movies and labels
+    config : config is an object containing information about the network parameters, this object is also saved as a json file
     
-    TrainModelName : Specify the name of the npz file containing training data and labels
-    
-    ValidationModelName :  Specify the name of the npz file containing validation data and labels
-    
-    categories : Number of action classes
+    TrainDirectory : Specify the location of the directory containing the training data with movies and labels
     
     Categories_Name : List of class names and labels
+    
+    box_vector : Number of components other than the categories that the network has to output to perform localization
     
     model_dir : Directory location where trained model weights are to be read or written from
     
     model_name : The h5 file of CNN + LSTM + Dense Neural Network to be used for training
     
-    model_keras : The model as it appears as a Keras function
-    
     model_weights : If re-training model_weights = model_dir + model_name else None as default
     
-    lstm_hidden_units : Number of hidden uniots for LSTm layer, 64 by default
-    
-    epochs :  Number of training epochs, 55 by default
-    
-    batch_size : batch_size to be used for training, 20 by default
+    show : If true the results of trainng will be displayed every epoch on a randomly chosen movie from the validation set along with the loss and accuracy plot. THis option is set true
+    if you are using jupyter notebooks but if executing this program from a py file this parameter is set to false.
     
     
     
