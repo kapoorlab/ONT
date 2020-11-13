@@ -56,11 +56,9 @@ class NEATDetection(object):
     """
     
     
-    def __init__(self, config, NpzDirectory, TrainModelName, ValidationModelName, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
+    def __init__(self, config, TrainDirectory, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
 
-        self.NpzDirectory = NpzDirectory
-        self.TrainModelName = TrainModelName
-        self.ValidationModelName = ValidationModelName
+        self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
         self.model_name = model_name
         self.Categories_Name = Categories_Name
@@ -76,74 +74,56 @@ class NEATDetection(object):
         self.learning_rate = config.learning_rate
         self.epochs = config.epochs
         self.residual = config.residual
-        self.simple = config.simple
-        self.catsimple = config.catsimple
+        self.multievent = config.multievent
         self.startfilter = config.startfilter
         self.batch_size = config.batch_size
-        
         self.anchors = config.anchors
         self.gridX = config.gridX
         self.gridY = config.gridY
         self.lambdacord = config.lambdacord
+        self.last_activation = None
+        self.entropy = None
         self.X = None
         self.Y = None
         self.X_val = None
         self.Y_val = None
         self.Trainingmodel = None
-        self.Xoriginal = None
-        self.Xoriginal_val = None
-        print(self.startfilter)
     def loadData(self):
         
-        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.NpzDirectory, self.categories, self.anchors)
-
-        
-        self.Xoriginal = X
-        self.Xoriginal_val = X_val
-        
-
-                     
+        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.anchors)
 
         self.X = X
-        self.Y = Y[:,:,0]
+        self.Y = Y
         self.X_val = X_val
-        self.Y_val = Y_val[:,:,0]
-        self.Y = self.Y.reshape( (self.Y.shape[0],1,1,self.Y.shape[1]))
-        self.Y_val = self.Y_val.reshape( (self.Y_val.shape[0],1,1,self.Y_val.shape[1]))
-          
-
+        self.Y_val = Y_val
               
     def TrainModel(self):
         
+        # input shape is T H W C
         input_shape = (self.X.shape[1], self.X.shape[2], self.X.shape[3], self.X.shape[4])
         
         
         Path(self.model_dir).mkdir(exist_ok=True)
         
-        if self.residual == True and self.simple == False:
+        if self.residual == True:
             model_keras = nets.ORNET
-        if self.residual == False and self.simple == False: 
+        if self.residual == False: 
             model_keras = nets.OSNET
-        if self.residual == True and self.simple == True:
-            model_keras = nets.SimpleORNET
-        if self.residual == False and self.simple == True:
-            model_keras = nets.SimpleOSNET
-        if self.residual == False and self.catsimple == True:
-            model_keras = nets.CatSimpleOSNET
-        if self.residual == True and self.catsimple == True:
-            model_keras = nets.CatSimpleORNET
             
+        if self.multievent == True:
+           self.last_activation = 'sigmoid'
+           self.entropy = 'binary'
+           
+           
+        if self.multievent == False:
+           self.last_activation = 'softmax'              
+           self.entropy = 'notbinary' 
          
-        self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = self.box_vector, gridX = self.gridX, gridY = self.gridY, depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter,  input_weights  =  self.model_weights)
-        
-            
+        self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = self.box_vector, gridX = self.gridX, gridY = self.gridY, anchors = self.anchors, depth = self.depth, start_kernel = self.start_kernel,
+                                         mid_kernel = self.mid_kernel, lstm_kernel = self.lstm_kernel, startfilter = self.startfilter,  
+                                         input_weights  =  self.model_weights, last_activation = self.last_activation)
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
-        
-        
-        
-        if self.simple == False:
-          self.Trainingmodel.compile(optimizer=sgd, loss = time_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord), metrics=['accuracy'])
-        
+        self.Trainingmodel.compile(optimizer = sgd, loss = time_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -151,7 +131,7 @@ class NEATDetection(object):
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, plot = self.show, simple = self.simple, catsimple = self.catsimple)
+        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, self.gridX, self.gridY, plot = self.show)
         
         
         #Train the model and save as a h5 file
@@ -161,17 +141,13 @@ class NEATDetection(object):
         # Removes the old model to be replaced with new model, if old one exists
         if os.path.exists(self.model_dir + self.model_name ):
 
-           os.remove(self.model_dir + self.model_name )
+           os.remove(self.model_dir + self.model_name)
         
-        self.Trainingmodel.save(self.model_dir + self.model_name )
+        self.Trainingmodel.save(self.model_dir + self.model_name)
         
         
-    def plot_prediction(self, idx):
-        
-        helpers.Printpredict(idx, self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name)
-
    
-def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
+def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, entropy):
     
     def loss(y_true, y_pred):
         
@@ -197,7 +173,13 @@ def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord):
         y_pred_angle = pred_boxes[...,6]
         y_true_angle = pred_boxes[...,6]
         
-        class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        if entropy == 'notbinary':
+            class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        if entropy == 'binary':
+            class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
+        else:
+            class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+            
         xy_loss = K.sum(K.sum(K.square(y_true_xyt - y_pred_xyt), axis = -1) * y_true_conf, axis = -1)
         hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
         angle_loss = K.sum(K.square(y_true_angle - y_pred_angle), axis=-1)

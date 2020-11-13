@@ -357,7 +357,7 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29, start_k
 
 
 
-def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 38, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -458,7 +458,7 @@ def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (start_kernel, start_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstmdeep")(branchAdd)
+    x = ConvLSTM2D(filters = unit, kernel_size = (lstm_kernel, lstm_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstmdeep")(branchAdd)
 
 
 
@@ -487,7 +487,7 @@ def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     return model
 
 
-def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -618,7 +618,7 @@ def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     
 
     
-    x = ConvLSTM2D(filters = unit, kernel_size = (start_kernel, start_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstmdeep")(branchAdd)
+    x = ConvLSTM2D(filters = unit, kernel_size = (lstm_kernel, lstm_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstmdeep")(branchAdd)
 
 
 
