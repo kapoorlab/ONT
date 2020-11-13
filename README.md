@@ -1,5 +1,5 @@
 
-ONT (ONT =  ONeat Training) contains the programs for training neural networks for static (Macrocheate, Mature and Non Mature P1 cells) and dynamic (division and apoptosis) events. The program is Keras and tensorflow based python program which consists of CNN and LSTM based networks for action recognition (division, apoptosis, cell rearrangements can be thought of as action events) and pure CNN networks for cell type recognition. The networks used in this program are fully convolutional hence enjoy the privelege of having the fast implementation of the sliding window operation.
+ONT (ONT =  ONEAT Training) contains the programs for training neural networks for static (Macrocheate, Mature and Non Mature P1 cells) and dynamic (division and apoptosis) events. The program is Keras and tensorflow based python program which consists of CNN and LSTM based networks for action recognition (division, apoptosis, cell rearrangements can be thought of as action events) and pure CNN networks for cell type recognition. The networks used in this program are fully convolutional hence enjoy the privilege of having the fast implementation of the sliding window operation.
 
 
 # Installation Instructions
