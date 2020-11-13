@@ -3,7 +3,7 @@
 """
 Created on Tue Jul  7 14:35:28 2020
 
-@author: aimachine
+@author: Varun Kapoor
 """
 
 __version__ = '1.0.0'
