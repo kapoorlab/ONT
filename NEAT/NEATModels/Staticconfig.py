@@ -17,7 +17,9 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
+    def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3,
+                 sizeX = 256, sizeY = 256, sizeTminus = 5, sizeTplus = 3,
+                 startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
         
            self.residual = residual
            self.depth = depth
@@ -33,6 +35,10 @@ class StaticNeatConfig(argparse.Namespace):
            self.batch_size = batch_size
            self.ModelName = ModelName
            self.multievent = multievent
+           self.sizeX = sizeX
+           self.sizeY = sizeY
+           self.sizeTminus = sizeTminus
+           self.sizeTplus = sizeTplus
            self.is_valid()      
            
     def to_json(self):
@@ -52,7 +58,11 @@ class StaticNeatConfig(argparse.Namespace):
                  'gridY' : self.gridY,
                  'lambdacord' : self.lambdacord,
                  'batch_size' : self.batch_size,
-                 'multievent' : self.multievent
+                 'multievent' : self.multievent,
+                 'sizeX' : self.sizeX,
+                 'sizeY' : self.sizeY,
+                 'sizeTminus' : self.sizeTminus,
+                 'sizeTplus' : self.sizeTplus,
                  }
          return config
                 
@@ -84,6 +94,10 @@ class StaticNeatConfig(argparse.Namespace):
             ok['gridX'] = _is_int(self.gridX, 1)
             ok['gridY'] = _is_int(self.gridY, 1)
             ok['lambdacord'] = _is_int(self.lambdacord, 1)
+            ok['sizeX'] = _is_int(self.sizeX, 1)
+            ok['sizeY'] = _is_int(self.sizeY, 1)
+            ok['sizeTminus'] = _is_int(self.sizeTminus, 1)
+            ok['sizeTplus'] = _is_int(self.sizeTplus, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
             ok['multievent'] = isinstance(self.multievent,bool)
             

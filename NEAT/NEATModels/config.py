@@ -10,7 +10,9 @@ import numpy as np
 
 class NeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
+    def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, 
+                 startfilter = 48, lstm = 16, epochs =100, sizeX = 256, sizeY = 256, sizeTminus = 5, sizeTplus = 3, categories = 6, box_vector = 7,
+                 learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True, Mode = 'Detection',  **kwargs):
         
         
            
@@ -24,12 +26,19 @@ class NeatConfig(argparse.Namespace):
            self.epochs = epochs
            self.learning_rate = learning_rate
            self.batch_size = batch_size
+           self.categories = categories
+           self.box_vector = box_vector
            self.ModelName = ModelName
            self.lambdacord = lambdacord
            self.gridX = gridX
            self.gridY = gridY
            self.anchors = anchors
            self.multievent = multievent
+           self.sizeX = sizeX
+           self.sizeY = sizeY
+           self.sizeTminus = sizeTminus
+           self.sizeTplus = sizeTplus
+           self.Mode = Mode
            self.is_valid()
     
 
@@ -44,6 +53,10 @@ class NeatConfig(argparse.Namespace):
                  'lstm_kernel' : self.lstm_kernel,
                  'startfilter' : self.startfilter,
                  'lstm' : self.lstm,
+                 'sizeX' : self.sizeX,
+                 'sizeY' : self.sizeY,
+                 'sizeTminus' : self.sizeTminus,
+                 'sizeTplus' : self.sizeTplus,
                  'epochs' : self.epochs,
                  'learning_rate' : self.learning_rate,
                  'anchors' : self.anchors,
@@ -51,7 +64,10 @@ class NeatConfig(argparse.Namespace):
                  'gridY' : self.gridY,
                  'lambdacord': self.lambdacord,
                  'batch_size' : self.batch_size,
-                 'multievent' : self.multievent
+                 'multievent' : self.multievent,
+                 'Mode' : self.Mode,
+                 'categories': self.categories,
+                 'box_vector': self.box_vector
                  }
          return config
          
@@ -85,9 +101,15 @@ class NeatConfig(argparse.Namespace):
             ok['gridX'] = _is_int(self.gridX, 1)
             ok['gridY'] = _is_int(self.gridY, 1)
             ok['lambdacord'] = _is_int(self.lambdacord, 1)
+            ok['sizeX'] = _is_int(self.sizeX, 1)
+            ok['sizeY'] = _is_int(self.sizeY, 1)
+            ok['sizeTminus'] = _is_int(self.sizeTminus, 1)
+            ok['sizeTplus'] = _is_int(self.sizeTplus, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
             ok['multievent'] = isinstance(self.multievent,bool)
-            
+            ok['Mode'] = self.Mode in ('Detection', 'Prediction')
+            ok['categories'] =  _is_int(self.categories, 1)
+            ok['box_vector'] = _is_int(self.box_vector, 1)
     
             if return_invalid:
                 return all(ok.values()), tuple(k for (k,v) in ok.items() if not v)
