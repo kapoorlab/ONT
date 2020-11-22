@@ -8,26 +8,45 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
+import ij.WindowManager;
 import ij.gui.OvalRoi;
 import net.imglib2.RealPoint;
+import net.imglib2.type.numeric.real.FloatType;
 import pluginTools.TrainingDataCreator;
 import pointSelector.Roiobject;
 
 public class LoadCSV implements ActionListener {
 	
 	final TrainingDataCreator parent;
-	
-	public LoadCSV(final TrainingDataCreator parent) {
+	final JComboBox<String> choice;
+	boolean isDone = false;
+	public LoadCSV(final TrainingDataCreator parent,JComboBox<String> choice) {
 	
 		this.parent = parent;
+		this.choice = choice;
 		
 	}
+	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 	
+		
+		
+		// Choose Image
+		String imagename = (String) choice.getSelectedItem();
+		
+    	parent.impOrig = WindowManager.getImage(imagename);
+    	if(parent.impOrig!=null) {
+    	parent.inputimage = 
+	    		io.SimplifiedIO.openImage(parent.impOrig.getOriginalFileInfo().directory + parent.impOrig.getOriginalFileInfo().fileName, new FloatType());
+    	parent.imageDirectory = new File(parent.impOrig.getOriginalFileInfo().directory);
+    	parent.imageFilename =  parent.impOrig.getOriginalFileInfo().fileName;
+		
 		JFileChooser csvfile = new JFileChooser();
 		FileFilter csvfilter = new FileFilter() 
 		{
@@ -53,11 +72,14 @@ public class LoadCSV implements ActionListener {
 		csvfile.setCurrentDirectory(new File(parent.impOrig.getOriginalFileInfo().directory));
 		else 
 			csvfile.setCurrentDirectory(new java.io.File("."));
-		csvfile.setDialogTitle("Green Cell CSV file");
+		csvfile.setDialogTitle("Matlab Time-Location File");
 		csvfile.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		csvfile.setFileFilter(csvfilter);
 		int count = 0;
-		
+		if(parent.overlay!=null)
+		parent.overlay.clear();
+		if(parent.MatlabOvalRois!=null)
+		parent.MatlabOvalRois.clear();
 		if (csvfile.showOpenDialog(parent.Cardframe) == JFileChooser.APPROVE_OPTION) {
 			File Matlabfile = new File(csvfile.getSelectedFile().getPath());
 			ArrayList<Roiobject> Allrois = new ArrayList<Roiobject>(); 
@@ -115,13 +137,12 @@ public class LoadCSV implements ActionListener {
         
         parent.ManualDots = false;
 		parent.MatlabDots = true;
-		
-		
+
      	parent.Clickrecorder();	
 	}
 	else
 		csvfile = null;
-	
+    	}
 	
 }
 }

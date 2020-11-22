@@ -1,6 +1,7 @@
 package fileListeners;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -38,7 +39,11 @@ public class ONTMatlabModeListener implements ItemListener {
 			CovistoTwoChDropbox originalncsv = new CovistoTwoChDropbox(parent.chooseMatlabTrainDatastring, parent.blankimageNames);
 			parent.Panelfile = originalncsv.TwoChannelOption();
 			
-			originalncsv.ChooseImage.addActionListener(new ChooseTrainingImageMatlabcsv(parent, originalncsv.ChooseImage, originalncsv.ChooseFile));
+			
+		 	ActionListener newAction = new LoadCSV( parent, originalncsv.ChooseImage );
+	    	// Choose CSV
+	    	
+		 	originalncsv.ChooseFile.addActionListener(newAction);
 			
 			
 			parent.panelFirst.add(parent.Panelfile, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,

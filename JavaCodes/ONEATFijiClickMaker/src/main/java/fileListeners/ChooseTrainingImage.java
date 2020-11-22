@@ -33,6 +33,7 @@ import pluginTools.TrainingDataCreator;
 			String imagename = (String) choice.getSelectedItem();
 			
 	    	parent.impOrig = WindowManager.getImage(imagename);
+	    	if(parent.impOrig!=null) {
 	    	parent.inputimage = 
     	    		io.SimplifiedIO.openImage(parent.impOrig.getOriginalFileInfo().directory + parent.impOrig.getOriginalFileInfo().fileName, new FloatType());
 	    	parent.imageDirectory = new File(parent.impOrig.getOriginalFileInfo().directory);
@@ -41,9 +42,12 @@ import pluginTools.TrainingDataCreator;
 	    	parent.ManualDots = true;
 			parent.MatlabDots = false;
 			
-			
+			if(parent.overlay!=null)
+			parent.overlay.clear();
+			if(parent.MatlabOvalRois!=null)
+			parent.MatlabOvalRois.clear();
 	     	parent.Clickrecorder();	
-		
+	    	}
 		
 }
 	

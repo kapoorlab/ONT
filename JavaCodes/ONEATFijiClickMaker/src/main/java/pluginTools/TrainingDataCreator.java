@@ -95,18 +95,24 @@ public class TrainingDataCreator extends JPanel {
 		return thirdDimensionSize;
 	}
 
+	
+	public ONTMouseListener mvl = null;
+	public KeyListener kvl = null;
 	public void Clickrecorder() {
 
 		impOrig = Reshape(impOrig);
+		
 		if (this.inputimage != null) {
 
 			setTime(thirdDimension);
-			ONTMouseListener mvl = new ONTMouseListener();
+			mvl = new ONTMouseListener();
+			ImagePlus.removeImageListener(mvl);
 			mvl.run("");
+            mvl.imageUpdated(impOrig);
+			 
 			impOrig.getCanvas().addMouseListener(mvl);
-			mvl.imageUpdated(impOrig);
-
-			KeyListener kvl = new AddPointKeyListener();
+			
+			 kvl = new AddPointKeyListener();
 			impOrig.getCanvas().addKeyListener(kvl);
 
 			int ndims = this.inputimage.numDimensions();
@@ -117,6 +123,7 @@ public class TrainingDataCreator extends JPanel {
 				thirdDimensionSize = (int) inputimage.dimension(2);
 
 			}
+			
 
 		}
 	}
@@ -142,7 +149,7 @@ public class TrainingDataCreator extends JPanel {
 				}
 
 			}
-			
+		
 
 		}
 
@@ -269,7 +276,6 @@ public class TrainingDataCreator extends JPanel {
 		public void mousePressed(MouseEvent e) {
 
 			getTime(impOrig);
-
 			// Make a dot red or green
 			System.out.println(AddDot);
 			if (SwingUtilities.isLeftMouseButton(e) && AddDot != "a") {
@@ -360,6 +366,8 @@ public class TrainingDataCreator extends JPanel {
 
 		// called when an image is opened
 		public void imageOpened(ImagePlus imp) {
+			
+			
 		}
 
 		// Called when an image is closed
@@ -375,8 +383,6 @@ public class TrainingDataCreator extends JPanel {
 			
 			ImagePlus.removeImageListener(this);
 			impOrig.updateAndDraw();
-
-			impOrig.setTitle("Active Image" + " " + "Do not close this ");
 			ImagePlus.addImageListener(this);
 		}
 	}
@@ -434,6 +440,7 @@ public class TrainingDataCreator extends JPanel {
 
 		}
 
+		System.out.print("Input frames" + frames);
 		imp.setDimensions(channels, imp.getNSlices(), frames);
 		imp.show();
 
