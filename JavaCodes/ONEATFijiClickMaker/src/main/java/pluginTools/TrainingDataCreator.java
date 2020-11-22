@@ -100,10 +100,6 @@ public class TrainingDataCreator extends JPanel {
 		if (this.inputimage != null) {
 
 			setTime(thirdDimension);
-
-			System.out.println(MatlabOvalRois.size());
-			System.out.println(MatlabOvalRois);
-
 			ONTMouseListener mvl = new ONTMouseListener();
 			mvl.run("");
 			impOrig.getCanvas().addMouseListener(mvl);
@@ -290,14 +286,19 @@ public class TrainingDataCreator extends JPanel {
 					Roiobject nearestRoi = getNearestRois(ClickedPointList, location);
 					ClickedPointList.remove(nearestRoi);
 					System.out.println("Original color" + nearestRoi.color);
+					
+					Color newcolor;
 					if (nearestRoi.color == AcceptColor)
-						nearestRoi.color = RejectColor;
-					if (nearestRoi.color == RejectColor)
-						nearestRoi.color = AcceptColor;
+
+						newcolor = RejectColor;
+					else
+						
+						newcolor = AcceptColor;
+					nearestRoi.color = newcolor;
 					System.out.println("New color" + nearestRoi.color);
 					ClickedPointList.add(nearestRoi);
 
-					
+					MatlabOvalRois.put(thirdDimension, ClickedPointList);
 					
 					if (MatlabOvalRois.containsKey(thirdDimension)) {
 						ArrayList<Roiobject> currentroi = MatlabOvalRois.get(thirdDimension);
