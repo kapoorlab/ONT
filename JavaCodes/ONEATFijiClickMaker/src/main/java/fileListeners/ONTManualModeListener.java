@@ -12,13 +12,13 @@ import pluginTools.TrainingDataCreator;
 
 
 
-public class ONTMatlabModeListener implements ItemListener {
+public class ONTManualModeListener implements ItemListener {
 
 	public final TrainingDataCreator parent;
 	
 	
 	
-	public ONTMatlabModeListener( final TrainingDataCreator parent) {
+	public ONTManualModeListener( final TrainingDataCreator parent) {
 		
 		this.parent = parent;
 	}
@@ -34,17 +34,16 @@ public class ONTMatlabModeListener implements ItemListener {
 			parent.panelFirst.validate();
 			parent.panelFirst.repaint();
 			
-			CovistoTwoChForceFileLoader originalncsv = new CovistoTwoChForceFileLoader(parent.chooseMatlabTrainDatastring, parent.blankimageNames);
-			parent.Panelfile = originalncsv.TwoChannelOption();
 			
-			originalncsv.ChooseImage.addActionListener(new ChooseTrainingImageMatlabcsv(parent, originalncsv.ChooseImage, originalncsv.ChoosesecImage));
+			CovistoOneChFileLoader original = new CovistoOneChFileLoader(parent.chooseTrainDatastring, parent.blankimageNames);
+			parent.Panelfile = original.SingleChannelOption();
+			original.ChooseImage.addActionListener(new ChooseTrainingImage(parent, original.ChooseImage));
 			
 			
 			parent.panelFirst.add(parent.Panelfile, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 					GridBagConstraints.HORIZONTAL, parent.insets, 0, 0));
 			
-			parent.ManualDots = false;
-			parent.MatlabDots = true;
+			
 		parent.Panelfile.validate();
 		parent.Panelfile.repaint();
 		

@@ -28,4 +28,11 @@ public class Roiobject {
 		
 	}
 	
+	
+	public void setColor(Color color) {
+		
+		this.color = color;
+		
+	}
+	
 }

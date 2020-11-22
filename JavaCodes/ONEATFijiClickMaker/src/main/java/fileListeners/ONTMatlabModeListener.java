@@ -6,19 +6,20 @@ import java.awt.event.ItemListener;
 
 import fileListeners.ChooseTrainingImage;
 import loadfile.CovistoOneChFileLoader;
+import loadfile.CovistoTwoChDropbox;
 import loadfile.CovistoTwoChForceFileLoader;
 import pluginTools.TrainingDataCreator;
 
 
 
 
-public class ONTManualModeListener implements ItemListener {
+public class ONTMatlabModeListener implements ItemListener {
 
 	public final TrainingDataCreator parent;
 	
 	
 	
-	public ONTManualModeListener( final TrainingDataCreator parent) {
+	public ONTMatlabModeListener( final TrainingDataCreator parent) {
 		
 		this.parent = parent;
 	}
@@ -34,17 +35,16 @@ public class ONTManualModeListener implements ItemListener {
 			parent.panelFirst.validate();
 			parent.panelFirst.repaint();
 			
+			CovistoTwoChDropbox originalncsv = new CovistoTwoChDropbox(parent.chooseMatlabTrainDatastring, parent.blankimageNames);
+			parent.Panelfile = originalncsv.TwoChannelOption();
 			
-			CovistoOneChFileLoader original = new CovistoOneChFileLoader(parent.chooseTrainDatastring, parent.blankimageNames);
-			parent.Panelfile = original.SingleChannelOption();
-			original.ChooseImage.addActionListener(new ChooseTrainingImage(parent, original.ChooseImage));
+			originalncsv.ChooseImage.addActionListener(new ChooseTrainingImageMatlabcsv(parent, originalncsv.ChooseImage, originalncsv.ChooseFile));
 			
 			
 			parent.panelFirst.add(parent.Panelfile, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 					GridBagConstraints.HORIZONTAL, parent.insets, 0, 0));
 			
-			parent.ManualDots = true;
-			parent.MatlabDots = false;
+		
 		parent.Panelfile.validate();
 		parent.Panelfile.repaint();
 		

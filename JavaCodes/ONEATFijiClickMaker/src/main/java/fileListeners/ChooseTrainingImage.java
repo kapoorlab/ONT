@@ -37,6 +37,14 @@ import pluginTools.TrainingDataCreator;
     	    		io.SimplifiedIO.openImage(parent.impOrig.getOriginalFileInfo().directory + parent.impOrig.getOriginalFileInfo().fileName, new FloatType());
 	    	parent.imageDirectory = new File(parent.impOrig.getOriginalFileInfo().directory);
 	    	parent.imageFilename =  parent.impOrig.getOriginalFileInfo().fileName;
+	    	
+	    	parent.ManualDots = true;
+			parent.MatlabDots = false;
+			
+			
+	     	parent.Clickrecorder();	
+		
+		
 }
 	
 }
