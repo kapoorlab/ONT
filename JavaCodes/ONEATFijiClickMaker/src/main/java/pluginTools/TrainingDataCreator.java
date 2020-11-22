@@ -39,6 +39,8 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+
+import ONEATloadfile.CovistoOneChFileLoader;
 import fileListeners.ChooseTrainingImage;
 import fileListeners.MouseClickTimeListener;
 import fileListeners.ONTManualModeListener;
@@ -52,7 +54,6 @@ import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.io.Opener;
 import io.scif.img.ImgIOException;
-import loadfile.CovistoOneChFileLoader;
 import mpicbg.imglib.util.Util;
 import net.imagej.ImageJ;
 import net.imglib2.Cursor;

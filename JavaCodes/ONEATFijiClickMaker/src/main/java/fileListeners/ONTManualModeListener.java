@@ -4,9 +4,9 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import ONEATloadfile.CovistoOneChFileLoader;
+import ONEATloadfile.CovistoTwoChForceFileLoader;
 import fileListeners.ChooseTrainingImage;
-import loadfile.CovistoOneChFileLoader;
-import loadfile.CovistoTwoChForceFileLoader;
 import pluginTools.TrainingDataCreator;
 
 
