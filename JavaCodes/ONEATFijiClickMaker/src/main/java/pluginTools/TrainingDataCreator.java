@@ -96,33 +96,29 @@ public class TrainingDataCreator extends JPanel {
 	}
 
 	
-	public ONTMouseListener mvl = null;
-	public KeyListener kvl = null;
+	public ONTMouseListener mvl;
+	public KeyListener kvl;
+	public ONTImageListener Ivl;
 	public void Clickrecorder() {
 
 		impOrig = Reshape(impOrig);
-		
+
 		if (this.inputimage != null) {
 
-			setTime(thirdDimension);
-			mvl = new ONTMouseListener();
-			ImagePlus.removeImageListener(mvl);
-			mvl.run("");
-            mvl.imageUpdated(impOrig);
-			 
-			impOrig.getCanvas().addMouseListener(mvl);
+			thirdDimension = 1;
+
+			thirdDimensionSize = (int) inputimage.dimension(2);
+			// Remove the listeners
 			
+			mvl = new ONTMouseListener();
+			Ivl = new ONTImageListener(); 
+			impOrig.getCanvas().addMouseListener(mvl);
+			 ImagePlus.addImageListener(Ivl);
 			 kvl = new AddPointKeyListener();
 			impOrig.getCanvas().addKeyListener(kvl);
 
-			int ndims = this.inputimage.numDimensions();
-			if (ndims == 3) {
 
-				thirdDimension = 1;
 
-				thirdDimensionSize = (int) inputimage.dimension(2);
-
-			}
 			
 
 		}
@@ -149,7 +145,7 @@ public class TrainingDataCreator extends JPanel {
 				}
 
 			}
-		
+			
 
 		}
 
@@ -250,7 +246,7 @@ public class TrainingDataCreator extends JPanel {
 
 		ManualMode.addItemListener(new ONTManualModeListener(this));
 		MatlabMode.addItemListener(new ONTMatlabModeListener(this));
-		eventfieldname.addTextListener(new eventnameListener());
+		eventfieldname.addTextListener(new eventnameListener());       
 		panelFirst.setVisible(true);
 		cl.show(panelCont, "1");
 		Cardframe.add(panelCont, "Center");
@@ -259,7 +255,7 @@ public class TrainingDataCreator extends JPanel {
 		Cardframe.setVisible(true);
 	}
 
-	public class ONTMouseListener implements MouseListener, ImageListener {
+	public class ONTMouseListener implements MouseListener {
 
 		public ONTMouseListener() {
 
@@ -342,31 +338,27 @@ public class TrainingDataCreator extends JPanel {
 		public void mouseClicked(MouseEvent arg0) {
 		}
 
-		public void getTime(ImagePlus imp) {
-			
-			
-			int time = imp.getFrame();
 
-			thirdDimension = time;
-			
-			if (overlay == null) {
 
-				overlay = new Overlay();
-				impOrig.setOverlay(overlay);
+	}
+	
+	
+	public class ONTImageListener implements ImageListener {
 
-			}
-			else
-			 overlay.clear();
-			
+		public ONTImageListener() {
+
 		}
-
-		public void run(String arg) {
-			ImagePlus.addImageListener(this);
-		}
-
 		// called when an image is opened
 		public void imageOpened(ImagePlus imp) {
+			getTime(imp);
+
+			updatePreview(ValueChange.THIRDDIMmouse);
 			
+			ImagePlus.removeImageListener(this);
+			
+			impOrig.updateAndDraw();
+			
+			ImagePlus.addImageListener(this);
 			
 		}
 
@@ -382,11 +374,29 @@ public class TrainingDataCreator extends JPanel {
 			updatePreview(ValueChange.THIRDDIMmouse);
 			
 			ImagePlus.removeImageListener(this);
+			
 			impOrig.updateAndDraw();
+			
 			ImagePlus.addImageListener(this);
 		}
 	}
+	public void getTime(ImagePlus imp) {
+		
+		
+		int time = imp.getFrame();
 
+		thirdDimension = time;
+		
+		if (overlay == null) {
+
+			overlay = new Overlay();
+			impOrig.setOverlay(overlay);
+
+		}
+		else
+		 overlay.clear();
+		
+	}
 	public class AddPointKeyListener implements KeyListener {
 
 		public AddPointKeyListener() {
@@ -440,7 +450,6 @@ public class TrainingDataCreator extends JPanel {
 
 		}
 
-		System.out.print("Input frames" + frames);
 		imp.setDimensions(channels, imp.getNSlices(), frames);
 		imp.show();
 
