@@ -2,21 +2,23 @@ package fileListeners;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JComboBox;
 
 import ij.WindowManager;
-import pluginTools.TrainingDataFileChooser;
+import net.imglib2.type.numeric.real.FloatType;
+import pluginTools.TrainingDataCreator;
 
 	
 	public class ChooseTrainingImage implements ActionListener {
 		
 		
-		final TrainingDataFileChooser parent;
+		final TrainingDataCreator parent;
 		final JComboBox<String> choice;
 		
 		
-		public ChooseTrainingImage(final TrainingDataFileChooser parent, final JComboBox<String> choice ) {
+		public ChooseTrainingImage(final TrainingDataCreator parent, final JComboBox<String> choice ) {
 			
 			
 			this.parent = parent;
@@ -31,7 +33,10 @@ import pluginTools.TrainingDataFileChooser;
 			String imagename = (String) choice.getSelectedItem();
 			
 	    	parent.impOrig = WindowManager.getImage(imagename);
-
+	    	parent.inputimage = 
+    	    		io.SimplifiedIO.openImage(parent.impOrig.getOriginalFileInfo().directory + parent.impOrig.getOriginalFileInfo().fileName, new FloatType());
+	    	parent.imageDirectory = new File(parent.impOrig.getOriginalFileInfo().directory);
+	    	parent.imageFilename =  parent.impOrig.getOriginalFileInfo().fileName;
 }
 	
 }

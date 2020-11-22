@@ -7,18 +7,18 @@ import java.awt.event.ItemListener;
 import fileListeners.ChooseTrainingImage;
 import loadfile.CovistoOneChFileLoader;
 import loadfile.CovistoTwoChForceFileLoader;
-import pluginTools.TrainingDataFileChooser;
+import pluginTools.TrainingDataCreator;
 
 
 
 
 public class ONTMatlabModeListener implements ItemListener {
 
-	public final TrainingDataFileChooser parent;
+	public final TrainingDataCreator parent;
 	
 	
 	
-	public ONTMatlabModeListener( final TrainingDataFileChooser parent) {
+	public ONTMatlabModeListener( final TrainingDataCreator parent) {
 		
 		this.parent = parent;
 	}

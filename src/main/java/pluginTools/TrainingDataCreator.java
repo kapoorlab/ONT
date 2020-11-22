@@ -7,8 +7,13 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Label;
+import java.awt.TextComponent;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +32,13 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import io.scif.img.ImgIOException;
 import loadfile.CovistoOneChFileLoader;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.real.FloatType;
 import pointSelector.Roiobject;
 
 
-public class TrainingDataFileChooser extends JPanel {
+public class TrainingDataCreator extends JPanel {
 
 	/**
 	 * 
@@ -43,38 +51,43 @@ public class TrainingDataFileChooser extends JPanel {
 	public JPanel panelFirst = new JPanel();
 	public JPanel Panelfile = new JPanel();
 	public JPanel Panelcsv = new JPanel();
-	public JPanel Paneldone = new JPanel();
+	public JPanel Panelclicker = new JPanel();
 	public JPanel Panelrun = new JPanel();
 	public final Insets insets = new Insets(10, 10, 0, 10);
 	public final GridBagLayout layout = new GridBagLayout();
 	public final GridBagConstraints c = new GridBagConstraints();
 	public final String[] imageNames, blankimageNames;
 	public JComboBox<String> ChooseImage;
-	public JButton Done = new JButton("Finished choosing files, start Clicker");
 	public HashMap<Integer, ArrayList<Roiobject>> MatlabOvalRois= new HashMap<Integer, ArrayList<Roiobject>>();
-
+	public String addToName = "";
 	public String chooseTrainDatastring = "Image for clicking";
 	public Border chooseTrainData = new CompoundBorder(new TitledBorder(chooseTrainDatastring), new EmptyBorder(c.insets));
 
 	public String chooseMatlabTrainDatastring = "Image and Matlab CSV file for correction";
 	public Border chooseMatlabTrainData = new CompoundBorder(new TitledBorder(chooseTrainDatastring), new EmptyBorder(c.insets));
 
-	public String donestring = "Done Selection";
-	public Border LoadONT = new CompoundBorder(new TitledBorder(donestring), new EmptyBorder(c.insets));
-
+	public String clickstring = "Clicker Menu";
+	public Border LoadONT = new CompoundBorder(new TitledBorder(clickstring), new EmptyBorder(c.insets));
+    public Label eventname;
+    public TextField eventfieldname;
 
 	public CheckboxGroup ONTmode = new CheckboxGroup();
 	public boolean ManualDots = true;
 	public boolean MatlabDots = false;
 	public Checkbox ManualMode = new Checkbox("Make Manual Dots", ManualDots, ONTmode);
     public Checkbox MatlabMode = new Checkbox("Select Matlab Dots", MatlabDots, ONTmode);
+    public File imageDirectory = new File("");
+    public String imageFilename = "";
+    public RandomAccessibleInterval<FloatType> inputimage;
 
-
-	public TrainingDataFileChooser() {
+	public TrainingDataCreator() {
 
 		panelFirst.setLayout(layout);
-
-		Paneldone.setLayout(layout);
+		eventname = new Label("Event/CellType Name");
+        eventfieldname = new TextField(10);
+        eventfieldname.setText("Normal");
+		
+		Panelclicker.setLayout(layout);
 		CardLayout cl = new CardLayout();
 
 		panelCont.setLayout(cl);
@@ -111,10 +124,12 @@ public class TrainingDataFileChooser extends JPanel {
 		panelFirst.add(Panelcsv, new GridBagConstraints(0, 9, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 				GridBagConstraints.HORIZONTAL, insets, 0, 0));
 		
-		Paneldone.add(Done, new GridBagConstraints(0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+		Panelclicker.add(eventname, new GridBagConstraints(0, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
-		Paneldone.setBorder(LoadONT);
-		panelFirst.add(Paneldone, new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+		Panelclicker.add(eventfieldname, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
+		Panelclicker.setBorder(LoadONT);
+		panelFirst.add(Panelclicker, new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 				GridBagConstraints.HORIZONTAL, insets, 0, 0));
 
 
@@ -123,7 +138,7 @@ public class TrainingDataFileChooser extends JPanel {
 
 		ManualMode.addItemListener(new ONTManualModeListener(this));
 		MatlabMode.addItemListener(new ONTMatlabModeListener(this));
-		Done.addActionListener(new TrainDoneListener());
+		eventfieldname.addTextListener(new eventnameListener());
 		panelFirst.setVisible(true);
 		cl.show(panelCont, "1");
 		Cardframe.add(panelCont, "Center");
@@ -136,26 +151,24 @@ public class TrainingDataFileChooser extends JPanel {
 	
 	
 
-	public class TrainDoneListener implements ActionListener {
+	public class eventnameListener implements TextListener {
 
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void textValueChanged(TextEvent e) {
 
-			try {
-				DoneCurrBud(Cardframe);
-			} catch (ImgIOException e1) {
-
-			}
+			
+			final TextComponent tc = (TextComponent) e.getSource();
+			
+			String s = tc.getText();
+			
+			if(s.length() > 0)
+				addToName = s;
 		}
 
+		
 	}
 
 	
-	public void DoneCurrBud(Frame parent) throws ImgIOException {
-
-		close(parent);
-
-	}
 
 	protected final void close(final Frame parent) {
 		if (parent != null)
@@ -167,7 +180,7 @@ public class TrainingDataFileChooser extends JPanel {
 		
 		JFrame frame = new JFrame("");
 
-		TrainingDataFileChooser panel = new TrainingDataFileChooser();
+		TrainingDataCreator panel = new TrainingDataCreator();
 
 		frame.getContentPane().add(panel, "Center");
 		frame.setSize(panel.getPreferredSize());

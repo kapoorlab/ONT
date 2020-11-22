@@ -16,18 +16,19 @@ import javax.swing.filechooser.FileFilter;
 import ij.WindowManager;
 import ij.gui.OvalRoi;
 import net.imglib2.RealPoint;
-import pluginTools.TrainingDataFileChooser;
+import net.imglib2.type.numeric.real.FloatType;
+import pluginTools.TrainingDataCreator;
 import pointSelector.Roiobject;
 
 public class ChooseTrainingImageMatlabcsv implements ActionListener {
 	
 	
-	final TrainingDataFileChooser parent;
+	final TrainingDataCreator parent;
 	final JComboBox<String> choice;
 	final JComboBox<String> choicecsv;
 	
 	
-	public ChooseTrainingImageMatlabcsv(final TrainingDataFileChooser parent, final JComboBox<String> choice, final JComboBox<String> choicecsv ) {
+	public ChooseTrainingImageMatlabcsv(final TrainingDataCreator parent, final JComboBox<String> choice, final JComboBox<String> choicecsv ) {
 		
 		
 		this.parent = parent;
@@ -40,11 +41,17 @@ public class ChooseTrainingImageMatlabcsv implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
+
+		// Choose Image
 		String imagename = (String) choice.getSelectedItem();
 		
     	parent.impOrig = WindowManager.getImage(imagename);
-
+    	parent.inputimage = 
+	    		io.SimplifiedIO.openImage(parent.impOrig.getOriginalFileInfo().directory + parent.impOrig.getOriginalFileInfo().fileName, new FloatType());
+    	parent.imageDirectory = new File(parent.impOrig.getOriginalFileInfo().directory);
+    	parent.imageFilename =  parent.impOrig.getOriginalFileInfo().fileName;
     	
+    	// Choose CSV
     	String csvname = (String) choicecsv.getSelectedItem();
     	
     	File Matlabfile = new File(csvname);
@@ -106,7 +113,7 @@ public class ChooseTrainingImageMatlabcsv implements ActionListener {
 	                OvalRoi roi = new OvalRoi(X, Y, 10, 10);
 	                
 	                Allrois.add(new Roiobject (Color.RED, roi, 
-	                		new RealPoint(new double[] {X, Y})));
+	                		new RealPoint(new double[] {X, Y, Angle})));
 	         
 	            }
 	                 count = count +  1;
