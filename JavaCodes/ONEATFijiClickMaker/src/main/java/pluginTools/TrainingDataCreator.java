@@ -25,9 +25,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -58,7 +61,9 @@ import mpicbg.imglib.util.Util;
 import net.imagej.ImageJ;
 import net.imglib2.Cursor;
 import net.imglib2.KDTree;
+import net.imglib2.Point;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.ARGBType;
@@ -76,7 +81,9 @@ public class TrainingDataCreator extends JPanel {
 	public int thirdDimension;
 	public int thirdDimensionSize;
 	public Overlay overlay;
-
+    public NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+	
+	
 	public static enum ValueChange {
 
 		THIRDDIMmouse, All;
@@ -100,7 +107,8 @@ public class TrainingDataCreator extends JPanel {
 	public KeyListener kvl;
 	public ONTImageListener Ivl;
 	public void Clickrecorder() {
-
+		nf.setMaximumFractionDigits(3);
+		nf.setGroupingUsed(false);
 		impOrig = Reshape(impOrig);
 
 		if (this.inputimage != null) {
@@ -175,6 +183,7 @@ public class TrainingDataCreator extends JPanel {
 	public Border chooseTrainData = new CompoundBorder(new TitledBorder(chooseTrainDatastring),
 			new EmptyBorder(c.insets));
 
+	public JButton SaveButton = new JButton("Save Current Selection");
 	public String chooseMatlabTrainDatastring = "Image and Matlab CSV file for correction";
 	public Border chooseMatlabTrainData = new CompoundBorder(new TitledBorder(chooseTrainDatastring),
 			new EmptyBorder(c.insets));
@@ -241,6 +250,8 @@ public class TrainingDataCreator extends JPanel {
 				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
 		Panelclicker.add(eventfieldname, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
+		Panelclicker.add(SaveButton, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
 		Panelclicker.setBorder(LoadONT);
 		panelFirst.add(Panelclicker, new GridBagConstraints(0, 10, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 				GridBagConstraints.HORIZONTAL, insets, 0, 0));
@@ -249,7 +260,8 @@ public class TrainingDataCreator extends JPanel {
 
 		ManualMode.addItemListener(new ONTManualModeListener(this));
 		MatlabMode.addItemListener(new ONTMatlabModeListener(this));
-		eventfieldname.addTextListener(new eventnameListener());       
+		eventfieldname.addTextListener(new eventnameListener());
+		SaveButton.addActionListener(new ONTSaveSelection());
 		panelFirst.setVisible(true);
 		cl.show(panelCont, "1");
 		Cardframe.add(panelCont, "Center");
@@ -258,6 +270,71 @@ public class TrainingDataCreator extends JPanel {
 		Cardframe.setVisible(true);
 	}
 
+	public class ONTSaveSelection implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			
+			
+			try {
+			    File budfile = new File(imageDirectory + "//" + "ONEAT" + imageFilename.replaceFirst("[.][^.]+$", "") + addToName + ".csv");
+			    
+			    
+			    
+				FileWriter fwbud = new FileWriter(budfile);
+				BufferedWriter bwbud = new BufferedWriter(fwbud);
+				bwbud.write(
+						"T, X, Y, Angle \n");
+               for (Map.Entry<Integer, ArrayList<Roiobject>> timeroi: MatlabOvalRois.entrySet()) {
+			    
+			    
+            	   
+            	   int T = timeroi.getKey();
+            	   ArrayList<Roiobject> Allrois = timeroi.getValue();
+            	   
+            	   for (Roiobject currentroi:Allrois) {
+            	      Color color = currentroi.color;
+            	      
+            	      if(color== AcceptColor) {
+            	      RealLocalizable currentpointAngle = currentroi.point;
+            	      
+                      double X = currentpointAngle.getDoublePosition(0);
+                      double Y = currentpointAngle.getDoublePosition(1);
+                      double angle =  currentpointAngle.getDoublePosition(2);
+            			   
+                      bwbud.write(T + "," 
+								+ nf.format(X) + "," 
+								+ nf.format(Y) +  "," 
+								+ nf.format(angle) + "," +
+								
+								
+								"\n");
+						}
+                      
+                      
+            	      }
+            			   
+            	   }
+               
+               bwbud.close();
+      			fwbud.close();
+      			
+      		}
+      		catch (IOException te) {
+      		}
+            	   
+			}
+			
+       
+			
+		}
+		
+		
+		
+		
+		
+	
+	
 	public class ONTMouseListener implements MouseListener {
 
 		public ONTMouseListener() {
