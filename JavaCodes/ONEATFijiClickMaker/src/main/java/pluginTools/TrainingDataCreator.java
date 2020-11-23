@@ -108,13 +108,16 @@ public class TrainingDataCreator extends JPanel {
 			thirdDimension = 1;
 
 			thirdDimensionSize = (int) inputimage.dimension(2);
-			// Remove the listeners
+
+			
+			updatePreview(ValueChange.THIRDDIMmouse);
+			impOrig.updateAndDraw();
 			
 			mvl = new ONTMouseListener();
 			Ivl = new ONTImageListener(); 
 			impOrig.getCanvas().addMouseListener(mvl);
-			 ImagePlus.addImageListener(Ivl);
-			 kvl = new AddPointKeyListener();
+			ImagePlus.addImageListener(Ivl);
+			kvl = new AddPointKeyListener();
 			impOrig.getCanvas().addKeyListener(kvl);
 
 

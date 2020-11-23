@@ -48,6 +48,7 @@ public class LoadCSV implements ActionListener {
 			parent.imageDirectory = new File(parent.impOrig.getOriginalFileInfo().directory);
 			parent.imageFilename = parent.impOrig.getOriginalFileInfo().fileName;
 
+		
 			JFileChooser csvfile = new JFileChooser();
 			FileFilter csvfilter = new FileFilter() {
 				// Override accept method
@@ -134,7 +135,8 @@ public class LoadCSV implements ActionListener {
 
 				parent.ManualDots = false;
 				parent.MatlabDots = true;
-
+				parent.addToName = csvfile.getSelectedFile().getName().replaceFirst("[.][^.]+$", "");
+				parent.eventfieldname.setText(parent.addToName);
 				parent.Clickrecorder();
 			} else
 				csvfile = null;
