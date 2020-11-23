@@ -276,7 +276,6 @@ public class TrainingDataCreator extends JPanel {
 
 			getTime(impOrig);
 			// Make a dot red or green
-			System.out.println(AddDot);
 			if (SwingUtilities.isLeftMouseButton(e) && AddDot != "a") {
 
 				int X = canvas.offScreenX(e.getX());
@@ -291,7 +290,6 @@ public class TrainingDataCreator extends JPanel {
 
 					Roiobject nearestRoi = getNearestRois(ClickedPointList, location);
 					ClickedPointList.remove(nearestRoi);
-					System.out.println("Original color" + nearestRoi.color);
 					
 					Color newcolor;
 					if (nearestRoi.color == AcceptColor)
@@ -301,7 +299,6 @@ public class TrainingDataCreator extends JPanel {
 						
 						newcolor = AcceptColor;
 					nearestRoi.color = newcolor;
-					System.out.println("New color" + nearestRoi.color);
 					ClickedPointList.add(nearestRoi);
 
 					MatlabOvalRois.put(thirdDimension, ClickedPointList);
@@ -325,6 +322,35 @@ public class TrainingDataCreator extends JPanel {
 
 			if (SwingUtilities.isLeftMouseButton(e) && AddDot == "a") {
 
+				int X = canvas.offScreenX(e.getX());
+				int Y = canvas.offScreenY(e.getY());
+				Clickedpoints[0] = X;
+				Clickedpoints[1] = Y;
+				
+				if (MatlabOvalRois.get(thirdDimension) != null) {
+
+					ArrayList<Roiobject> ClickedPointList = MatlabOvalRois.get(thirdDimension);
+					OvalRoi nearestRoi = new OvalRoi(X - 5, Y - 5 , 10, 10);
+					ClickedPointList.add(new Roiobject(AcceptColor, nearestRoi,
+							new RealPoint(new double[] { X, Y, 2 })));
+					MatlabOvalRois.put(thirdDimension,ClickedPointList );
+					
+					
+					if (MatlabOvalRois.containsKey(thirdDimension)) {
+						ArrayList<Roiobject> currentroi = MatlabOvalRois.get(thirdDimension);
+						for (Roiobject roi : currentroi) {
+
+							roi.roi.setStrokeColor(roi.color);
+
+							if (overlay!= null)
+								overlay.add(roi.roi);
+
+						}
+						impOrig.updateAndDraw();
+					}
+					
+				}
+				
 				AddDot = "b";
 			}
 		}
