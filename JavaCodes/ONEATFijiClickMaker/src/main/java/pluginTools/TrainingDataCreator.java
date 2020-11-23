@@ -284,7 +284,7 @@ public class TrainingDataCreator extends JPanel {
 				FileWriter fwbud = new FileWriter(budfile);
 				BufferedWriter bwbud = new BufferedWriter(fwbud);
 				bwbud.write(
-						"T, X, Y, Angle \n");
+						"T, Y, X, Angle \n");
                for (Map.Entry<Integer, ArrayList<Roiobject>> timeroi: MatlabOvalRois.entrySet()) {
 			    
 			    
@@ -303,8 +303,8 @@ public class TrainingDataCreator extends JPanel {
                       double angle =  currentpointAngle.getDoublePosition(2);
             			   
                       bwbud.write(T + "," 
-								+ nf.format(X) + "," 
-								+ nf.format(Y) +  "," 
+								+ nf.format(Y) + "," 
+								+ nf.format(X) +  "," 
 								+ nf.format(angle) + "," +
 								
 								
