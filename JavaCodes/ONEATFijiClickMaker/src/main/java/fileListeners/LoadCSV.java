@@ -104,27 +104,65 @@ public class LoadCSV implements ActionListener {
 						if (count > 0) {
 
 							int Y, X;
+							if(TYXApoints[0]!="NAN" || TYXApoints[1]!="NAN" || TYXApoints[2]!="NAN") {
 							int T = (int) Float.parseFloat(TYXApoints[0]);
 							if (SecondHead == "Y") {
+								try {
 								Y = (int) Float.parseFloat(TYXApoints[1]);
 								X = (int) Float.parseFloat(TYXApoints[2]);
+								
+								int Angle = 2;
+								if (TYXApoints.length > 3)
+									Angle = (int) Float.parseFloat(TYXApoints[3]);
+
+								if (parent.MatlabOvalRois.get(T) == null) {
+									Allrois = new ArrayList<Roiobject>();
+									parent.MatlabOvalRois.put(T, Allrois);
+								} else
+									parent.MatlabOvalRois.put(T, Allrois);
+								if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
+								
+								OvalRoi roi = new OvalRoi(X, Y, 10, 10);
+								Allrois.add(new Roiobject(parent.RejectColor, roi,
+										new RealPoint(new double[] { X, Y, Angle })));
+								
+								}
+								
+								}
+								catch(NumberFormatException Nan) {
+									
+									
+								}
 							} else {
+								try {
 								Y = (int) Float.parseFloat(TYXApoints[2]);
 								X = (int) Float.parseFloat(TYXApoints[1]);
+								
+								int Angle = 2;
+								if (TYXApoints.length > 3)
+									Angle = (int) Float.parseFloat(TYXApoints[3]);
+
+								if (parent.MatlabOvalRois.get(T) == null) {
+									Allrois = new ArrayList<Roiobject>();
+									parent.MatlabOvalRois.put(T, Allrois);
+								} else
+									parent.MatlabOvalRois.put(T, Allrois);
+								if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
+								
+								OvalRoi roi = new OvalRoi(X, Y, 10, 10);
+								Allrois.add(new Roiobject(parent.RejectColor, roi,
+										new RealPoint(new double[] { X, Y, Angle })));
+								
+								}
+								}
+								catch(NumberFormatException Nan) {
+									
+									
+								}
 							}
-							int Angle = 0;
-							if (TYXApoints.length > 3)
-								Angle = (int) Float.parseFloat(TYXApoints[3]);
+					
 
-							if (parent.MatlabOvalRois.get(T) == null) {
-								Allrois = new ArrayList<Roiobject>();
-								parent.MatlabOvalRois.put(T, Allrois);
-							} else
-								parent.MatlabOvalRois.put(T, Allrois);
-							OvalRoi roi = new OvalRoi(X, Y, 10, 10);
-							Allrois.add(new Roiobject(parent.RejectColor, roi,
-									new RealPoint(new double[] { X, Y, Angle })));
-
+						}
 						}
 						count = count + 1;
 					}

@@ -669,7 +669,7 @@ public class TrainingDataCreator extends JPanel {
 
 		new ImageJ();
 
-		File csvfile = new File("/home/kapoorlab/OLDONEAT/Movie2Normal.csv");
+		File csvfile = new File("/home/kapoorlab/Downloads/Divisions_Coordinates_TYX_for_wt_mov8..csv");
 
 		ImagePlus impA = new Opener().openImage("/home/kapoorlab/OLDONEAT/NEATcsvfiles/EventMovie.tif");
 		impA.show();
