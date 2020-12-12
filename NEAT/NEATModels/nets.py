@@ -40,175 +40,6 @@ class Concat(layers.Layer):
 
     
 
-    
-def TDresnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel = 7, mid_kernel = 3, startfilter = 48, input_weights = None, last_activation = 'softmax'):
-    """ResNet Version 2 Model builder [b]
-   
-    # Returns
-        model (Model): Keras model instance
-    """
-    img_input = layers.Input(shape = (input_shape[0], None, None, input_shape[3]))
-    if (depth - 2) % 9 != 0:
-        raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
-    # Start model definition.
-    num_filters_in = startfilter
-    num_res_blocks = int((depth - 2) / 9)
-
-    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
-    x = TDresnet_layer(inputs=img_input,
-                     num_filters=num_filters_in,
-                     kernel_size = start_kernel,
-                     conv_first=True)
-
-    # Instantiate the stack of residual units
-    for stage in range(3):
-        for res_block in range(num_res_blocks):
-            activation = 'relu'
-            batch_normalization = True
-            strides = 1
-            if stage == 0:
-                num_filters_out = num_filters_in * 4
-                if res_block == 0:  # first layer and first stage
-                    activation = None
-                    batch_normalization = False
-            else:
-                num_filters_out = num_filters_in * 2
-                if stage == 0:  # not first layer and not first stage
-                    strides = 2   # downsample
-
-            # bottleneck residual unit
-            y = TDresnet_layer(inputs=x,
-                             num_filters=num_filters_in,
-                             kernel_size=1,
-                             strides=strides,
-                             activation=activation,
-                             batch_normalization=batch_normalization,
-                             conv_first=False)
-            y = TDresnet_layer(inputs=y,
-                             num_filters=num_filters_in,
-                             kernel_size = mid_kernel,
-
-                             conv_first=False)
-            y = TDresnet_layer(inputs=y,
-                             num_filters=num_filters_out,
-                             kernel_size=1,
-                             conv_first=False)
-            if res_block == 0:
-                # linear projection residual shortcut connection to match
-                # changed dims
-                x = TDresnet_layer(inputs=x,
-                                 num_filters=num_filters_out,
-                                 kernel_size=1,
-                                 strides=strides,
-                                 activation=None,
-                                 batch_normalization=False)
-              
-            x = K.layers.add([x, y])
-        num_filters_in = num_filters_out
-
-    # Add classifier on top.
-    # v2 has BN-ReLU before Pooling
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
-    x = ConvLSTM2D(filters = unit, kernel_size = (start_kernel, start_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstm")(x)
-
-    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
-    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
-    
-    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)), activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    output_box = (Conv2D((box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
-    
-    block = Concat(-1)
-    outputs = block([output_cat,output_box]) 
-    inputs = img_input
-   
-    # Create model.
-    model = models.Model(inputs, outputs)
-    
-    
-    if input_weights is not None:
-
-        model.load_weights(input_weights, by_name =True)
-        
-    return model
-
-def TDSeqnet_v2(input_shape, categories,unit, box_vector,depth = 29,start_kernel = 7, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
-    """ResNet Version 2 Model builder [b]
-
-    # Returns
-        model (Model): Keras model instance
-    """
-    img_input = layers.Input(shape = (input_shape[0], None, None, input_shape[3]))
-    if (depth - 2) % 9 != 0:
-        raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
-    # Start model definition.
-    num_filters_in = startfilter
-    num_res_blocks = int((depth - 2) / 9)
-
-    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
-    x = TDresnet_layer(inputs=img_input,
-                     num_filters=num_filters_in,
-                     kernel_size = start_kernel,
-                     conv_first=True)
-
-    # Instantiate the stack of residual units
-    for stage in range(3):
-        for res_block in range(num_res_blocks):
-            activation = 'relu'
-            batch_normalization = True
-            strides = 1
-            if stage == 0:
-                num_filters_out = num_filters_in * 4
-                if res_block == 0:  # first layer and first stage
-                    activation = None
-                    batch_normalization = False
-            else:
-                num_filters_out = num_filters_in * 2
-                if stage == 0:  # not first layer and not first stage
-                    strides = 2   # downsample
-
-            # bottleneck residual unit
-            
-            x = TDresnet_layer(inputs=x,
-                             num_filters=num_filters_in,
-                               kernel_size= mid_kernel,
-                             conv_first=False,
-                             strides = strides,
-                             activation=activation,
-                             batch_normalization=batch_normalization)
-            
-              
-        num_filters_in = num_filters_out
-
-    # Add classifier on top.
-    # v2 has BN-ReLU before Pooling
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
-    x = ConvLSTM2D(filters = unit, kernel_size = (start_kernel, start_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstmbig")(x)
-
-    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
-    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
-    
-    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)), activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    output_box = (Conv2D((box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
-    
-    block = Concat(-1)
-    outputs = block([output_cat,output_box]) 
-    inputs = img_input
-   
-    # Create model.
-    model = models.Model(inputs, outputs)
-    
-    
-    if input_weights is not None:
-
-        model.load_weights(input_weights, by_name =True)
-        
-    return model
-
-
-
-
 def TDresnet_layer(inputs,
                  num_filters=64,
                  kernel_size= 3,
@@ -254,8 +85,8 @@ def TDresnet_layer(inputs,
 
 
 
-
-def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29, start_kernel = 7, mid_kernel = 3,startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax', 
+          TimeDistributedConv = True, ThreeDConv = True ):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -266,198 +97,97 @@ def ThreeDresnet_v2(input_shape, categories,unit, box_vector,depth = 29, start_k
     # Start model definition.
     num_filters_in = startfilter
     num_res_blocks = int((depth - 2) / 9)
-
-    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
-    x = ThreeDresnet_layer(inputs=img_input,
-                     num_filters=num_filters_in,
-                     kernel_size = start_kernel,
-                     conv_first=True)
-
-    # Instantiate the stack of residual units
-    for stage in range(3):
-        for res_block in range(num_res_blocks):
-            activation = 'relu'
-            batch_normalization = True
-            strides = 1
-            if stage == 0:
-                num_filters_out = num_filters_in * 4
-                if res_block == 0:  # first layer and first stage
-                    activation = None
-                    batch_normalization = False
-            else:
-                num_filters_out = num_filters_in * 2
-                if res_block == 0:  # not first layer and not first stage
-                    strides = 2   # downsample
-
-            # bottleneck residual unit
-            y = ThreeDresnet_layer(inputs=x,
+    if ThreeDConv == True:
+            # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
+            x = ThreeDresnet_layer(inputs=img_input,
                              num_filters=num_filters_in,
-                             kernel_size=1,
-                             strides=strides,
-                             activation=activation,
-                             batch_normalization=batch_normalization,
-                             conv_first=False)
-            y = ThreeDresnet_layer(inputs=y,
-                             num_filters=num_filters_in,
-                               kernel_size= mid_kernel,
-                             conv_first=False)
-            y = ThreeDresnet_layer(inputs=y,
-                             num_filters=num_filters_out,
-                             kernel_size=1,
-                             conv_first=False)
-            if res_block == 0:
-                # linear projection residual shortcut connection to match
-                # changed dims
-                x = ThreeDresnet_layer(inputs=x,
-                                 num_filters=num_filters_out,
-                                 kernel_size=1,
-                                 strides=strides,
-                                 activation=None,
-                                 batch_normalization=False)
-              
-            x = K.layers.add([x, y])
-            #if res_block%3 == 0:
-              #x = (layers.MaxPooling3D((1,2,2)))(x)
-        num_filters_in = num_filters_out
-
-    # Add classifier on top.
-    # v2 has BN-ReLU before Pooling
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
-    
-
-    
-    x = ConvLSTM2D(filters = unit, kernel_size = (start_kernel, start_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstm")(x)
-
-    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
-    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
-
+                             kernel_size = start_kernel,
+                             conv_first=True)
         
-    output_cat = (Conv2D(categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    output_box = (Conv2D((box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
-
-
-
-
-    block = Concat(-1)
-    outputs = block([output_cat,output_box]) 
-    inputs = img_input
-   
-    # Create model.
-    model = models.Model(inputs, outputs)
-
-    
-    if input_weights is not None:
-
-        model.load_weights(input_weights, by_name =True)
+            # Instantiate the stack of residual units
+            for stage in range(3):
+                for res_block in range(num_res_blocks):
+                    activation = 'relu'
+                    batch_normalization = True
+                    strides = 1
+                    if stage == 0:
+                        num_filters_out = num_filters_in * 4
+                        if res_block == 0:  # first layer and first stage
+                            activation = None
+                            batch_normalization = False
+                    else:
+                        num_filters_out = num_filters_in * 2
+                        if res_block == 0:  # not first layer and not first stage
+                            strides = 2   # downsample
         
-    return model
+                    # bottleneck residual unit
+          
+                    x = ThreeDresnet_layer(inputs=x,
+                                     num_filters=num_filters_in,
+                                     kernel_size = mid_kernel,
+                                     conv_first=False,
+                                     strides=strides,
+                                     activation=activation,
+                                     batch_normalization=batch_normalization)
+        
+        
+                      
+                num_filters_in = num_filters_out
 
-
-
-
-
-
-
-def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 38, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
-    """ResNet Version 2 Model builder [b]
-    depth of 29 == max pooling of 28 for image patch of 55
-    depth of 56 == max pooling of 14 for image patch of 55
-    """
-    img_input = layers.Input(shape = (input_shape[0], None, None, input_shape[3]))
-    if (depth - 2) % 9 != 0:
-        raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
-    # Start model definition.
-    num_filters_in = startfilter
-    num_res_blocks = int((depth - 2) / 9)
-
-    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
-    x = ThreeDresnet_layer(inputs=img_input,
-                     num_filters=num_filters_in,
-                     kernel_size = start_kernel,
-                     conv_first=True)
-
-    # Instantiate the stack of residual units
-    for stage in range(3):
-        for res_block in range(num_res_blocks):
-            activation = 'relu'
-            batch_normalization = True
-            strides = 1
-            if stage == 0:
-                num_filters_out = num_filters_in * 4
-                if res_block == 0:  # first layer and first stage
-                    activation = None
-                    batch_normalization = False
-            else:
-                num_filters_out = num_filters_in * 2
-                if res_block == 0:  # not first layer and not first stage
-                    strides = 2   # downsample
-
-            # bottleneck residual unit
-  
-            x = ThreeDresnet_layer(inputs=x,
-                             num_filters=num_filters_in,
-                               kernel_size= mid_kernel,
-                             conv_first=False,
-                             strides=strides,
-                             activation=activation,
-                             batch_normalization=batch_normalization)
-
-
-              
-        num_filters_in = num_filters_out
-
-    # Add classifier on top.
-    # v2 has BN-ReLU before Pooling
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
+            # Add classifier on top.
+            # v2 has BN-ReLU before Pooling
+            x = BatchNormalization()(x)
+            x = Activation('relu')(x)
     num_filters_in_TD = startfilter
     num_res_blocks = int((depth - 2) / 9)
-    
-    z = TDresnet_layer(inputs=img_input,
-                     num_filters=num_filters_in_TD,
-                     kernel_size = start_kernel,
-                     conv_first=True)
-
-    # Instantiate the stack of residual units
-    for stage in range(3):
-        for res_block in range(num_res_blocks):
-            activation = 'relu'
-            batch_normalization = True
-            strides = 1
-            if stage == 0:
-                num_filters_out = num_filters_in_TD * 4
-                if res_block == 0:  # first layer and first stage
-                    activation = None
-                    batch_normalization = False
-            else:
-                num_filters_out = num_filters_in_TD * 2
-                if res_block == 0:  # not first layer and not first stage
-                    strides = 2   # downsample
-
-            # bottleneck residual unit
-      
-            z = TDresnet_layer(inputs=z,
+    if TimeDistributedConv == True:
+            z = TDresnet_layer(inputs=img_input,
                              num_filters=num_filters_in_TD,
-                               kernel_size= mid_kernel,
-                             conv_first=False,
-                             strides=strides,
-                             activation=activation,
-                             batch_normalization=batch_normalization)
-
-
+                             kernel_size = start_kernel,
+                             conv_first=True)
+        
+            # Instantiate the stack of residual units
+            for stage in range(3):
+                for res_block in range(num_res_blocks):
+                    activation = 'relu'
+                    batch_normalization = True
+                    strides = 1
+                    if stage == 0:
+                        num_filters_out = num_filters_in_TD * 4
+                        if res_block == 0:  # first layer and first stage
+                            activation = None
+                            batch_normalization = False
+                    else:
+                        num_filters_out = num_filters_in_TD * 2
+                        if res_block == 0:  # not first layer and not first stage
+                            strides = 2   # downsample
+        
+                    # bottleneck residual unit
               
-        num_filters_in_TD = num_filters_out
+                    z = TDresnet_layer(inputs=z,
+                                     num_filters=num_filters_in_TD,
+                                       kernel_size= mid_kernel,
+                                     conv_first=False,
+                                     strides=strides,
+                                     activation=activation,
+                                     batch_normalization=batch_normalization)
+        
+        
+                      
+                num_filters_in_TD = num_filters_out
 
-    # Add classifier on top.
-    # v2 has BN-ReLU before Pooling
-    z = BatchNormalization()(z)
-    z = Activation('relu')(z)
+            # Add classifier on top.
+            # v2 has BN-ReLU before Pooling
+            z = BatchNormalization()(z)
+            z = Activation('relu')(z)
     
     
-    
-    branchAdd = layers.add([z, x])
-    
+    if TimeDistributedConv == True and ThreeDConv == True:
+         branchAdd = layers.add([z, x])
+    if TimeDistributedConv == True and ThreeDConv == False:
+         branchAdd = z
+    if TimeDistributedConv == True and ThreeDConv == True:
+         branchAdd = x
 
     
     x = ConvLSTM2D(filters = unit, kernel_size = (lstm_kernel, lstm_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstmdeep")(branchAdd)
@@ -469,7 +199,7 @@ def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
 
         
     output_cat = (Conv2D(gridX * gridY * anchors * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
-    output_box = (Conv2D((gridX * gridY * anchors * box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
+    output_box = (Conv2D(gridX * gridY * anchors * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
 
 
 
@@ -489,7 +219,8 @@ def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     return model
 
 
-def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax',
+          TimeDistributedConv = True, ThreeDConv = True):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
     depth of 56 == max pooling of 14 for image patch of 55
@@ -500,124 +231,128 @@ def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     # Start model definition.
     num_filters_in = startfilter
     num_res_blocks = int((depth - 2) / 9)
-
-    # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
-    x = ThreeDresnet_layer(inputs=img_input,
-                     num_filters=num_filters_in,
-                     kernel_size = start_kernel,
-                     conv_first=True)
-
-    # Instantiate the stack of residual units
-    for stage in range(3):
-        for res_block in range(num_res_blocks):
-            activation = 'relu'
-            batch_normalization = True
-            strides = 1
-            if stage == 0:
-                num_filters_out = num_filters_in * 4
-                if res_block == 0:  # first layer and first stage
-                    activation = None
-                    batch_normalization = False
-            else:
-                num_filters_out = num_filters_in * 2
-                if res_block == 0:  # not first layer and not first stage
-                    strides = 2   # downsample
-
-            # bottleneck residual unit
-            y = ThreeDresnet_layer(inputs=x,
-                             num_filters=num_filters_in,
-                             kernel_size=1,
-                             strides=strides,
-                             activation=activation,
-                             batch_normalization=batch_normalization,
-                             conv_first=False)
-            y = ThreeDresnet_layer(inputs=y,
-                             num_filters=num_filters_in,
-                               kernel_size= mid_kernel,
-                             conv_first=False)
-            y = ThreeDresnet_layer(inputs=y,
-                             num_filters=num_filters_out,
-                             kernel_size=1,
-                             conv_first=False)
-            if res_block == 0:
-                # linear projection residual shortcut connection to match
-                # changed dims
-                x = ThreeDresnet_layer(inputs=x,
-                                 num_filters=num_filters_out,
-                                 kernel_size=1,
-                                 strides=strides,
-                                 activation=None,
-                                 batch_normalization=False)
-              
-            x = K.layers.add([x, y])
-        num_filters_in = num_filters_out
-
-    # Add classifier on top.
-    # v2 has BN-ReLU before Pooling
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
+    if ThreeDConv == True:
+                # v2 performs Conv2D with BN-ReLU on input before splitting into 2 paths
+                x = ThreeDresnet_layer(inputs=img_input,
+                                 num_filters=num_filters_in,
+                                 kernel_size = start_kernel,
+                                 conv_first=True)
+            
+                # Instantiate the stack of residual units
+                for stage in range(3):
+                    for res_block in range(num_res_blocks):
+                        activation = 'relu'
+                        batch_normalization = True
+                        strides = 1
+                        if stage == 0:
+                            num_filters_out = num_filters_in * 4
+                            if res_block == 0:  # first layer and first stage
+                                activation = None
+                                batch_normalization = False
+                        else:
+                            num_filters_out = num_filters_in * 2
+                            if res_block == 0:  # not first layer and not first stage
+                                strides = 2   # downsample
+            
+                        # bottleneck residual unit
+                        y = ThreeDresnet_layer(inputs=x,
+                                         num_filters=num_filters_in,
+                                         kernel_size=1,
+                                         strides=strides,
+                                         activation=activation,
+                                         batch_normalization=batch_normalization,
+                                         conv_first=False)
+                        y = ThreeDresnet_layer(inputs=y,
+                                         num_filters=num_filters_in,
+                                           kernel_size= mid_kernel,
+                                         conv_first=False)
+                        y = ThreeDresnet_layer(inputs=y,
+                                         num_filters=num_filters_out,
+                                         kernel_size=1,
+                                         conv_first=False)
+                        if res_block == 0:
+                            # linear projection residual shortcut connection to match
+                            # changed dims
+                            x = ThreeDresnet_layer(inputs=x,
+                                             num_filters=num_filters_out,
+                                             kernel_size=1,
+                                             strides=strides,
+                                             activation=None,
+                                             batch_normalization=False)
+                          
+                        x = K.layers.add([x, y])
+                    num_filters_in = num_filters_out
+            
+                # Add classifier on top.
+                # v2 has BN-ReLU before Pooling
+                x = BatchNormalization()(x)
+                x = Activation('relu')(x)
     num_filters_in_TD = startfilter
     num_res_blocks = int((depth - 2) / 9)
-    
-    z = TDresnet_layer(inputs=img_input,
-                     num_filters=num_filters_in_TD,
-                     kernel_size = start_kernel,
-                     conv_first=True)
-
-    # Instantiate the stack of residual units
-    for stage in range(3):
-        for res_block in range(num_res_blocks):
-            activation = 'relu'
-            batch_normalization = True
-            strides = 1
-            if stage == 0:
-                num_filters_out = num_filters_in_TD * 4
-                if res_block == 0:  # first layer and first stage
-                    activation = None
-                    batch_normalization = False
-            else:
-                num_filters_out = num_filters_in_TD * 2
-                if res_block == 0:  # not first layer and not first stage
-                    strides = 2   # downsample
-
-            # bottleneck residual unit
-            yz = TDresnet_layer(inputs=z,
+    if TimeDistributedConv == True:
+            z = TDresnet_layer(inputs=img_input,
                              num_filters=num_filters_in_TD,
-                             kernel_size=1,
-                             strides=strides,
-                             activation=activation,
-                             batch_normalization=batch_normalization,
-                             conv_first=False)
-            yz = TDresnet_layer(inputs=yz,
-                             num_filters=num_filters_in_TD,
-                               kernel_size= mid_kernel,
-                             conv_first=False)
-            yz = TDresnet_layer(inputs=yz,
-                             num_filters=num_filters_out,
-                             kernel_size=1,
-                             conv_first=False)
-            if res_block == 0:
-                # linear projection residual shortcut connection to match
-                # changed dims
-                z = TDresnet_layer(inputs=z,
-                                 num_filters=num_filters_out,
-                                 kernel_size=1,
-                                 strides=strides,
-                                 activation=None,
-                                 batch_normalization=False)
-              
-            z = K.layers.add([z, yz])
-        num_filters_in_TD = num_filters_out
-
-    # Add classifier on top.
-    # v2 has BN-ReLU before Pooling
-    z = BatchNormalization()(z)
-    z = Activation('relu')(z)
+                             kernel_size = start_kernel,
+                             conv_first=True)
+        
+            # Instantiate the stack of residual units
+            for stage in range(3):
+                for res_block in range(num_res_blocks):
+                    activation = 'relu'
+                    batch_normalization = True
+                    strides = 1
+                    if stage == 0:
+                        num_filters_out = num_filters_in_TD * 4
+                        if res_block == 0:  # first layer and first stage
+                            activation = None
+                            batch_normalization = False
+                    else:
+                        num_filters_out = num_filters_in_TD * 2
+                        if res_block == 0:  # not first layer and not first stage
+                            strides = 2   # downsample
+        
+                    # bottleneck residual unit
+                    yz = TDresnet_layer(inputs=z,
+                                     num_filters=num_filters_in_TD,
+                                     kernel_size=1,
+                                     strides=strides,
+                                     activation=activation,
+                                     batch_normalization=batch_normalization,
+                                     conv_first=False)
+                    yz = TDresnet_layer(inputs=yz,
+                                     num_filters=num_filters_in_TD,
+                                       kernel_size= mid_kernel,
+                                     conv_first=False)
+                    yz = TDresnet_layer(inputs=yz,
+                                     num_filters=num_filters_out,
+                                     kernel_size=1,
+                                     conv_first=False)
+                    if res_block == 0:
+                        # linear projection residual shortcut connection to match
+                        # changed dims
+                        z = TDresnet_layer(inputs=z,
+                                         num_filters=num_filters_out,
+                                         kernel_size=1,
+                                         strides=strides,
+                                         activation=None,
+                                         batch_normalization=False)
+                      
+                    z = K.layers.add([z, yz])
+                num_filters_in_TD = num_filters_out
+        
+            # Add classifier on top.
+            # v2 has BN-ReLU before Pooling
+            z = BatchNormalization()(z)
+            z = Activation('relu')(z)
     
     
     
-    branchAdd = layers.add([z, x])
-    
+    if TimeDistributedConv == True and ThreeDConv == True:
+         branchAdd = layers.add([z, x])
+    if TimeDistributedConv == True and ThreeDConv == False:
+         branchAdd = z
+    if TimeDistributedConv == True and ThreeDConv == True:
+         branchAdd = x
 
     
     x = ConvLSTM2D(filters = unit, kernel_size = (lstm_kernel, lstm_kernel),  activation='relu', data_format = 'channels_last', return_sequences = False, padding = "same", name = "newlstmdeep")(branchAdd)
@@ -629,7 +364,7 @@ def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
 
         
     output_cat = (Conv2D(gridX * gridY * anchors * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation  , kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
-    output_box = (Conv2D((gridX * gridY * anchors * box_vector), (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
+    output_box = (Conv2D(gridX * gridY * anchors * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
 
 
 
