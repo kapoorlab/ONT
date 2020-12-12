@@ -43,7 +43,7 @@ class NEATDetection(object):
     
     model_weights : If re-training model_weights = model_dir + model_name else None as default
     
-    show : If true the results of trainng will be displayed every epoch on a randomly chosen movie from the validation set along with the loss and accuracy plot. THis option is set true
+    show : If true the results of trainng will be displayed every epoch on a randomly chosen movie from the validation set along with the loss and accuracy plot. This option is set true
     if you are using jupyter notebooks but if executing this program from a py file this parameter is set to false.
     
     
