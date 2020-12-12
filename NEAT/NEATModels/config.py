@@ -12,7 +12,7 @@ class NeatConfig(argparse.Namespace):
     
     def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, 
                  startfilter = 48, lstm = 16, epochs =100, sizeX = 256, sizeY = 256, sizeTminus = 5, sizeTplus = 3, categories = 6, box_vector = 7,
-                 learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True, Mode = 'Detection',  **kwargs):
+                 learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True, Mode = 'Detection',TimeDistributedConv = True, ThreeDConv = True,  **kwargs):
         
         
            
@@ -39,6 +39,8 @@ class NeatConfig(argparse.Namespace):
            self.sizeTminus = sizeTminus
            self.sizeTplus = sizeTplus
            self.Mode = Mode
+           self.TimeDistributedConv = TimeDistributedConv
+           self.ThreeDConv = ThreeDConv
            self.is_valid()
     
 
@@ -67,7 +69,9 @@ class NeatConfig(argparse.Namespace):
                  'multievent' : self.multievent,
                  'Mode' : self.Mode,
                  'categories': self.categories,
-                 'box_vector': self.box_vector
+                 'box_vector': self.box_vector,
+                 'TimeDistributedConv' : self.TimeDistributedConv,
+                 'ThreeDConv' : self.ThreeDConv
                  }
          return config
          
@@ -90,6 +94,8 @@ class NeatConfig(argparse.Namespace):
 
             ok = {}
             ok['residual'] = isinstance(self.residual,bool)
+            ok['TimeDistributedConv'] = isinstance(self.TimeDistributedConv, bool)
+            ok['ThreeDConv'] = isinstance(self.ThreeDConv, bool)
             ok['depth']         = _is_int(self.depth,1)
             ok['start_kernel']       = _is_int(self.start_kernel,1)
             ok['mid_kernel']         = _is_int(self.mid_kernel,1)
