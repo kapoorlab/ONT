@@ -44,6 +44,11 @@ public class ONTManualModeListener implements ItemListener {
 					GridBagConstraints.HORIZONTAL, parent.insets, 0, 0));
 			
 			
+			parent.Panelclicker.remove(parent.headername);
+			parent.Panelclicker.remove(parent.ChooseHeader);
+			parent.Panelclicker.validate();
+			parent.Panelclicker.repaint();
+			
 		parent.Panelfile.validate();
 		parent.Panelfile.repaint();
 		

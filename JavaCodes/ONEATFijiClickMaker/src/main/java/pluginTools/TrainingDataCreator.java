@@ -46,6 +46,7 @@ import javax.swing.border.TitledBorder;
 import ONEATloadfile.CovistoOneChFileLoader;
 import fileListeners.ChooseTrainingImage;
 import fileListeners.MouseClickTimeListener;
+import fileListeners.ONTHeaderListener;
 import fileListeners.ONTManualModeListener;
 import fileListeners.ONTMatlabModeListener;
 import ij.ImageListener;
@@ -174,8 +175,9 @@ public class TrainingDataCreator extends JPanel {
 	public final Insets insets = new Insets(10, 10, 0, 10);
 	public final GridBagLayout layout = new GridBagLayout();
 	public final GridBagConstraints c = new GridBagConstraints();
-	public final String[] imageNames, blankimageNames;
+	public final String[] imageNames, blankimageNames, headerNames;
 	public JComboBox<String> ChooseImage;
+	public JComboBox<String> ChooseHeader;
 	public HashMap<Integer, ArrayList<Roiobject>> MatlabOvalRois = new HashMap<Integer, ArrayList<Roiobject>>();
 	public int[] Clickedpoints = new int[2];
 	public String addToName = "";
@@ -190,7 +192,7 @@ public class TrainingDataCreator extends JPanel {
 
 	public String clickstring = "Clicker Menu";
 	public Border LoadONT = new CompoundBorder(new TitledBorder(clickstring), new EmptyBorder(c.insets));
-	public Label eventname;
+	public Label eventname, headername;
 	public TextField eventfieldname;
 
 	public CheckboxGroup ONTmode = new CheckboxGroup();
@@ -200,6 +202,8 @@ public class TrainingDataCreator extends JPanel {
 	public Checkbox MatlabMode = new Checkbox("Select Matlab Dots", MatlabDots, ONTmode);
 	public File imageDirectory = new File("");
 	public String imageFilename = "";
+	public String header ="Y";
+	
 	public RandomAccessibleInterval<FloatType> inputimage;
 	public final int scrollbarSize = 1000;
 	public String AddDot = "b";
@@ -208,10 +212,13 @@ public class TrainingDataCreator extends JPanel {
 	public Label timeText = new Label("Current T = " + 1, Label.CENTER);
 	public String timestring = "Current T";
 
+	public File Matlabfile;
+	
 	public TrainingDataCreator() {
 
 		panelFirst.setLayout(layout);
 		eventname = new Label("Event/CellType Name");
+		headername = new Label("Second Column field");
 		eventfieldname = new TextField(10);
 		eventfieldname.setText("Normal");
 
@@ -222,12 +229,20 @@ public class TrainingDataCreator extends JPanel {
 		panelCont.add(panelFirst, "1");
 		imageNames = WindowManager.getImageTitles();
 		blankimageNames = new String[imageNames.length + 1];
+		
+		headerNames = new String[2];
+		
+		headerNames[0] = "Y";
+		headerNames[1] = "X";
+		
 		blankimageNames[0] = " ";
 
 		for (int i = 0; i < imageNames.length; ++i)
 			blankimageNames[i + 1] = imageNames[i];
 
 		ChooseImage = new JComboBox<String>(blankimageNames);
+		
+		ChooseHeader = new JComboBox<String>(headerNames);
 
 		CovistoOneChFileLoader original = new CovistoOneChFileLoader(chooseTrainDatastring, blankimageNames);
 
@@ -250,6 +265,10 @@ public class TrainingDataCreator extends JPanel {
 				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
 		Panelclicker.add(eventfieldname, new GridBagConstraints(0, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
+		
+
+		
+		
 		Panelclicker.add(SaveButton, new GridBagConstraints(0, 2, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 				GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
 		Panelclicker.setBorder(LoadONT);
@@ -260,6 +279,7 @@ public class TrainingDataCreator extends JPanel {
 
 		ManualMode.addItemListener(new ONTManualModeListener(this));
 		MatlabMode.addItemListener(new ONTMatlabModeListener(this));
+		ChooseHeader.addActionListener(new ONTHeaderListener(this, ChooseHeader));
 		eventfieldname.addTextListener(new eventnameListener());
 		SaveButton.addActionListener(new ONTSaveSelection());
 		panelFirst.setVisible(true);

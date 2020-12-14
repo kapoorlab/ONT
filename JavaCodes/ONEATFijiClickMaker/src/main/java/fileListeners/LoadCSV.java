@@ -82,31 +82,23 @@ public class LoadCSV implements ActionListener {
 			if (parent.MatlabOvalRois != null)
 				parent.MatlabOvalRois.clear();
 			if (csvfile.showOpenDialog(parent.Cardframe) == JFileChooser.APPROVE_OPTION) {
-				File Matlabfile = new File(csvfile.getSelectedFile().getPath());
+				parent.Matlabfile = new File(csvfile.getSelectedFile().getPath());
 				ArrayList<Roiobject> Allrois = new ArrayList<Roiobject>();
 
-				try (BufferedReader br = new BufferedReader(new FileReader(Matlabfile))) {
+				try (BufferedReader br = new BufferedReader(new FileReader(parent.Matlabfile))) {
 
 					while ((line = br.readLine()) != null) {
 
 						// use comma as separator
 						// Csv file has structure T Y X Angle
 						String[] TYXApoints = line.split(cvsSplitBy);
-						String FirstHead = "", SecondHead = "", ThirdHead = "";
-
-						if (count == 0) {
-
-							FirstHead = TYXApoints[0];
-							SecondHead = TYXApoints[1];
-							ThirdHead = TYXApoints[2];
-						}
-
+						
 						if (count > 0) {
 
 							int Y, X;
 							if(TYXApoints[0]!="NAN" || TYXApoints[1]!="NAN" || TYXApoints[2]!="NAN") {
 							int T = (int) Float.parseFloat(TYXApoints[0]);
-							if (SecondHead == "Y") {
+							if (parent.header == "Y") {
 								try {
 								Y = (int) Float.parseFloat(TYXApoints[1]);
 								X = (int) Float.parseFloat(TYXApoints[2]);
@@ -175,6 +167,7 @@ public class LoadCSV implements ActionListener {
 				parent.MatlabDots = true;
 				parent.addToName = csvfile.getSelectedFile().getName().replaceFirst("[.][^.]+$", "");
 				parent.eventfieldname.setText(parent.addToName);
+				parent.impOrig.updateAndDraw();
 				parent.Clickrecorder();
 			} else
 				csvfile = null;
