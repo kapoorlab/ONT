@@ -27,7 +27,6 @@ except (ImportError,AttributeError):
  @author: Varun Kapoor
 
 """    
-  ##Save image data as a tiff file, function defination taken from CARE csbdeep python package  
     
 def MarkerToCSV(MarkerImage):
     

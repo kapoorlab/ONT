@@ -54,6 +54,7 @@ def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, 
             Path(save_dir).mkdir(exist_ok=True)
             name = 1
             dataset = pd.read_csv(csv_file)
+            # The csv files contain TYX or TYX + Angle
             if len(dataset.keys() >= 3):
                 
                 time = dataset[dataset.keys()[0]][1:]
@@ -111,12 +112,16 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         crop_Xplus = x + shift[0] + int(ImagesizeX/2)
                         crop_Yminus = y + shift[1] - int(ImagesizeY/2)
                         crop_Yplus = y + shift[1] + int(ImagesizeY/2)
-                  
+                       
+                        # Cut off the region for training movie creation
                         region =(slice(int(time - sizeTminus),int(time + sizeTplus  + 1)),slice(int(crop_Yminus), int(crop_Yplus)),
                               slice(int(crop_Xminus), int(crop_Xplus)))
-                        crop_image = image[region]      
-                        crop_seg_image = segimage[region]      
-                        crop_seg_image = crop_seg_image[sizeTminus + 1,:]
+                        #Define the movie region volume that was cut
+                        crop_image = image[region]     
+                        #Cut the segmentation region volume
+                        crop_seg_image = segimage[region]  
+                        #Cut the central slice for making bounding box
+                        crop_seg_image = crop_seg_image[sizeTminus + 1,:,:]
                         
                         for region in regionprops(crop_seg_image):
            
@@ -126,10 +131,13 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                                                 height =  abs(maxc - minc)
                                                 width =  abs(maxr - minr)
                
-
+                        #X
                         Label[TotalCategories] =  center[1]/sizeX
+                        #Y
                         Label[TotalCategories + 1] = center[0]/sizeY
+                        #Height
                         Label[TotalCategories + 3] = height/ImagesizeY
+                        #Width
                         Label[TotalCategories + 4] = width/ImagesizeX
                
                
@@ -141,11 +149,12 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                           
                         Label[TotalCategories + 6] = angle  
                       
+                        #Write the image as 32 bit tif file 
                         if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                                                 imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))    
         
           
-                       
+                       #Write the corresponding csv file of labels 
                         writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
                         for l in Label : writer.writerow ([l])
 
