@@ -107,16 +107,10 @@ public class LoadCSV implements ActionListener {
 								if (TYXApoints.length > 3)
 									Angle = (int) Float.parseFloat(TYXApoints[3]);
 
-								if (parent.MatlabOvalRois.get(T) == null) {
-									Allrois = new ArrayList<Roiobject>();
-									parent.MatlabOvalRois.put(T, Allrois);
-								} else
-									parent.MatlabOvalRois.put(T, Allrois);
 								if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
-								
 								OvalRoi roi = new OvalRoi(X, Y, 10, 10);
-								Allrois.add(new Roiobject(parent.RejectColor, roi,
-										new RealPoint(new double[] { X, Y, Angle })));
+								Allrois.add(new Roiobject(parent.RejectColor, roi, 
+										new RealPoint(new double[] { X, Y, Angle }), T));
 								
 								}
 								
@@ -134,16 +128,11 @@ public class LoadCSV implements ActionListener {
 								if (TYXApoints.length > 3)
 									Angle = (int) Float.parseFloat(TYXApoints[3]);
 
-								if (parent.MatlabOvalRois.get(T) == null) {
-									Allrois = new ArrayList<Roiobject>();
-									parent.MatlabOvalRois.put(T, Allrois);
-								} else
-									parent.MatlabOvalRois.put(T, Allrois);
+							
 								if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
-								
 								OvalRoi roi = new OvalRoi(X, Y, 10, 10);
 								Allrois.add(new Roiobject(parent.RejectColor, roi,
-										new RealPoint(new double[] { X, Y, Angle })));
+										new RealPoint(new double[] { X, Y, Angle }), T));
 								
 								}
 								}
@@ -162,6 +151,26 @@ public class LoadCSV implements ActionListener {
 				} catch (IOException f) {
 					f.printStackTrace();
 				}
+				
+				
+				for (int t = 1; t < parent.inputimage.dimension(0); ++t) {
+					
+					ArrayList<Roiobject> TimeRois = new ArrayList<Roiobject>();
+					
+				   for(Roiobject tcroi: Allrois) {
+					
+						
+						if(tcroi.time == t) {
+							
+							TimeRois.add(tcroi);
+							
+						}
+						
+					}
+				   parent.MatlabOvalRois.put(t, TimeRois);
+					
+				}
+				
 
 				parent.ManualDots = false;
 				parent.MatlabDots = true;

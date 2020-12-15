@@ -14,9 +14,10 @@ public class Roiobject {
 	
 	public  RealLocalizable point;
 	
+	public int time;
 	
 	
-	public Roiobject(final Color color, final OvalRoi roi, final RealLocalizable point) {
+	public Roiobject(final Color color, final OvalRoi roi, final RealLocalizable point, final int time) {
 		
 		this.color = color;
 		
@@ -24,7 +25,7 @@ public class Roiobject {
 		
 		this.point = point;
 		
-		
+		this.time = time;
 		
 	}
 	

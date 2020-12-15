@@ -50,86 +50,90 @@ public class ONTHeaderListener implements ActionListener {
 			String cvsSplitBy = ",";
 			int count = 0;
 			try (BufferedReader br = new BufferedReader(new FileReader(parent.Matlabfile))) {
-	    	while ((line = br.readLine()) != null) {
 
-				// use comma as separator
-				// Csv file has structure T Y X Angle
-				String[] TYXApoints = line.split(cvsSplitBy);
+				while ((line = br.readLine()) != null) {
+
+					// use comma as separator
+					// Csv file has structure T Y X Angle
+					String[] TYXApoints = line.split(cvsSplitBy);
+					
+					if (count > 0) {
+
+						int Y, X;
+						if(TYXApoints[0]!="NAN" || TYXApoints[1]!="NAN" || TYXApoints[2]!="NAN") {
+						int T = (int) Float.parseFloat(TYXApoints[0]);
+						if (parent.header == "Y") {
+							try {
+							Y = (int) Float.parseFloat(TYXApoints[1]);
+							X = (int) Float.parseFloat(TYXApoints[2]);
+							
+							int Angle = 2;
+							if (TYXApoints.length > 3)
+								Angle = (int) Float.parseFloat(TYXApoints[3]);
+
+							if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
+							OvalRoi roi = new OvalRoi(X, Y, 10, 10);
+							Allrois.add(new Roiobject(parent.RejectColor, roi, 
+									new RealPoint(new double[] { X, Y, Angle }), T));
+							
+							}
+							
+							}
+							catch(NumberFormatException Nan) {
+								
+								
+							}
+						} else {
+							try {
+							Y = (int) Float.parseFloat(TYXApoints[2]);
+							X = (int) Float.parseFloat(TYXApoints[1]);
+							
+							int Angle = 2;
+							if (TYXApoints.length > 3)
+								Angle = (int) Float.parseFloat(TYXApoints[3]);
+
+						
+							if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
+							OvalRoi roi = new OvalRoi(X, Y, 10, 10);
+							Allrois.add(new Roiobject(parent.RejectColor, roi,
+									new RealPoint(new double[] { X, Y, Angle }), T));
+							
+							}
+							}
+							catch(NumberFormatException Nan) {
+								
+								
+							}
+						}
 				
-				if (count > 0) {
 
-					int Y, X;
-					if(TYXApoints[0]!="NAN" || TYXApoints[1]!="NAN" || TYXApoints[2]!="NAN") {
-					int T = (int) Float.parseFloat(TYXApoints[0]);
-					if (parent.header == "Y") {
-						try {
-						Y = (int) Float.parseFloat(TYXApoints[1]);
-						X = (int) Float.parseFloat(TYXApoints[2]);
-						
-						int Angle = 2;
-						if (TYXApoints.length > 3)
-							Angle = (int) Float.parseFloat(TYXApoints[3]);
-
-						if (parent.MatlabOvalRois.get(T) == null) {
-							Allrois = new ArrayList<Roiobject>();
-							parent.MatlabOvalRois.put(T, Allrois);
-						} else
-							parent.MatlabOvalRois.put(T, Allrois);
-						if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
-						
-						OvalRoi roi = new OvalRoi(X, Y, 10, 10);
-						Allrois.add(new Roiobject(parent.RejectColor, roi,
-								new RealPoint(new double[] { X, Y, Angle })));
-						
-						}
-						
-						}
-						catch(NumberFormatException Nan) {
-							
-							
-						}
-					} else {
-						try {
-						Y = (int) Float.parseFloat(TYXApoints[2]);
-						X = (int) Float.parseFloat(TYXApoints[1]);
-						
-						int Angle = 2;
-						if (TYXApoints.length > 3)
-							Angle = (int) Float.parseFloat(TYXApoints[3]);
-
-						if (parent.MatlabOvalRois.get(T) == null) {
-							Allrois = new ArrayList<Roiobject>();
-							parent.MatlabOvalRois.put(T, Allrois);
-						} else
-							parent.MatlabOvalRois.put(T, Allrois);
-						if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
-						
-						OvalRoi roi = new OvalRoi(X, Y, 10, 10);
-						Allrois.add(new Roiobject(parent.RejectColor, roi,
-								new RealPoint(new double[] { X, Y, Angle })));
-						
-						}
-						}
-						catch(NumberFormatException Nan) {
-							
-							
-						}
 					}
-			
+					}
+					count = count + 1;
+				}
 
-				}
-				}
-				count = count + 1;
-			}
-	    	
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (IOException f) {
+				f.printStackTrace();
 			}
 			
+			
+			for (int t = 1; t < parent.inputimage.dimension(0); ++t) {
+				
+				ArrayList<Roiobject> TimeRois = new ArrayList<Roiobject>();
+				
+			   for(Roiobject tcroi: Allrois) {
+				
+					
+					if(tcroi.time == t) {
+						
+						TimeRois.add(tcroi);
+						
+					}
+					
+				}
+			   parent.MatlabOvalRois.put(t, TimeRois);
+				
+			}
 			
 			parent.impOrig.updateAndDraw();
 }

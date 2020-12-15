@@ -146,9 +146,12 @@ public class TrainingDataCreator extends JPanel {
 				impOrig.setOverlay(overlay);
 
 			}
+			else
+				overlay.clear();
 
 			if (MatlabOvalRois.get(thirdDimension) != null) {
 
+				
 				for (Roiobject roi : MatlabOvalRois.get(thirdDimension)) {
 
 					overlay.add(roi.roi);
@@ -429,7 +432,7 @@ public class TrainingDataCreator extends JPanel {
 					ArrayList<Roiobject> ClickedPointList = MatlabOvalRois.get(thirdDimension);
 					OvalRoi nearestRoi = new OvalRoi(X - 5, Y - 5 , 10, 10);
 					ClickedPointList.add(new Roiobject(AcceptColor, nearestRoi,
-							new RealPoint(new double[] { X, Y, 2 })));
+							new RealPoint(new double[] { X, Y, 2 }), thirdDimension));
 					MatlabOvalRois.put(thirdDimension,ClickedPointList );
 					
 					
@@ -691,7 +694,7 @@ public class TrainingDataCreator extends JPanel {
 
 		File csvfile = new File("/home/kapoorlab/Downloads/Divisions_Coordinates_TYX_for_wt_mov8..csv");
 
-		ImagePlus impA = new Opener().openImage("/home/kapoorlab/OLDONEAT/NEATcsvfiles/EventMovie.tif");
+		ImagePlus impA = new Opener().openImage("/home/kapoorlab/OLDONEAT/NEATcsvfiles/wt_N10.tif");
 		impA.show();
 
 		JFrame frame = new JFrame("");
