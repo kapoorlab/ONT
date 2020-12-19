@@ -79,7 +79,7 @@ class NEATStaticDetection(object):
         self.batch_size = staticconfig.batch_size
         self.multievent = staticconfig.multievent
         
-        self.anchors = staticconfig.anchors
+        self.nboxes = staticconfig.nboxes
         self.gridX = staticconfig.gridX
         self.gridY = staticconfig.gridY
         self.lambdacord = staticconfig.lambdacord
@@ -93,7 +93,7 @@ class NEATStaticDetection(object):
 
     def loadData(self):
         
-        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.anchors)
+        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.nboxes)
 
         self.X = X
         self.Y = Y
@@ -126,12 +126,12 @@ class NEATStaticDetection(object):
            self.entropy = 'notbinary' 
         
         self.Trainingmodel = model_keras(input_shape, self.categories, box_vector = self.box_vector , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter, 
-                                         gridX = self.gridX, gridY = self.gridY, anchors = self.anchors,  last_activation = self.last_activation, input_weights  =  self.model_weights)
+                                         gridX = self.gridX, gridY = self.gridY, nboxes = self.nboxes,  last_activation = self.last_activation, input_weights  =  self.model_weights)
         
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -139,7 +139,7 @@ class NEATStaticDetection(object):
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, self.gridX, self.gridY, plot = self.show)
+        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, self.gridX, self.gridY, plot = self.show, nboxes = self.nboxes)
         
         
         #Train the model and save as a h5 file
@@ -157,19 +157,19 @@ class NEATStaticDetection(object):
 
 
 
-def static_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, entropy):
+def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, entropy):
     
     def loss(y_true, y_pred):
         
        
-        grid = np.array([ [[float(x),float(y)]]*anchors   for y in range(gridY) for x in range(gridX)])
+        grid = np.array([ [[float(x),float(y)]]*nboxes   for y in range(gridY) for x in range(gridX)])
         
         y_true_class = y_true[...,0:categories]
         y_pred_class = y_pred[...,0:categories]
         
         
-        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, anchors, box_vector))
-        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, anchors, box_vector))
+        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
+        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
         
         y_pred_xy = pred_boxes[...,0:2] +  (grid)
         y_true_xy = true_boxes[...,0:2]
