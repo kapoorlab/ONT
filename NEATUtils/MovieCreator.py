@@ -51,7 +51,7 @@ csv file containing time, ylocation, xlocation of that event/cell type
 
 """    
     
-def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0 ):
+def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0, defname = "" ):
 
             Path(save_dir).mkdir(exist_ok=True)
             name = 1
@@ -69,7 +69,7 @@ def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, 
             
             #Categories + XYTHW + Confidence + Angle
             for t in time:
-               MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, str(name), save_dir)
+               MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, defname + str(name), save_dir)
                name = name + 1
                
 
@@ -105,6 +105,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
                 
+                #Get the closest centroid to the clicked point
                 properties = measure.regionprops(currentsegimage, currentsegimage)
                 TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
                 TwoDtree = spatial.cKDTree(TwoDCoordinates)
@@ -167,7 +168,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
    
                   
     
-def CreateTrainingImages(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0):
+def CreateTrainingImages(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0, defname = ""):
 
             Path(save_dir).mkdir(exist_ok=True)
             name = 1
@@ -213,6 +214,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
            
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
+                #Get the closest centroid to the clicked point
                 properties = measure.regionprops(currentsegimage, currentsegimage)
                 TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
                 TwoDtree = spatial.cKDTree(TwoDCoordinates)
