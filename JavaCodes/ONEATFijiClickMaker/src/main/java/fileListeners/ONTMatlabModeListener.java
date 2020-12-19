@@ -48,8 +48,13 @@ public class ONTMatlabModeListener implements ItemListener {
 			
 			parent.panelFirst.add(parent.Panelfile, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 					GridBagConstraints.HORIZONTAL, parent.insets, 0, 0));
-			
+			parent.Panelclicker.add(parent.headername, new GridBagConstraints(3, 0, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+					GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
+			parent.Panelclicker.add(parent.ChooseHeader, new GridBagConstraints(3, 1, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
+					GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 10), 0, 0));
 		
+			parent.Panelclicker.validate();
+			parent.Panelclicker.repaint();
 		parent.Panelfile.validate();
 		parent.Panelfile.repaint();
 		
