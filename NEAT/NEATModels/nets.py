@@ -85,7 +85,7 @@ def TDresnet_layer(inputs,
 
 
 
-def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax', 
+def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, nboxes = 1,  depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax', 
           TimeDistributedConv = True, ThreeDConv = True ):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
@@ -198,8 +198,8 @@ def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
 
         
-    output_cat = (Conv2D(gridX * gridY * anchors * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
-    output_box = (Conv2D(gridX * gridY * anchors * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
+    output_cat = (Conv2D(gridX * gridY * nboxes * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
+    output_box = (Conv2D(gridX * gridY * nboxes * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
 
 
 
@@ -219,7 +219,7 @@ def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     return model
 
 
-def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax',
+def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, nboxes = 1, depth = 38, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax',
           TimeDistributedConv = True, ThreeDConv = True):
     """ResNet Version 2 Model builder [b]
     depth of 29 == max pooling of 28 for image patch of 55
@@ -363,8 +363,8 @@ def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, anchor
     input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
 
         
-    output_cat = (Conv2D(gridX * gridY * anchors * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation  , kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
-    output_box = (Conv2D(gridX * gridY * anchors * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
+    output_cat = (Conv2D(gridX * gridY * nboxes * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation  , kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
+    output_box = (Conv2D(gridX * gridY * nboxes * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
 
 
 
@@ -437,7 +437,7 @@ def ThreeDresnet_layer(inputs,
 
 
 
-def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors = 1,  depth = 38,  start_kernel = 3, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes = 1,  depth = 38,  start_kernel = 3, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
     bottleneck layer
@@ -531,8 +531,8 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors
       
     
 
-    output_cat = (Conv2D(gridX * gridY * anchors * categories, (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    output_box = (Conv2D((gridX * gridY * anchors * box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+    output_cat = (Conv2D(gridX * gridY * nboxes * categories, (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((gridX * gridY * nboxes * box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
     block = Concat(-1)
@@ -551,7 +551,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors
         
     return model
   
-def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors = 1, depth = 38, start_kernel = 3, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
+def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes = 1, depth = 38, start_kernel = 3, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
     bottleneck layer
@@ -630,8 +630,8 @@ def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, anchors
       
     
 
-    output_cat = (Conv2D(gridX * gridY * anchors *  categories, (round(input_shape[0]/4),round(input_shape[1]/4)),activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    output_box = (Conv2D((gridX * gridY * anchors *  box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)), activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+    output_cat = (Conv2D(gridX * gridY * nboxes *  categories, (round(input_shape[0]/4),round(input_shape[1]/4)),activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((gridX * gridY * nboxes *  box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)), activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
     block = Concat(-1)

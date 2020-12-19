@@ -72,7 +72,7 @@ class NEATDetection(object):
         self.multievent = config.multievent
         self.startfilter = config.startfilter
         self.batch_size = config.batch_size
-        self.anchors = config.anchors
+        self.boxes = config.boxes
         self.gridX = config.gridX
         self.gridY = config.gridY
         self.lambdacord = config.lambdacord
@@ -88,7 +88,7 @@ class NEATDetection(object):
         self.Trainingmodel = None
     def loadData(self):
         
-        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.anchors)
+        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.boxes)
 
         self.X = X
         self.Y = Y
@@ -117,13 +117,13 @@ class NEATDetection(object):
            self.last_activation = 'softmax'              
            self.entropy = 'notbinary' 
          
-        self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = self.box_vector, gridX = self.gridX, gridY = self.gridY, anchors = self.anchors, depth = self.depth, start_kernel = self.start_kernel,
+        self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = self.box_vector, gridX = self.gridX, gridY = self.gridY, boxes = self.boxes, depth = self.depth, start_kernel = self.start_kernel,
                                          mid_kernel = self.mid_kernel, lstm_kernel = self.lstm_kernel, startfilter = self.startfilter,  
                                          input_weights  =  self.model_weights, last_activation = self.last_activation,TimeDistributedConv = self.TimeDistributedConv, ThreeDConv = self.ThreeDConv)
         
         
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
-        self.Trainingmodel.compile(optimizer = sgd, loss = time_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer = sgd, loss = time_yolo_loss(self.categories, self.gridX, self.gridY, self.boxes, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -147,19 +147,19 @@ class NEATDetection(object):
         
         
    
-def time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, entropy):
+def time_yolo_loss(categories, gridX, gridY, boxes, box_vector, lambdacord, entropy):
     
     def loss(y_true, y_pred):
         
        
-        grid = np.array([ [[float(x),float(y), float(t)]]*anchors   for y in range(gridY) for x in range(gridX) for t in range(1)])
+        grid = np.array([ [[float(x),float(y), float(t)]]*boxes   for y in range(gridY) for x in range(gridX) for t in range(1)])
         
         y_true_class = y_true[...,0:categories]
         y_pred_class = y_pred[...,0:categories]
         
         
-        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, anchors, box_vector))
-        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, anchors, box_vector))
+        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, boxes, box_vector))
+        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, boxes, box_vector))
         
         y_pred_xyt = pred_boxes[...,0:3] +  (grid)
         y_true_xyt = true_boxes[...,0:3]

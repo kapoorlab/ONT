@@ -3,6 +3,8 @@ import numpy as np
 from tifffile import imwrite 
 import pandas as pd
 from skimage.measure import regionprops
+from skimage import measure
+from scipy import spatial 
 try:
     from pathlib import Path
     Path().expanduser()
@@ -102,7 +104,22 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
            
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
-                imageLabel = currentsegimage[defaultY, defaultX]
+                
+                properties = measure.regionprops(currentsegimage, currentsegimage)
+                TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
+                TwoDtree = spatial.cKDTree(TwoDCoordinates)
+                TwoDLocation = (defaultY,defaultX)
+                closestpoint = TwoDtree.query(TwoDLocation)
+                for prop in properties:
+                                   
+                                   
+                            if int(prop.centroid[0]) == int(TwoDCoordinates[closestpoint[1]][0]) and int(prop.centroid[1]) == int(TwoDCoordinates[closestpoint[1]][1]):
+                                                minr, minc, maxr, maxc = prop.bbox
+                                                center = prop.centroid
+                                                height =  abs(maxc - minc)
+                                                width =  abs(maxr - minr)
+                                                break
+                
                 Label = np.zeros([TotalCategories + 7])
                 Label[trainlabel] = 1
                 #T co ordinate
@@ -118,18 +135,6 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                               slice(int(crop_Xminus), int(crop_Xplus)))
                         #Define the movie region volume that was cut
                         crop_image = image[region]     
-                        #Cut the segmentation region volume
-                        crop_seg_image = segimage[region]  
-                        #Cut the central slice for making bounding box
-                        crop_seg_image = crop_seg_image[sizeTminus + 1,:,:]
-                        
-                        for region in regionprops(crop_seg_image):
-           
-                                        if region.label == imageLabel and imageLabel > 0:
-                                                minr, minc, maxr, maxc = region.bbox
-                                                center = region.centroid
-                                                height =  abs(maxc - minc)
-                                                width =  abs(maxr - minr)
                
                         #X
                         Label[TotalCategories] =  center[1]/sizeX
@@ -208,7 +213,21 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
            
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
-                imageLabel = currentsegimage[defaultY, defaultX]
+                properties = measure.regionprops(currentsegimage, currentsegimage)
+                TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
+                TwoDtree = spatial.cKDTree(TwoDCoordinates)
+                TwoDLocation = (defaultY,defaultX)
+                closestpoint = TwoDtree.query(TwoDLocation)
+                for prop in properties:
+                                   
+                                   
+                            if int(prop.centroid[0]) == int(TwoDCoordinates[closestpoint[1]][0]) and int(prop.centroid[1]) == int(TwoDCoordinates[closestpoint[1]][1]):
+                                                minr, minc, maxr, maxc = prop.bbox
+                                                center = prop.centroid
+                                                height =  abs(maxc - minc)
+                                                width =  abs(maxr - minr)
+                                                break
+                
                 Label = np.zeros([TotalCategories + 5])
                 Label[trainlabel] = 1
                 
@@ -221,15 +240,6 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                             region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
                                    slice(int(crop_Xminus), int(crop_Xplus)))
                             crop_image = image[region]      
-                            crop_seg_image = segimage[region]
-                            for region in regionprops(crop_seg_image):
-                       
-                                   if region.label == imageLabel and imageLabel > 0:
-                                            minr, minc, maxr, maxc = region.bbox
-                                            center = region.centroid
-                                            height =  abs(maxc - minc)
-                                            width =  abs(maxr - minr)
-                           
             
                             Label[TotalCategories] =  center[1]/sizeX
                             Label[TotalCategories + 1] = center[0]/sizeY
