@@ -10,7 +10,7 @@ import numpy as np
 
 class NeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, 
+    def __init__(self, residual = True, gridX = 1, gridY = 1, nboxes = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3, lstm_kernel = 3, 
                  startfilter = 48, lstm = 16, epochs =100, sizeX = 256, sizeY = 256, sizeTminus = 5, sizeTplus = 3, categories = 6, box_vector = 7,
                  learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True, Mode = 'Detection',TimeDistributedConv = True, ThreeDConv = True,  **kwargs):
         
@@ -32,7 +32,7 @@ class NeatConfig(argparse.Namespace):
            self.lambdacord = lambdacord
            self.gridX = gridX
            self.gridY = gridY
-           self.anchors = anchors
+           self.nboxes = nboxes
            self.multievent = multievent
            self.sizeX = sizeX
            self.sizeY = sizeY
@@ -61,7 +61,7 @@ class NeatConfig(argparse.Namespace):
                  'sizeTplus' : self.sizeTplus,
                  'epochs' : self.epochs,
                  'learning_rate' : self.learning_rate,
-                 'anchors' : self.anchors,
+                 'nboxes' : self.nboxes,
                  'gridX' : self.gridX,
                  'gridY' : self.gridY,
                  'lambdacord': self.lambdacord,
@@ -103,7 +103,7 @@ class NeatConfig(argparse.Namespace):
             ok['startfilter']        = _is_int(self.startfilter, 1)
             ok['lstm']         = _is_int(self.lstm,1)
             ok['epochs']        = _is_int(self.epochs, 1)
-            ok['anchors']       = _is_int(self.anchors, 1)
+            ok['nboxes']       = _is_int(self.nboxes, 1)
             ok['gridX'] = _is_int(self.gridX, 1)
             ok['gridY'] = _is_int(self.gridY, 1)
             ok['lambdacord'] = _is_int(self.lambdacord, 1)
