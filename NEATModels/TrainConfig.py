@@ -17,24 +17,30 @@ import argparse
 
 class TrainConfig(argparse.Namespace):
     
-    def __init__(self, ActionEventCSV, ActionEventLabel,  **kwargs):
+    def __init__(self, ActionEventCSV, ActionEventLabel, ActionCoordinateName, ActionCoordinateLabel,  **kwargs):
         
         
            
            self.ActionEventCSV = ActionEventCSV
            self.ActionEventLabel = ActionEventLabel
+           self.ActionCoordinateName = ActionCoordinateName
+           self.ActionCoordinateLabel = ActionCoordinateLabel
            assert len(ActionEventCSV) == len(ActionEventLabel)
+           assert len(ActionCoordinateName) == len(ActionCoordinateLabel)
     
 
     def to_json(self):
 
          config = {}
+         configCord = {}
          for i in range(0, len(self.ActionEventCSV)):
              
              config[self.ActionEventCSV[i]] = self.ActionEventLabel[i]
-             
+         for i in range(0, len(self.ActionCoordinateName)):
+            
+             configCord[self.ActionCoordinateName[i]] = self.ActionCoordinateLabel[i]
         
-         return config
+         return config, configCord
          
          
         
