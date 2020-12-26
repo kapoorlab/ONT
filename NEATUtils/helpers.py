@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals, absolute_import, division
-#import matplotlib.pyplot as plt
 import numpy as np
 import os
 import collections
@@ -7,8 +5,13 @@ import csv
 import json
 import cv2
 import glob
+from scipy import spatial
+from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from tifffile import imread, imwrite
+from skimage.segmentation import watershed
+from skimage import morphology
+from skimage.filters import sobel
 from skimage import measure
 try:
     from pathlib import Path
@@ -28,10 +31,15 @@ except (ImportError,AttributeError):
 
 """    
     
+"""
+This method is used to convert Marker image to a list containing the XY indices for all time points
+"""
+
 def MarkerToCSV(MarkerImage):
     
     MarkerImage = MarkerImage.astype('uint16')
     MarkerList = []
+    print('Obtaining co-ordinates of markers in all regions')
     for i in range(0, MarkerImage.shape[0]):
           waterproperties = measure.regionprops(MarkerImage, MarkerImage)
           indices = [prop.centroid for prop in waterproperties]
@@ -39,7 +47,9 @@ def MarkerToCSV(MarkerImage):
     return  MarkerList
     
   
-
+"""
+This method is used to import tif files and csv files of the same name as the tif files to create training and validation datasets for training ONEAT network
+"""
     
 def load_full_training_data(directory, categories, nboxes):
     
@@ -91,9 +101,93 @@ def load_full_training_data(directory, categories, nboxes):
      
      return (traindata,trainlabel) , (validdata, validlabel)
         
-    
+"""
+This method decides if a region should be downsampled for applying the prediction by counting the density around the marker image,
+default density veto is 10 cells, if density of region is below this veto the region would be downsampled for applying the ONEAT prediction
+"""    
   
+def DensityCounter(MarkerImage, TrainshapeX, TrainshapeY, densityveto = 10):
+
+        
+    AllDensity = {}
+
+    for i in tqdm(range(0, MarkerImage.shape[0])):
+            density = []
+            location = []
+            currentimage = MarkerImage[i, :].astype('uint16')
+            waterproperties = measure.regionprops(currentimage, currentimage)
+            indices = [prop.centroid for prop in waterproperties]
+            
+            for y,x in indices:
+                
+                           crop_Xminus = x - int(TrainshapeX/2)
+                           crop_Xplus = x  + int(TrainshapeX/2)
+                           crop_Yminus = y  - int(TrainshapeY/2)
+                           crop_Yplus = y  + int(TrainshapeY/2)
+                      
+                           region =(slice(int(crop_Yminus), int(crop_Yplus)),
+                                      slice(int(crop_Xminus), int(crop_Xplus)))
+                           crop_image = currentimage[region].astype('uint16')
+                           if crop_image.shape[0] >= TrainshapeY and crop_image.shape[1] >= TrainshapeX:
+                                    
+                                     waterproperties = measure.regionprops(crop_image, crop_image)
+                                     
+                                     labels = [prop.label for prop in waterproperties]
+                                     labels = np.asarray(labels)
+                                     #These regions should be downsampled                               
+                                     if labels.shape[0] < densityveto:
+                                         density.append(labels.shape[0])
+                                         location.append((int(y),int(x)))
+            #Create a list of TYX marker locations that should be downsampled                             
+            AllDensity[str(i)] = [density, location]
     
+    return AllDensity
+
+"""
+This method takes the integer labelled segmentation image as input and creates a dictionary of markers at all timepoints for easy search
+"""    
+def MakeTrees(segimage):
+    
+        AllTrees = {}
+        print("Creating Dictionary of marker location for fast search")
+        for i in tqdm(range(0, segimage.shape[0])):
+                currentimage = segimage[i, :].astype('uint16')
+                waterproperties = measure.regionprops(currentimage, currentimage)
+                indices = [prop.centroid for prop in waterproperties] 
+                if len(indices) > 0:
+                    tree = spatial.cKDTree(indices)
+                
+                    AllTrees[str(i)] =  [tree, indices]
+                    
+                    
+                           
+        return AllTrees
+    
+"""
+This method is used to create a segmentation image of an input image (StarDist probability or distance map) using marker controlled watershedding using a mask image (UNET) 
+"""    
+def WatershedwithMask(Image, Label,mask, grid):
+    
+    
+   
+    properties = measure.regionprops(Label, Image)
+    Coordinates = [prop.centroid for prop in properties] 
+    Coordinates = sorted(Coordinates , key=lambda k: [k[1], k[0]])
+    Coordinates.append((0,0))
+    Coordinates = np.asarray(Coordinates)
+    
+    
+
+    coordinates_int = np.round(Coordinates).astype(int)
+    markers_raw = np.zeros_like(Image)  
+    markers_raw[tuple(coordinates_int.T)] = 1 + np.arange(len(Coordinates))
+    
+    markers = morphology.dilation(markers_raw, morphology.disk(2))
+    Image = sobel(Image)
+    watershedImage = watershed(Image, markers, mask = mask)
+    
+    return watershedImage, markers     
+   
 def time_pad(image, TimeFrames):
 
          time = image.shape[0]
@@ -286,7 +380,48 @@ def axes_dict(axes):
     """
     axes, allowed = axes_check_and_normalize(axes,return_allowed=True)
     return { a: None if axes.find(a) == -1 else axes.find(a) for a in allowed }
-    # return collections.namedt      
+    # return collections.namedt     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+##Need new method for the function below    
+    
+    
+    
+    
 def X_right_prediction(image,sY, sX, time_prediction, stride, inputtime, Categories_Name, Categories_event_threshold, TrainshapeX, TrainshapeY, TimeFrames):
     
                          LocationBoxes = []
