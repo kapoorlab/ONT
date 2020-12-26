@@ -58,17 +58,17 @@ class NEATStaticDetection(object):
     """
     
     
-    def __init__(self, staticconfig, TrainDirectory, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
+    def __init__(self, staticconfig, TrainDirectory, KeyCatagories, box_vector, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
         self.model_name = model_name
-        self.Categories_Name = Categories_Name
+        self.KeyCatagories = KeyCatagories
         self.box_vector = box_vector
-        self.model_weights = model_weights
+        self.model_weights = None
         self.show = show
         self.simple = staticconfig.simple
-        self.categories = len(Categories_Name)
+        self.categories = len(KeyCatagories)
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel
         self.mid_kernel = staticconfig.mid_kernel
@@ -124,6 +124,16 @@ class NEATStaticDetection(object):
         if self.multievent == False:
            self.last_activation = 'softmax'              
            self.entropy = 'notbinary' 
+           
+        model_weights = self.model_dir + self.model_name
+        if os.path.exists(model_weights):
+        
+            self.model_weights = model_weights
+            print('loading weights')
+        else:
+           
+            self.model_weights = None    
+           
         
         self.Trainingmodel = model_keras(input_shape, self.categories, box_vector = self.box_vector , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter, 
                                          gridX = self.gridX, gridY = self.gridY, nboxes = self.nboxes,  last_activation = self.last_activation, input_weights  =  self.model_weights)
@@ -139,7 +149,7 @@ class NEATStaticDetection(object):
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, self.gridX, self.gridY, plot = self.show, nboxes = self.nboxes)
+        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.KeyCatagories, self.gridX, self.gridY, plot = self.show, nboxes = self.nboxes)
         
         
         #Train the model and save as a h5 file
