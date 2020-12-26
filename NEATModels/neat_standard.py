@@ -51,16 +51,16 @@ class NEATDetection(object):
     """
     
     
-    def __init__(self, config, TrainDirectory, Categories_Name, box_vector, model_dir, model_name,  show = False ):
+    def __init__(self, config, TrainDirectory, KeyCatagories, box_vector, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
         self.model_name = model_name
-        self.Categories_Name = Categories_Name
+        self.KeyCatagories = KeyCatagories
         self.model_weights = None
         self.show = show
         self.box_vector = box_vector
-        self.categories = len(Categories_Name)
+        self.categories = len(KeyCatagories)
         self.depth = config.depth
         self.lstm_hidden_unit = config.lstm
         self.start_kernel = config.start_kernel
@@ -142,7 +142,7 @@ class NEATDetection(object):
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.Categories_Name, self.gridX, self.gridY, plot = self.show, nboxes = self.nboxes)
+        prate = plotters.PlotHistory(self.Trainingmodel, self.X_val, self.Y_val, self.KeyCatagories, self.gridX, self.gridY, plot = self.show, nboxes = self.nboxes)
         
         
         #Train the model and save as a h5 file

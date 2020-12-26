@@ -9,7 +9,7 @@ import random
 class PlotHistory(keras.callbacks.Callback):
     
     
-    def __init__(self, Trainingmodel, X, Y, Categories_Name, gridX, gridY, plot = False, nboxes = 1):
+    def __init__(self, Trainingmodel, X, Y, KeyCatagories, gridX, gridY, plot = False, nboxes = 1):
        self.Trainingmodel = Trainingmodel 
        self.X = X
        self.Y = Y
@@ -18,7 +18,7 @@ class PlotHistory(keras.callbacks.Callback):
        self.gridY = gridY
        self.nboxes = nboxes
       
-       self.Categories_Name = Categories_Name
+       self.KeyCatagories = KeyCatagories
     def on_train_begin(self, logs={}):
         self.i = 0
         self.x = []
@@ -57,9 +57,9 @@ class PlotHistory(keras.callbacks.Callback):
          plt.show()
          #clear_output(True)
         idx = random.randint(1,self.X.shape[0] - 1)
-        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, self.gridX, self.gridY, plot = self.plot, nboxes = self.nboxes)
+        Printpredict(idx,self.Trainingmodel, self.X, self.Y, self.KeyCatagories, self.gridX, self.gridY, plot = self.plot, nboxes = self.nboxes)
         
-def Printpredict(idx, model, data, Truelabel, Categories_name, gridX, gridY, plot = False, nboxes = 1):
+def Printpredict(idx, model, data, Truelabel, KeyCatagories, gridX, gridY, plot = False, nboxes = 1):
 
     Image = data[idx]
     Truelabel = Truelabel[idx]
@@ -77,17 +77,14 @@ def Printpredict(idx, model, data, Truelabel, Categories_name, gridX, gridY, plo
             img = Image[j,:,:,0]
             if plot:
               ax[j].imshow(img, cm.Spectral)
-     
-    if len(Categories_name) > 1:
-               for k in range(0, len(Categories_name)):
-               
-                           Name, Label = Categories_name[k]
-                           
-                           print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, int(Label)])
+              
+    for (Name, Label) in KeyCatagories.items():
+        
+             print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, Label])
                    
-                           for b in range(nboxes): 
+             for b in range(nboxes): 
                              print('Box: ' , b)  
-                             print('X Y T H W Confidence Angle',prediction[0,:,:,int(Label) + b: int(Label) + b + 7])
+                             print('X Y T H W Confidence Angle',prediction[0,:,:,len(KeyCatagories) + b: len(KeyCatagories) + b + 7])
                        
             
     print('True Label : ', Truelabel)
@@ -99,7 +96,7 @@ def Printpredict(idx, model, data, Truelabel, Categories_name, gridX, gridY, plo
 class PlotStaticHistory(keras.callbacks.Callback):
     
     
-    def __init__(self, Trainingmodel, X, Y, Categories_Name, gridX, gridY, plot = False, nboxes = 1):
+    def __init__(self, Trainingmodel, X, Y, KeyCatagories, gridX, gridY, plot = False, nboxes = 1):
        self.Trainingmodel = Trainingmodel 
        self.X = X
        self.Y = Y
@@ -108,7 +105,7 @@ class PlotStaticHistory(keras.callbacks.Callback):
        self.plot = plot
        self.nboxes = nboxes
       
-       self.Categories_Name = Categories_Name
+       self.KeyCatagories = KeyCatagories
     def on_train_begin(self, logs={}):
         self.i = 0
         self.x = []
@@ -147,9 +144,9 @@ class PlotStaticHistory(keras.callbacks.Callback):
          plt.show()
          #clear_output(True)
         idx = random.randint(1,self.X.shape[0] - 1)
-        PrintStaticpredict(idx,self.Trainingmodel, self.X, self.Y, self.Categories_Name, self.gridX, self.gridY, plot = self.plot, nboxes = self.nboxes)
+        PrintStaticpredict(idx,self.Trainingmodel, self.X, self.Y, self.KeyCatagories, self.gridX, self.gridY, plot = self.plot, nboxes = self.nboxes)
         
-def PrintStaticpredict(idx, model, data, Truelabel, Categories_name, gridX, gridY, plot = False, nboxes = 1):
+def PrintStaticpredict(idx, model, data, Truelabel, KeyCatagories, gridX, gridY, plot = False, nboxes = 1):
 
     Image = data[idx]
     Truelabel = Truelabel[idx]
@@ -161,16 +158,13 @@ def PrintStaticpredict(idx, model, data, Truelabel, Categories_name, gridX, grid
     if plot:
         plt.imshow(img, cm.Spectral)
      
-    if len(Categories_name) > 1:
-               for k in range(0, len(Categories_name)):
-               
-                           Name, Label = Categories_name[k]
-                           
-                           print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, int(Label)])
+    for (Name, Label) in KeyCatagories.items():
+        
+             print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, Label])
                    
-                           for b in range(nboxes):
-                               print('Box: ' , b)  
-                               print('X Y H W Confidence',prediction[0,:,:,int(Label) + b: int(Label) + b + 5])
+             for b in range(nboxes): 
+                             print('Box: ' , b)  
+                             print('X Y T H W Confidence Angle',prediction[0,:,:,len(KeyCatagories) + b: len(KeyCatagories) + b + 5])
                        
             
     print('True Label : ', Truelabel)
