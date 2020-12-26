@@ -17,7 +17,7 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, gridX = 1, gridY = 1, anchors = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3,
+    def __init__(self, residual = True, gridX = 1, gridY = 1, nboxes = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3,
                  sizeX = 256, sizeY = 256, sizeTminus = 5, sizeTplus = 3,
                  startfilter = 48, lstm = 16, epochs =100, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
         
@@ -28,7 +28,7 @@ class StaticNeatConfig(argparse.Namespace):
            self.startfilter = startfilter
            self.gridX = gridX
            self.gridY = gridY
-           self.anchors = anchors
+           self.nboxes = nboxes
            self.lambdacord = lambdacord
            self.epochs = epochs
            self.learning_rate = learning_rate
@@ -44,20 +44,19 @@ class StaticNeatConfig(argparse.Namespace):
     def to_json(self):
 
          config = {
-                 'ModelName' : self.ModelName,
                  'residual' : self.residual,
-                 'simple' : self.simple,
                  'depth' : self.depth,
                  'start_kernel' : self.start_kernel,
                  'mid_kernel' : self.mid_kernel,
                  'startfilter' : self.startfilter,
-                 'epochs' : self.epochs,
-                 'learning_rate' : self.learning_rate,
-                 'anchors' : self.anchors,
                  'gridX' : self.gridX,
                  'gridY' : self.gridY,
+                 'nboxes' : self.nboxes,
                  'lambdacord' : self.lambdacord,
+                 'epochs' : self.epochs,
+                 'learning_rate' : self.learning_rate,
                  'batch_size' : self.batch_size,
+                 'ModelName' : self.ModelName,
                  'multievent' : self.multievent,
                  'sizeX' : self.sizeX,
                  'sizeY' : self.sizeY,
@@ -90,7 +89,7 @@ class StaticNeatConfig(argparse.Namespace):
             ok['mid_kernel']         = _is_int(self.mid_kernel,1)
             ok['startfilter']        = _is_int(self.startfilter, 1)
             ok['epochs']        = _is_int(self.epochs, 1)
-            ok['anchors']       = _is_int(self.anchors, 1)
+            ok['nboxes']       = _is_int(self.nboxes, 1)
             ok['gridX'] = _is_int(self.gridX, 1)
             ok['gridY'] = _is_int(self.gridY, 1)
             ok['lambdacord'] = _is_int(self.lambdacord, 1)

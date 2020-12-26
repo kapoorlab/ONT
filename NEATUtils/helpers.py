@@ -41,7 +41,7 @@ def MarkerToCSV(MarkerImage):
   
 
     
-def load_full_training_data(directory, categories, nb_boxes):
+def load_full_training_data(directory, categories, nboxes):
     
      #Generate npz file with data and label attributes   
      Raw_path = os.path.join(directory, '*tif')
@@ -66,7 +66,7 @@ def load_full_training_data(directory, categories, nb_boxes):
                    catarr = [float(s) for s in train_vec[0:categories]]
                    xarr = [float(s) for s in train_vec[categories:]]
                    newxarr = []
-                   for b in range(nb_boxes):
+                   for b in range(nboxes):
                        newxarr+= [xarr[s] for s in range(len(xarr))]
                        
                    trainarr = catarr + newxarr    
