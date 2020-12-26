@@ -51,13 +51,13 @@ class NEATDetection(object):
     """
     
     
-    def __init__(self, config, TrainDirectory, Categories_Name, box_vector, model_dir, model_name, model_weights = None,  show = False ):
+    def __init__(self, config, TrainDirectory, Categories_Name, box_vector, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
         self.model_name = model_name
         self.Categories_Name = Categories_Name
-        self.model_weights = model_weights
+        self.model_weights = None
         self.show = show
         self.box_vector = box_vector
         self.categories = len(Categories_Name)
@@ -116,7 +116,18 @@ class NEATDetection(object):
         if self.multievent == False:
            self.last_activation = 'softmax'              
            self.entropy = 'notbinary' 
-         
+           
+           
+        model_weights = self.model_dir + self.model_name
+        if os.path.exists(model_weights):
+        
+            self.model_weights = model_weights
+            print('loading weights')
+        else:
+           
+            self.model_weights = None 
+            
+            
         self.Trainingmodel = model_keras(input_shape, self.categories,  unit = self.lstm_hidden_unit , box_vector = self.box_vector, gridX = self.gridX, gridY = self.gridY, nboxes = self.nboxes, depth = self.depth, start_kernel = self.start_kernel,
                                          mid_kernel = self.mid_kernel, lstm_kernel = self.lstm_kernel, startfilter = self.startfilter,  
                                          input_weights  =  self.model_weights, last_activation = self.last_activation,TimeDistributedConv = self.TimeDistributedConv, ThreeDConv = self.ThreeDConv)
