@@ -51,7 +51,7 @@ class NEATDetection(object):
     """
     
     
-    def __init__(self, config, TrainDirectory, KeyCatagories, box_vector, model_dir, model_name,  show = False ):
+    def __init__(self, config, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
@@ -59,7 +59,7 @@ class NEATDetection(object):
         self.KeyCatagories = KeyCatagories
         self.model_weights = None
         self.show = show
-        self.box_vector = box_vector
+        self.box_vector = len(KeyCord)
         self.categories = len(KeyCatagories)
         self.depth = config.depth
         self.lstm_hidden_unit = config.lstm

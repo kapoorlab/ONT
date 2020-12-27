@@ -58,13 +58,13 @@ class NEATStaticDetection(object):
     """
     
     
-    def __init__(self, staticconfig, TrainDirectory, KeyCatagories, box_vector, model_dir, model_name,  show = False ):
+    def __init__(self, staticconfig, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
         self.model_name = model_name
         self.KeyCatagories = KeyCatagories
-        self.box_vector = box_vector
+        self.box_vector = len(KeyCord)
         self.model_weights = None
         self.show = show
         self.simple = staticconfig.simple
