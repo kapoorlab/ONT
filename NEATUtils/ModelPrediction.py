@@ -98,43 +98,43 @@ def ConvertModel(ModelDirectory, Model):
       f.close()      
       
                 
-def MatlabTester(Moviefile, CSVfile, ResultCSV, ModelDirectory, ConfigFileA, ConfigFileB, DownsampleFactor, Category, n_tiles = 1, densityveto = 10): 
+def MatlabTester(Movie, CSVFile, ResultFile, ModelDir, ModelA, ModelB, ModelAConfig, ModelBConfig,
+             KeyCategories,KeyCord, TestCategory, n_tiles = 1): 
     
     
-      ModelconfigA = load_json(ConfigFileA)
-      TrainshapeX = ModelconfigA["sizeX"]
-      TrainshapeY = ModelconfigA["sizeY"]
-      sizeTminus = ModelconfigA["sizeTminus"]
-      sizeTplus = ModelconfigA["sizeTplus"]
-      gridX = ModelconfigA["gridX"]
-      gridY = ModelconfigA["gridY"]
-      multieventA = ModelconfigA["multievent"]
-      ModelA = ModelconfigA["ModelName"]
-      Mode = ModelconfigA["Mode"]
-      categories = ModelconfigA["categories"]
-      box_vector = ModelconfigA["box_vector"]
-      lambdacord = ModelconfigA["lambdacord"]
-      anchors = ModelconfigA["anchors"]
+      
+      TrainshapeX = ModelAConfig["sizeX"]
+      TrainshapeY = ModelAConfig["sizeY"]
+      sizeTminus = ModelAConfig["sizeTminus"]
+      sizeTplus = ModelAConfig["sizeTplus"]
+      gridX = ModelAConfig["gridX"]
+      gridY = ModelAConfig["gridY"]
+      multieventA = ModelAConfig["multievent"]
+      ModelA = ModelAConfig["ModelName"]
+      Mode = ModelAConfig["Mode"]
+      categories = ModelAConfig["categories"]
+      box_vector = ModelAConfig["box_vector"]
+      lambdacord = ModelAConfig["lambdacord"]
+      nboxes = ModelAConfig["nboxes"]
+      
+      multieventB = ModelBConfig["multievent"]
+      ModelB = ModelBConfig["ModelName"]
       
       
-      ModelconfigB = load_json(ConfigFileB)
-      multieventB = ModelconfigB["multievent"]
-      ModelB = ModelconfigB["ModelName"]
       
       
-      
-      ConvertModel(ModelDirectory, ModelA)
-      ConvertModel(ModelDirectory, ModelB)
+      ConvertModel(ModelDir, ModelA)
+      ConvertModel(ModelDir, ModelB)
       
       if multieventA == True:
-          NEATModelA =  load_model( ModelDirectory + ModelA + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, 'binary'), 'Concat':Concat})
+          NEATModelA =  load_model( ModelDir + ModelA + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, 'binary'), 'Concat':Concat})
       if multieventA == False:
-          NEATModelA =  load_model( ModelDirectory + ModelA + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, 'notbinary'), 'Concat':Concat})  
+          NEATModelA =  load_model( ModelDir + ModelA + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, 'notbinary'), 'Concat':Concat})  
         
       if multieventB == True:
-          NEATModelB =  load_model( ModelDirectory + ModelB + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, 'binary'), 'Concat':Concat})
+          NEATModelB =  load_model( ModelDir + ModelB + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, 'binary'), 'Concat':Concat})
       if multieventB == False:
-          NEATModelB =  load_model( ModelDirectory + ModelB + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, anchors, box_vector, lambdacord, 'notbinary'), 'Concat':Concat})  
+          NEATModelB =  load_model( ModelDir + ModelB + '.h5',  custom_objects={'loss':time_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, 'notbinary'), 'Concat':Concat})  
       
         
         
@@ -150,21 +150,11 @@ def MatlabTester(Moviefile, CSVfile, ResultCSV, ModelDirectory, ConfigFileA, Con
       Categories_Name.append(['MatureP1', 5])
       
       
-      image = imread(Moviefile)
+      image = imread(Movie)
       print(image.shape)
-     
-      scale_percent = int(100/DownsampleFactor) # percent of original size
-      width = int(image.shape[2] * scale_percent / 100)
-      height = int(image.shape[1] * scale_percent / 100)
-      dim = (width, height)
-      # resize image
-      smallimage = np.zeros([image.shape[0], height, width])
-      for i in tqdm(range(0, image.shape[0])):
-          smallimage[i,:] = cv2.resize(image[i,:], dim)
-        
-      image = smallimage 
+
       
-      time, y, x =   np.loadtxt(CSVfile, delimiter = ",", skiprows = 0, unpack=True)  
+      time, y, x =   np.loadtxt(CSVFile, delimiter = ",", skiprows = 0, unpack=True)  
       Timelist = []
       Ylist = []
       Xlist = []
@@ -175,8 +165,7 @@ def MatlabTester(Moviefile, CSVfile, ResultCSV, ModelDirectory, ConfigFileA, Con
       for t in tqdm(range(0, len(time))):
           
           if time[t] > sizeTplus + 1 and math.isnan(x[t])==False and math.isnan(y[t])== False  :
-                   x[t] = x[t]/DownsampleFactor
-                   y[t] = y[t]/DownsampleFactor
+                   
                    crop_Xminus = x[t] - int(TrainshapeX/2)
                    crop_Xplus = x[t]  + int(TrainshapeX/2)
                    crop_Yminus = y[t]  - int(TrainshapeY/2)
@@ -191,14 +180,14 @@ def MatlabTester(Moviefile, CSVfile, ResultCSV, ModelDirectory, ConfigFileA, Con
                                            ,Mode,n_tiles,TrainshapeX, TrainshapeY, TimeFrames )
                            
                            Timelist.append(time[t])
-                           Ylist.append(y[t]*DownsampleFactor)
-                           Xlist.append(x[t]*DownsampleFactor)
+                           Ylist.append(y[t])
+                           Xlist.append(x[t])
                            Scorelist.append(score)
                            Sizelist.append(size)
 
       Event_Count = np.column_stack([Timelist,Ylist, Xlist, Scorelist, Sizelist]) 
       Event_data = []
-      writer = csv.writer(open(ResultCSV, "w"))
+      writer = csv.writer(open(ResultFile, "w"))
       for line in Event_Count:
         Event_data.append(line)
       writer.writerows(Event_data)

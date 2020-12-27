@@ -104,7 +104,7 @@ class NEATStaticDetection(object):
               
     def TrainModel(self):
         
-        # input shape is T H W C
+        # input shape is  H W C
         input_shape = (self.X.shape[1], self.X.shape[2], self.X.shape[3])
         
         Path(self.model_dir).mkdir(exist_ok=True)

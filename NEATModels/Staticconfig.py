@@ -19,7 +19,7 @@ class StaticNeatConfig(argparse.Namespace):
     
     def __init__(self, residual = True, gridX = 1, gridY = 1, nboxes = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3,
                  
-                 startfilter = 48, lstm = 16, epochs =100,categories = 6, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
+                 startfilter = 48, lstm = 16, epochs =100,categories = 6, box_vector = 5, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
         
            self.residual = residual
            self.depth = depth
@@ -32,6 +32,7 @@ class StaticNeatConfig(argparse.Namespace):
            self.lambdacord = lambdacord
            self.epochs = epochs
            self.categories = categories
+           self.box_vector = box_vector
            self.learning_rate = learning_rate
            self.batch_size = batch_size
            self.ModelName = ModelName
@@ -53,6 +54,7 @@ class StaticNeatConfig(argparse.Namespace):
                  'lambdacord' : self.lambdacord,
                  'epochs' : self.epochs,
                  'categories' : self.categories,
+                 'box_vector' : self.box_vector,
                  'learning_rate' : self.learning_rate,
                  'batch_size' : self.batch_size,
                  'ModelName' : self.ModelName,
@@ -92,7 +94,7 @@ class StaticNeatConfig(argparse.Namespace):
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
             ok['multievent'] = isinstance(self.multievent,bool)
             ok['categories'] =  _is_int(self.categories, 1)
-    
+            ok['box_vector'] =  _is_int(self.box_vector, 1)
             if return_invalid:
                 return all(ok.values()), tuple(k for (k,v) in ok.items() if not v)
             else:

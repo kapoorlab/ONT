@@ -3,6 +3,7 @@ import os
 import collections
 import csv
 import json
+import math
 import cv2
 import glob
 from scipy import spatial
@@ -187,6 +188,68 @@ def WatershedwithMask(Image, Label,mask, grid):
     watershedImage = watershed(Image, markers, mask = mask)
     
     return watershedImage, markers     
+   
+"""
+Prediction function for whole image/tile, output is Prediction vector for each image patch it passes over
+"""    
+
+def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategories, KeyCord, TrainshapeX, TrainshapeY, TimeFrames, Mode, EventType):
+    
+    
+                       
+                                    
+                         ClassPredict = {}
+                         TotalClasses = len(KeyCategories)
+                         j = 0
+                         k = 1
+                         for (k,v) in KeyCategories.items():
+                             while True:
+                                      j = j + 1
+                                      if j > time_prediction.shape[1]:
+                                           j = 1
+                                           k = k + 1
+
+                                      if k > time_prediction.shape[0]:
+                                          break;
+
+                                      y = (k - 1) * stride
+                                      x = (j - 1) * stride
+                                      prediction_vector = time_prediction[k-1,j-1,:]
+                                      
+                                      Xstart = x + sX
+                                      Ystart = y + sY
+
+                                      Xcenter = Xstart + prediction_vector[TotalClasses + KeyCord['X'] ] * TrainshapeX
+                                      Ycenter = Ystart + prediction_vector[TotalClasses + KeyCord['Y'] ] * TrainshapeY
+                                      Height = prediction_vector[TotalClasses + KeyCord['H']] * TrainshapeX  
+                                      Width = prediction_vector[TotalClasses + KeyCord['W']] * TrainshapeY
+                                      Confidence = prediction_vector[TotalClasses + KeyCord['Conf']]
+                                      if EventType == 'Dynamic':
+                                              if Mode == 'Detection':
+                                                      RealTimeevent = int(inputtime + prediction_vector[TotalClasses + KeyCord['T']] * TimeFrames)
+                                                      BoxTimeevent = prediction_vector[TotalClasses + KeyCord['T']]    
+                                              if Mode == 'Prediction':
+                                                      RealTimeevent = int(inputtime)
+                                                      BoxTimeevent = int(inputtime)
+                                              RealAngle = math.pi * (prediction_vector[TotalClasses + KeyCord['Angle']] - 0.5)
+                                              RawAngle = prediction_vector[TotalClasses + KeyCord['Angle']]
+                                      
+                                      if EventType == 'Static':
+                                                      RealTimeevent = int(inputtime)
+                                                      BoxTimeevent = int(inputtime)
+                                                      RealAngle = 0
+                                                      RawAngle = 0
+                                      
+                                      box = {'Xstart' : Xstart, 'Ystart' : Ystart, 'Xcenter' : Xcenter, 'Ycenter' : Ycenter, 'RealTimeevent' : RealTimeevent, 'BoxTimeevent' : BoxTimeevent,
+                                             'Height' : Height, 'Width' : Width, 'Confidence' : Confidence, 'RealAngle' : RealAngle, 'RawAngle' : RawAngle}
+                                      if Confidence > 0.5:
+                                          
+                                           ClassPredict[k] = [prediction_vector[v], box ] 
+                                      
+                                       
+                                                 
+                                                           
+                         return ClassPredict
    
 def time_pad(image, TimeFrames):
 
