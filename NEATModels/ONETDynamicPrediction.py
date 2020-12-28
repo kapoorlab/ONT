@@ -27,8 +27,7 @@ from NEATUtils.helpers import normalizeFloatZeroOne
 class ONETDynamicPrediction(object):
     
     
-   def __init__(self, image, ModelA, ModelB, ModelAConfig, ModelBConfig, inputtime, KeyCategories, KeyCord, stride = 4, n_tiles = 1, 
-                overlap_percent = 0.8 ):
+   def __init__(self, image, ModelA, ModelB, ModelAConfig, ModelBConfig, inputtime, KeyCategories, KeyCord, Mode = 'Detection', multievent = False, stride = 4, n_tiles = 1, overlap_percent = 0.8 ):
         
         self.image = image
         self.ModelA = ModelA
@@ -38,7 +37,9 @@ class ONETDynamicPrediction(object):
         self.KeyCategories = KeyCategories
         self.KeyCord = KeyCord
         self.stride = stride
+        self.multievent = multievent
         self.inputtime = inputtime
+        self.Mode = Mode
         self.n_tiles = n_tiles
         self.originalX = self.image.shape[1]
         self.originalY = self.image.shape[2]
@@ -67,12 +68,12 @@ class ONETDynamicPrediction(object):
                    sum_time_prediction = AllPredictions[p]
                    
                    if sum_time_prediction is not None:
-                   
-                    for i in range(0, sum_time_prediction.shape[0]):
-                         
-                         time_prediction =  sum_time_prediction[i]
-                         #This method returns a dictionary of event names and output vectors and we collect it for all tiles as a list
-                         EventBoxes = EventBoxes + Yoloprediction(self.image, AllY[p], AllX[p], time_prediction, self.stride, self.inputtime, self.KeyCategories, self.KeyCord, self.TrainshapeX, self.TrainshapeY, self.TimeFrames, self.Mode, 'Dynamic')
+                      #For each tile the prediction vector has shape N H W Categories + Trainng Vecotr labels
+                      for i in range(0, sum_time_prediction.shape[0]):
+                           time_prediction =  sum_time_prediction[i]
+                           #This method returns a dictionary of event names and output vectors and we collect it for all tiles as a list
+                           EventBoxes = EventBoxes + Yoloprediction(self.image, AllY[p], AllX[p], time_prediction, self.stride, self.inputtime, self.KeyCategories, self.KeyCord, 
+                                                                  self.TrainshapeX, self.TrainshapeY, self.TimeFrames, self.Mode, 'Dynamic', self.multievent)
                  
                  self.EventBoxes =  EventBoxes
                

@@ -193,16 +193,18 @@ def WatershedwithMask(Image, Label,mask, grid):
 Prediction function for whole image/tile, output is Prediction vector for each image patch it passes over
 """    
 
-def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategories, KeyCord, TrainshapeX, TrainshapeY, TimeFrames, Mode, EventType):
+def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategories, KeyCord, TrainshapeX, TrainshapeY, TimeFrames, Mode, EventType, multievent = False):
     
     
                        
-                                    
-                         ClassPredict = {}
-                         TotalClasses = len(KeyCategories)
-                         j = 0
-                         k = 1
-                         for (k,v) in KeyCategories.items():
+                                        
+                             
+                    if multievent == False:
+                             ClassPredict = {}
+                             LocationBoxes = []
+                             
+                             j = 0
+                             k = 1
                              while True:
                                       j = j + 1
                                       if j > time_prediction.shape[1]:
@@ -212,44 +214,100 @@ def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategori
                                       if k > time_prediction.shape[0]:
                                           break;
 
-                                      y = (k - 1) * stride
-                                      x = (j - 1) * stride
-                                      prediction_vector = time_prediction[k-1,j-1,:]
-                                      
-                                      Xstart = x + sX
-                                      Ystart = y + sY
-
-                                      Xcenter = Xstart + prediction_vector[TotalClasses + KeyCord['X'] ] * TrainshapeX
-                                      Ycenter = Ystart + prediction_vector[TotalClasses + KeyCord['Y'] ] * TrainshapeY
-                                      Height = prediction_vector[TotalClasses + KeyCord['H']] * TrainshapeX  
-                                      Width = prediction_vector[TotalClasses + KeyCord['W']] * TrainshapeY
-                                      Confidence = prediction_vector[TotalClasses + KeyCord['Conf']]
-                                      if EventType == 'Dynamic':
-                                              if Mode == 'Detection':
-                                                      RealTimeevent = int(inputtime + prediction_vector[TotalClasses + KeyCord['T']] * TimeFrames)
-                                                      BoxTimeevent = prediction_vector[TotalClasses + KeyCord['T']]    
-                                              if Mode == 'Prediction':
-                                                      RealTimeevent = int(inputtime)
-                                                      BoxTimeevent = int(inputtime)
-                                              RealAngle = math.pi * (prediction_vector[TotalClasses + KeyCord['Angle']] - 0.5)
-                                              RawAngle = prediction_vector[TotalClasses + KeyCord['Angle']]
-                                      
-                                      if EventType == 'Static':
-                                                      RealTimeevent = int(inputtime)
-                                                      BoxTimeevent = int(inputtime)
-                                                      RealAngle = 0
-                                                      RawAngle = 0
-                                      
-                                      box = {'Xstart' : Xstart, 'Ystart' : Ystart, 'Xcenter' : Xcenter, 'Ycenter' : Ycenter, 'RealTimeevent' : RealTimeevent, 'BoxTimeevent' : BoxTimeevent,
-                                             'Height' : Height, 'Width' : Width, 'Confidence' : Confidence, 'RealAngle' : RealAngle, 'RawAngle' : RawAngle}
+                                      prediction_vector, box, Confidence = PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, TotalClasses, KeyCord, inputtime, Mode, EventType)
                                       if Confidence > 0.5:
                                           
-                                           ClassPredict[k] = [prediction_vector[v], box ] 
-                                      
-                                       
+                                          MaxProbLabel = np.argmax(prediction_vector[:TotalClasses])
+                                          MaxProb = prediction_vector[MaxProbLabel]
+                                          
+                                          
+                                          for (EventName,EventLabel) in KeyCategories.items():
                                                  
+                                                    if EventLabel == MaxProbLabel:
+                                                        
+                                                          MaxClassName = EventName
+                                                          break
+                                          LocationBoxes.append([MaxProb, box])         
+                                          ClassPredict[MaxClassName] = LocationBoxes        
+                                                        
+                                         
+                    if multievent:
+                         
+                                 TotalClasses = len(KeyCategories)
+                                 j = 0
+                                 k = 1
+                                 while True:
+                                          j = j + 1
+                                          if j > time_prediction.shape[1]:
+                                               j = 1
+                                               k = k + 1
+    
+                                          if k > time_prediction.shape[0]:
+                                              break;
+    
+                                          prediction_vector, box, Confidence = PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, TotalClasses, KeyCord, inputtime, Mode, EventType)
+                                          if Confidence > 0.5:
+                                               for (EventName,EventLabel) in KeyCategories.items():
+                               
+                                                      ClassPredict = {}
+                                                      LocationBoxes = []
+                                                      Prob = prediction_vector[EventLabel]
+                                                      LocationBoxes.append([Prob, box])         
+                                                      ClassPredict[EventName] = LocationBoxes           
+                                                              
+                       
+                                                             
                                                            
-                         return ClassPredict
+                    return ClassPredict
+                         
+                            
+def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, KeyCategories, KeyCord, inputtime, Mode, EventType):
+
+                                          TotalClasses = len(KeyCategories) 
+                                          y = (k - 1) * stride
+                                          x = (j - 1) * stride
+                                          prediction_vector = time_prediction[k-1,j-1,:]
+                                          
+                                          Xstart = x + sX
+                                          Ystart = y + sY
+                                          Class = {}
+                                          #Compute the probability of each class
+                                          for (EventName,EventLabel) in KeyCategories.items():
+                                              
+                                              Class[EventName] = prediction_vector[EventLabel]
+                                              
+                                          Xcenter = Xstart + prediction_vector[TotalClasses + KeyCord['X'] ] * TrainshapeX
+                                          Ycenter = Ystart + prediction_vector[TotalClasses + KeyCord['Y'] ] * TrainshapeY
+                                          Height = prediction_vector[TotalClasses + KeyCord['H']] * TrainshapeX  
+                                          Width = prediction_vector[TotalClasses + KeyCord['W']] * TrainshapeY
+                                          Confidence = prediction_vector[TotalClasses + KeyCord['Conf']]
+                                          if EventType == 'Dynamic':
+                                                  if Mode == 'Detection':
+                                                          RealTimeevent = int(inputtime + prediction_vector[TotalClasses + KeyCord['T']] * TimeFrames)
+                                                          BoxTimeevent = prediction_vector[TotalClasses + KeyCord['T']]    
+                                                  if Mode == 'Prediction':
+                                                          RealTimeevent = int(inputtime)
+                                                          BoxTimeevent = int(inputtime)
+                                                  RealAngle = math.pi * (prediction_vector[TotalClasses + KeyCord['Angle']] - 0.5)
+                                                  RawAngle = prediction_vector[TotalClasses + KeyCord['Angle']]
+                                          
+                                          if EventType == 'Static':
+                                                          RealTimeevent = int(inputtime)
+                                                          BoxTimeevent = int(inputtime)
+                                                          RealAngle = 0
+                                                          RawAngle = 0
+                                          #Compute the box vectors 
+                                          box = {'Xstart' : Xstart, 'Ystart' : Ystart, 'Xcenter' : Xcenter, 'Ycenter' : Ycenter, 'RealTimeevent' : RealTimeevent, 'BoxTimeevent' : BoxTimeevent,
+                                                 'Height' : Height, 'Width' : Width, 'Confidence' : Confidence, 'RealAngle' : RealAngle, 'RawAngle' : RawAngle}
+                                          
+                                          
+                                          
+                                          #Make a single dict object containing the class and the box vectors
+                                          Classybox = {}
+                                          for d in [Class,box]:
+                                              Classybox.update(d) 
+                                          
+                                          return Classybox
    
 def time_pad(image, TimeFrames):
 

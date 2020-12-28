@@ -547,31 +547,28 @@ def SmartPredONEAT(MovieDir, ResultCSVDirectory, NEATA, NEATB,  DownsampleFactor
 
 
 
-def MatDynamicEvents(image,time, y, x, CubicModels, classicNEAT, Categories_Name, Category
-                           ,Mode,n_tiles,TrainshapeX, TrainshapeY, TimeFrames ):
+def MatDynamicEvents(image, Models, ModelAConfig, ModelBConfig, KeyCategories, KeyCord, CategoryName, n_tiles):
     
-
             
                MasterApop = []
                MasterDiv = []
                 
-               CubicModelA = CubicModels[0]
-               CubicModelB = CubicModels[1]
+               ModelA = Models[0]
+               ModelB = Models[1]
     
-    
-               PredictionEvents =  ONETDynamicPrediction(image, CubicModelA, CubicModelB , 0,
-                                                    Categories_Name, TrainshapeX, TrainshapeY, TimeFrames, Mode, cut = 0, classicNEAT = classicNEAT, n_tiles = n_tiles, overlap_percent = 0.8 )
+   
+               PredictionEvents =  ONETDynamicPrediction( image, ModelA, ModelB, ModelAConfig, ModelBConfig, 0, KeyCategories, KeyCord, multievent = True, n_tiles = n_tiles )
 
            
                PredictionEvents.GetLocationMaps()
                n_tiles = PredictionEvents.GetTiles()  
-               LocationBoxesApoptosis = PredictionEvents.LocationBoxesApoptosis
-               LocationBoxesDivision = PredictionEvents.LocationBoxesDivision
+               LocationBoxesEvent = PredictionEvents.EventBoxes
                
                
-               if len(LocationBoxesApoptosis) > 0:
-                 boxA, _ = LocationBoxesApoptosis[0]
-                
+               if len(LocationBoxesEvent) > 0:
+                 #Returns dictionary of class predictions  
+                 ClassPredict = LocationBoxesEvent[0]
+                 Score, box = ClassPredict[CategoryName]         
                  center = ( ((boxA[2])) , ((boxA[3])) )
        
                  size =  math.sqrt(boxA[8] * boxA[8] + boxA[9] * boxA[9] )
