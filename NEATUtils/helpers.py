@@ -193,16 +193,9 @@ def WatershedwithMask(Image, Label,mask, grid):
 Prediction function for whole image/tile, output is Prediction vector for each image patch it passes over
 """    
 
-def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategories, KeyCord, TrainshapeX, TrainshapeY, TimeFrames, Mode, EventType, multievent = False):
+def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategories, KeyCord, TrainshapeX, TrainshapeY, TimeFrames, Mode, EventType):
     
-    
-                       
-                                        
-                             
-                    if multievent == False:
-                             ClassPredict = {}
                              LocationBoxes = []
-                             
                              j = 0
                              k = 1
                              while True:
@@ -214,51 +207,10 @@ def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategori
                                       if k > time_prediction.shape[0]:
                                           break;
 
-                                      prediction_vector, box, Confidence = PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, TotalClasses, KeyCord, inputtime, Mode, EventType)
-                                      if Confidence > 0.5:
-                                          
-                                          MaxProbLabel = np.argmax(prediction_vector[:TotalClasses])
-                                          MaxProb = prediction_vector[MaxProbLabel]
-                                          
-                                          
-                                          for (EventName,EventLabel) in KeyCategories.items():
-                                                 
-                                                    if EventLabel == MaxProbLabel:
-                                                        
-                                                          MaxClassName = EventName
-                                                          break
-                                          LocationBoxes.append([MaxProb, box])         
-                                          ClassPredict[MaxClassName] = LocationBoxes        
-                                                        
-                                         
-                    if multievent:
-                         
-                                 TotalClasses = len(KeyCategories)
-                                 j = 0
-                                 k = 1
-                                 while True:
-                                          j = j + 1
-                                          if j > time_prediction.shape[1]:
-                                               j = 1
-                                               k = k + 1
-    
-                                          if k > time_prediction.shape[0]:
-                                              break;
-    
-                                          prediction_vector, box, Confidence = PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, TotalClasses, KeyCord, inputtime, Mode, EventType)
-                                          if Confidence > 0.5:
-                                               for (EventName,EventLabel) in KeyCategories.items():
-                               
-                                                      ClassPredict = {}
-                                                      LocationBoxes = []
-                                                      Prob = prediction_vector[EventLabel]
-                                                      LocationBoxes.append([Prob, box])         
-                                                      ClassPredict[EventName] = LocationBoxes           
-                                                              
-                       
-                                                             
-                                                           
-                    return ClassPredict
+                                      Classybox, MaxProb = PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, KeyCategories, KeyCord, inputtime, Mode, EventType)
+                                      
+                                      LocationBoxes.append([Classybox, MaxProb])         
+                             return LocationBoxes
                          
                             
 def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, KeyCategories, KeyCord, inputtime, Mode, EventType):
@@ -281,6 +233,8 @@ def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, t
                                           Height = prediction_vector[TotalClasses + KeyCord['H']] * TrainshapeX  
                                           Width = prediction_vector[TotalClasses + KeyCord['W']] * TrainshapeY
                                           Confidence = prediction_vector[TotalClasses + KeyCord['Conf']]
+                                          MaxProbLabel = np.argmax(prediction_vector[:TotalClasses])
+                                          MaxProb = prediction_vector[MaxProbLabel]
                                           if EventType == 'Dynamic':
                                                   if Mode == 'Detection':
                                                           RealTimeevent = int(inputtime + prediction_vector[TotalClasses + KeyCord['T']] * TimeFrames)
@@ -307,7 +261,7 @@ def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, t
                                           for d in [Class,box]:
                                               Classybox.update(d) 
                                           
-                                          return Classybox
+                                          return Classybox, MaxProb
    
 def time_pad(image, TimeFrames):
 

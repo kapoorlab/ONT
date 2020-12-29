@@ -98,8 +98,7 @@ def ConvertModel(ModelDirectory, Model):
       f.close()      
       
                 
-def MatlabTester(Movie, CSVFile, ResultFile, ModelDir, ModelA, ModelB, ModelAConfig, ModelBConfig,
-             KeyCategories,KeyCord, TestCategory, n_tiles = 1): 
+def MatlabTester(Movie, CSVFile, ResultFile, ModelDir, ModelA, ModelB, ModelAConfig, ModelBConfig,KeyCategories,KeyCord, TestCategory, n_tiles = 1): 
     
     
       
@@ -111,18 +110,12 @@ def MatlabTester(Movie, CSVFile, ResultFile, ModelDir, ModelA, ModelB, ModelACon
       gridY = ModelAConfig["gridY"]
       multieventA = ModelAConfig["multievent"]
       ModelA = ModelAConfig["ModelName"]
-      Mode = ModelAConfig["Mode"]
       categories = ModelAConfig["categories"]
       box_vector = ModelAConfig["box_vector"]
       lambdacord = ModelAConfig["lambdacord"]
       nboxes = ModelAConfig["nboxes"]
-      
       multieventB = ModelBConfig["multievent"]
       ModelB = ModelBConfig["ModelName"]
-      
-      
-      
-      
       ConvertModel(ModelDir, ModelA)
       ConvertModel(ModelDir, ModelB)
       
@@ -140,20 +133,8 @@ def MatlabTester(Movie, CSVFile, ResultFile, ModelDir, ModelA, ModelB, ModelACon
         
          
          
-      Categories_Name = []
-      CubicModels = [NEATModelA, NEATModelB]
-      Categories_Name.append(['Normal', 0])
-      Categories_Name.append(['Apoptosis', 1])
-      Categories_Name.append(['Divisions', 2])
-      Categories_Name.append(['MacroKitty', 3])
-      Categories_Name.append(['NonMatureP1', 4])
-      Categories_Name.append(['MatureP1', 5])
-      
-      
+      Models = [NEATModelA, NEATModelB]
       image = imread(Movie)
-      print(image.shape)
-
-      
       time, y, x =   np.loadtxt(CSVFile, delimiter = ",", skiprows = 0, unpack=True)  
       Timelist = []
       Ylist = []
@@ -161,7 +142,6 @@ def MatlabTester(Movie, CSVFile, ResultFile, ModelDir, ModelA, ModelB, ModelACon
       Scorelist= []
       Sizelist = []
      
-     #os.remove(CSVfile)
       for t in tqdm(range(0, len(time))):
           
           if time[t] > sizeTplus + 1 and math.isnan(x[t])==False and math.isnan(y[t])== False  :
@@ -175,9 +155,8 @@ def MatlabTester(Movie, CSVFile, ResultFile, ModelDir, ModelA, ModelB, ModelACon
                               slice(int(crop_Xminus), int(crop_Xplus)))
                    crop_image = image[region]
                    if(crop_image.shape[0] >= sizeTminus + sizeTplus + 1  and crop_image.shape[1] >= TrainshapeY - 1 and crop_image.shape[2] >= TrainshapeX - 1 ):
-                           
-                           score, size = MatDynamicEvents(crop_image,time[t], y[t], x[t], CubicModels, classicNEAT,  Categories_Name, Category
-                                           ,Mode,n_tiles,TrainshapeX, TrainshapeY, TimeFrames )
+                       
+                           score, size = MatDynamicEvents(crop_image, Models,ModelAConfig, ModelBConfig, KeyCategories, KeyCord,TestCategory,n_tiles )
                            
                            Timelist.append(time[t])
                            Ylist.append(y[t])
@@ -546,56 +525,42 @@ def SmartPredONEAT(MovieDir, ResultCSVDirectory, NEATA, NEATB,  DownsampleFactor
 
 
 
-
+"""
+In this method we apply the prediction of two networks on the image patch created by the previous function and return the score of the category asked by the user. The category can be a string or a label for the category
+"""
 def MatDynamicEvents(image, Models, ModelAConfig, ModelBConfig, KeyCategories, KeyCord, CategoryName, n_tiles):
     
             
-               MasterApop = []
-               MasterDiv = []
-                
                ModelA = Models[0]
                ModelB = Models[1]
-    
-   
-               PredictionEvents =  ONETDynamicPrediction( image, ModelA, ModelB, ModelAConfig, ModelBConfig, 0, KeyCategories, KeyCord, multievent = True, n_tiles = n_tiles )
-
-           
+               PredictionEvents =  ONETDynamicPrediction( image, ModelA, ModelB, ModelAConfig, ModelBConfig, 0, KeyCategories, KeyCord, n_tiles = n_tiles )
                PredictionEvents.GetLocationMaps()
                n_tiles = PredictionEvents.GetTiles()  
                LocationBoxesEvent = PredictionEvents.EventBoxes
-               
-               
                if len(LocationBoxesEvent) > 0:
-                 #Returns dictionary of class predictions  
-                 ClassPredict = LocationBoxesEvent[0]
-                 Score, box = ClassPredict[CategoryName]         
-                 center = ( ((boxA[2])) , ((boxA[3])) )
-       
-                 size =  math.sqrt(boxA[8] * boxA[8] + boxA[9] * boxA[9] )
-                 MasterApop.append([center, boxA[5],boxA[6], boxA[4], size] )
-                 
-               if len(LocationBoxesDivision) > 0:  
-                  boxD, _ =  LocationBoxesDivision[0]
-                  
-                  center = ( ((boxD[2])) , ((boxD[3])) )
-       
-                  size =  math.sqrt(boxD[8] * boxD[8] + boxD[9] * boxD[9] )
-                  MasterDiv.append([center, boxD[5],boxD[6], boxD[4], size] )
-              
-               Score = 0
-               size = 0
-               if Category == 1:
-                   
-                   #Check for apoptosis
-                   if len(MasterApop) > 0:
-                     location, time, Name, Score, size = MasterApop[0]
-                   
-               if Category == 2:
-                   
-                   #Check for division
-                   if len(MasterDiv) > 0:
-                      location, time, Name, Score, size = MasterDiv[0]
-                
+                         #Returns dictionary of class predictions  
+                         box, MaxScore = LocationBoxesEvent[0]
+                         
+                         Confidence = box['Confidence']
+                         Xstart = box['Xstart']
+                         Ystart = box['Ystart']
+                         Xcenter = box['Xcenter']
+                         Ycenter = box['Ycenter']
+                         Height = box['Height']
+                         Width = box['Width']
+                         try:
+                             if isinstance(CategoryName,str):
+                                   Score = box[CategoryName]
+                             if isinstance(CategoryName, int):
+                                 for (EventName,EventLabel) in KeyCategories.items():
+                                       if CategoryName == EventLabel:
+                                           Score = box[EventName]
+                                           break
+                                 
+                         except:
+                             raise ValueError('Provided class name/label id not included in training, all existing classes start with capital letter and have integer training labels')
+                             
+                         size = math.sqrt(Height * Height + Width * Width)
                
                return Score, size                                               
                 
