@@ -193,7 +193,7 @@ def WatershedwithMask(Image, Label,mask, grid):
 Prediction function for whole image/tile, output is Prediction vector for each image patch it passes over
 """    
 
-def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategories, KeyCord, TrainshapeX, TrainshapeY, TimeFrames, Mode, EventType):
+def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategories, KeyCord, TrainshapeX, TrainshapeY, TimeFrames, nboxes, Mode, EventType):
     
                              LocationBoxes = []
                              j = 0
@@ -207,13 +207,13 @@ def Yoloprediction(image,sY, sX, time_prediction, stride, inputtime, KeyCategori
                                       if k > time_prediction.shape[0]:
                                           break;
 
-                                      Classybox, MaxProb = PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, KeyCategories, KeyCord, inputtime, Mode, EventType)
-                                      
-                                      LocationBoxes.append([Classybox, MaxProb])         
+                                      Classybox, MaxProbLabel = PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, KeyCategories, KeyCord, inputtime, Mode, EventType)
+                                      #Append the box and the maximum likelehood detected class
+                                      LocationBoxes.append([Classybox, MaxProbLabel])         
                              return LocationBoxes
                          
                             
-def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, time_prediction, KeyCategories, KeyCord, inputtime, Mode, EventType):
+def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, nboxes, stride, time_prediction, KeyCategories, KeyCord, inputtime, Mode, EventType):
 
                                           TotalClasses = len(KeyCategories) 
                                           y = (k - 1) * stride
@@ -227,14 +227,34 @@ def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, t
                                           for (EventName,EventLabel) in KeyCategories.items():
                                               
                                               Class[EventName] = prediction_vector[EventLabel]
-                                              
-                                          Xcenter = Xstart + prediction_vector[TotalClasses + KeyCord['X'] ] * TrainshapeX
-                                          Ycenter = Ystart + prediction_vector[TotalClasses + KeyCord['Y'] ] * TrainshapeY
-                                          Height = prediction_vector[TotalClasses + KeyCord['H']] * TrainshapeX  
-                                          Width = prediction_vector[TotalClasses + KeyCord['W']] * TrainshapeY
-                                          Confidence = prediction_vector[TotalClasses + KeyCord['Conf']]
+                                          Xcentermean = 0
+                                          Ycentermean = 0
+                                          Widthmean = 0
+                                          Heightmean = 0
+                                          Confidencemean = 0
+                                          for b in nboxes:
+                                                  Xcenter = Xstart + prediction_vector[TotalClasses + KeyCord['X'] ] * TrainshapeX
+                                                  Ycenter = Ystart + prediction_vector[TotalClasses + KeyCord['Y'] ] * TrainshapeY
+                                                  Height = prediction_vector[TotalClasses + KeyCord['H']] * TrainshapeX  
+                                                  Width = prediction_vector[TotalClasses + KeyCord['W']] * TrainshapeY
+                                                  Confidence = prediction_vector[TotalClasses + KeyCord['Conf']]
+                                                  #Ignore Yolo boxes with lower than 0.5 confidence
+                                                  if Confidence < 0.5:
+                                                       continue
+                                                  Xcentermean = Xcentermean + Xcenter
+                                                  Ycentermean = Ycentermean + Ycenter
+                                                  Heightmean = Heightmean + Height
+                                                  Widthmean = Widthmean + Width
+                                                  Confidencemean = Confidencemean + Confidence
+                                         
+                                          
+                                          Xcentermean = Xcentermean/nboxes
+                                          Ycentermean = Ycentermean/nboxes
+                                          Heightmean = Heightmean/nboxes
+                                          Widthmean = Widthmean/nboxes
+                                          Confidencemean = Confidencemean/nboxes
                                           MaxProbLabel = np.argmax(prediction_vector[:TotalClasses])
-                                          MaxProb = prediction_vector[MaxProbLabel]
+                                          
                                           if EventType == 'Dynamic':
                                                   if Mode == 'Detection':
                                                           RealTimeevent = int(inputtime + prediction_vector[TotalClasses + KeyCord['T']] * TimeFrames)
@@ -261,7 +281,7 @@ def PredictionLoop(j, k, sX, sY, TrainshapeX, TrainshapeY, TimeFrames, stride, t
                                           for d in [Class,box]:
                                               Classybox.update(d) 
                                           
-                                          return Classybox, MaxProb
+                                          return Classybox, MaxProbLabel
    
 def time_pad(image, TimeFrames):
 

@@ -49,6 +49,7 @@ class ONETDynamicPrediction(object):
         self.TrainshapeY = ModelAConfig["sizeY"]
         self.sizeTminus = ModelAConfig["sizeTminus"]
         self.sizeTplus = ModelAConfig["sizeTplus"]
+        self.nboxes = ModelAConfig["nboxes"]
         self.TimeFrames = self.Tminus + self.sizeTplus
 
    def GetTiles(self):
@@ -73,7 +74,7 @@ class ONETDynamicPrediction(object):
                            time_prediction =  sum_time_prediction[i]
                            #This method returns a dictionary of event names and output vectors and we collect it for all tiles as a list
                            EventBoxes = EventBoxes + Yoloprediction(self.image, AllY[p], AllX[p], time_prediction, self.stride, self.inputtime, self.KeyCategories, self.KeyCord, 
-                                                                  self.TrainshapeX, self.TrainshapeY, self.TimeFrames, self.Mode, 'Dynamic', self.multievent)
+                                                                  self.TrainshapeX, self.TrainshapeY, self.TimeFrames, self.nboxes, self.Mode, 'Dynamic')
                  
                  self.EventBoxes =  EventBoxes
                

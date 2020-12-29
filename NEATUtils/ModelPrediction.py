@@ -534,12 +534,13 @@ def MatDynamicEvents(image, Models, ModelAConfig, ModelBConfig, KeyCategories, K
                ModelA = Models[0]
                ModelB = Models[1]
                PredictionEvents =  ONETDynamicPrediction( image, ModelA, ModelB, ModelAConfig, ModelBConfig, 0, KeyCategories, KeyCord, n_tiles = n_tiles )
+               
                PredictionEvents.GetLocationMaps()
                n_tiles = PredictionEvents.GetTiles()  
                LocationBoxesEvent = PredictionEvents.EventBoxes
                if len(LocationBoxesEvent) > 0:
                          #Returns dictionary of class predictions  
-                         box, MaxScore = LocationBoxesEvent[0]
+                         box, MaxLabel = LocationBoxesEvent[0]
                          
                          Confidence = box['Confidence']
                          Xstart = box['Xstart']
