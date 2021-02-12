@@ -43,7 +43,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import ONEATloadfile.CovistoOneChFileLoader;
 import fileListeners.ChooseTrainingImage;
 import fileListeners.MouseClickTimeListener;
 import fileListeners.ONTHeaderListener;
@@ -58,6 +57,7 @@ import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.io.Opener;
 import io.scif.img.ImgIOException;
+import loadfile.CovistoOneChFileLoader;
 import mpicbg.imglib.util.Util;
 import net.imagej.ImageJ;
 import net.imglib2.Cursor;
@@ -383,6 +383,8 @@ public class TrainingDataCreator extends JPanel {
 				Clickedpoints[0] = X;
 				Clickedpoints[1] = Y;
 
+				
+				
 				if (MatlabOvalRois.get(thirdDimension) != null) {
 
 					ArrayList<Roiobject> ClickedPointList = MatlabOvalRois.get(thirdDimension);
@@ -450,6 +452,31 @@ public class TrainingDataCreator extends JPanel {
 					}
 					
 				}
+				else {
+					
+					ArrayList<Roiobject> ClickedPointList = new ArrayList<Roiobject>();
+					OvalRoi nearestRoi = new OvalRoi(X - 5, Y - 5 , 10, 10);
+					ClickedPointList.add(new Roiobject(AcceptColor, nearestRoi,
+							new RealPoint(new double[] { X, Y, 2 }), thirdDimension));
+					MatlabOvalRois.put(thirdDimension,ClickedPointList );
+					
+					
+					if (MatlabOvalRois.containsKey(thirdDimension)) {
+						ArrayList<Roiobject> currentroi = MatlabOvalRois.get(thirdDimension);
+						for (Roiobject roi : currentroi) {
+
+							roi.roi.setStrokeColor(roi.color);
+
+							if (overlay!= null)
+								overlay.add(roi.roi);
+
+						}
+						impOrig.updateAndDraw();
+					}
+					
+				}
+				
+				
 				
 				AddDot = "b";
 			}
@@ -692,9 +719,8 @@ public class TrainingDataCreator extends JPanel {
 
 		new ImageJ();
 
-		File csvfile = new File("/home/kapoorlab/Downloads/Divisions_Coordinates_TYX_for_wt_mov8..csv");
 
-		ImagePlus impA = new Opener().openImage("/home/kapoorlab/OLDONEAT/NEATcsvfiles/wt_N10.tif");
+		ImagePlus impA = new Opener().openImage("/Users/aimachine/Nts.tif");
 		impA.show();
 
 		JFrame frame = new JFrame("");

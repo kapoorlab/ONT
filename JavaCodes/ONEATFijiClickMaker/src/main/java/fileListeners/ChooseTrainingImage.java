@@ -46,8 +46,9 @@ import pluginTools.TrainingDataCreator;
 			parent.overlay.clear();
 			if(parent.MatlabOvalRois!=null)
 			parent.MatlabOvalRois.clear();
-	     	parent.Clickrecorder();	
+	     	
 	    	}
+	    	parent.Clickrecorder();	
 		
 }
 	

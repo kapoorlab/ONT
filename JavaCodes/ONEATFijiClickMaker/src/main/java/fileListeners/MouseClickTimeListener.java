@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import javax.swing.JScrollBar;
 
-import ONEATkalmanGUI.CovistoKalmanPanel;
 import ij.IJ;
 import ij.gui.OvalRoi;
 import mpicbg.imglib.util.Util;

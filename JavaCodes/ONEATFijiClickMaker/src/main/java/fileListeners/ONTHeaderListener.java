@@ -11,7 +11,6 @@ import java.util.ArrayList;
 
 import javax.swing.JComboBox;
 
-import ONEATloadfile.CovistoTwoChDropbox;
 import ij.WindowManager;
 import ij.gui.OvalRoi;
 import net.imglib2.RealPoint;

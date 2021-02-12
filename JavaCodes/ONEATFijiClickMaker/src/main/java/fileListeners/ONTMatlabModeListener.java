@@ -5,10 +5,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import ONEATloadfile.CovistoOneChFileLoader;
-import ONEATloadfile.CovistoTwoChDropbox;
-import ONEATloadfile.CovistoTwoChForceFileLoader;
 import fileListeners.ChooseTrainingImage;
+import loadfile.CovistoTwoChDropbox;
 import pluginTools.TrainingDataCreator;
 
 

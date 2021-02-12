@@ -4,9 +4,8 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import ONEATloadfile.CovistoOneChFileLoader;
-import ONEATloadfile.CovistoTwoChForceFileLoader;
 import fileListeners.ChooseTrainingImage;
+import loadfile.CovistoOneChFileLoader;
 import pluginTools.TrainingDataCreator;
 
 
@@ -42,13 +41,13 @@ public class ONTManualModeListener implements ItemListener {
 			
 			parent.panelFirst.add(parent.Panelfile, new GridBagConstraints(0, 7, 3, 1, 0.0, 0.0, GridBagConstraints.WEST,
 					GridBagConstraints.HORIZONTAL, parent.insets, 0, 0));
-			
+			parent.ManualDots = true;
+			parent.MatlabDots = false;
 			
 			parent.Panelclicker.remove(parent.headername);
 			parent.Panelclicker.remove(parent.ChooseHeader);
 			parent.Panelclicker.validate();
 			parent.Panelclicker.repaint();
-			
 		parent.Panelfile.validate();
 		parent.Panelfile.repaint();
 		
