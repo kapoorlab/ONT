@@ -14,18 +14,11 @@ from skimage.segmentation import watershed
 from skimage import morphology
 from skimage.filters import sobel
 from skimage import measure
-try:
-    from pathlib import Path
-    Path().expanduser()
-except (ImportError,AttributeError):
-    from pathlib2 import Path
-
-try:
-    import tempfile
-    tempfile.TemporaryDirectory
-except (ImportError,AttributeError):
-    from backports import tempfile
-    
+from pathlib import Path
+from skimage.util import invert as invertimage
+from scipy.ndimage.morphology import  binary_dilation    
+from skimage.measure import label
+from skimage.morphology import erosion, dilation, square
 
 """
  @author: Varun Kapoor
@@ -35,6 +28,49 @@ except (ImportError,AttributeError):
 """
 This method is used to convert Marker image to a list containing the XY indices for all time points
 """
+
+def remove_big_objects(ar, max_size=6400, connectivity=1, in_place=False):
+    
+    out = ar.copy()
+    ccs = out
+
+    try:
+        component_sizes = np.bincount(ccs.ravel())
+    except ValueError:
+        raise ValueError("Negative value labels are not supported. Try "
+                         "relabeling the input with `scipy.ndimage.label` or "
+                         "`skimage.morphology.label`.")
+
+
+
+    too_big = component_sizes > max_size
+    too_big_mask = too_big[ccs]
+    out[too_big_mask] = 0
+
+    return out
+
+def IntergerLabelGen(fname, savedir):
+            
+            BinaryImage = imread(fname)
+            Name = os.path.basename(os.path.splitext(fname)[0])
+            InputBinaryImage = BinaryImage.astype('uint8')
+            IntegerImage = np.zeros([BinaryImage.shape[0],BinaryImage.shape[1], BinaryImage.shape[2]])
+            for i in tqdm(range(0, InputBinaryImage.shape[0])):
+                 
+                    BinaryImageOriginal = InputBinaryImage[i,:]
+                    Orig = normalizeFloatZeroOne(BinaryImageOriginal)
+                    InvertedBinaryImage = invertimage(BinaryImageOriginal)
+                    BinaryImage = normalizeFloatZeroOne(InvertedBinaryImage)
+                    image = binary_dilation(BinaryImage)
+                    image = invertimage(image)
+                    labelclean = label(image)
+                    labelclean = remove_big_objects(labelclean, max_size = 15000) 
+                    AugmentedLabel = dilation(labelclean, selem = square(3) )
+                    AugmentedLabel = np.multiply(AugmentedLabel ,  Orig)
+                    IntegerImage[i,:] = AugmentedLabel
+            
+            imwrite(savedir + Name + '.tif', IntegerImage.astype('uint16'))
+            
 
 def MarkerToCSV(MarkerImage):
     
