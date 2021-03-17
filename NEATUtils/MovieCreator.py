@@ -2,6 +2,7 @@ import csv
 import numpy as np
 from tifffile import imwrite 
 import pandas as pd
+import os
 from skimage.measure import regionprops
 from skimage import measure
 from scipy import spatial 
@@ -55,22 +56,24 @@ def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, 
 
             Path(save_dir).mkdir(exist_ok=True)
             name = 1
-            dataset = pd.read_csv(csv_file)
-            # The csv files contain TYX or TYX + Angle
-            if len(dataset.keys() >= 3):
-                
-                time = dataset[dataset.keys()[0]][1:]
-                y = dataset[dataset.keys()[1]][1:]
-                x = dataset[dataset.keys()[2]][1:]
-                angle = np.full(time.shape, 2)                        
-            if len(dataset.keys() > 3):
-                
-                angle = dataset[dataset.keys()[3]][1:]      
-            
-            #Categories + XYTHW + Confidence + Angle
-            for t in time:
-               MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, defname + str(name), save_dir)
-               name = name + 1
+            #Check if the csv file exists
+            if os.path.exists(csv_file):
+                    dataset = pd.read_csv(csv_file)
+                    # The csv files contain TYX or TYX + Angle
+                    if len(dataset.keys() >= 3):
+                        
+                        time = dataset[dataset.keys()[0]][1:]
+                        y = dataset[dataset.keys()[1]][1:]
+                        x = dataset[dataset.keys()[2]][1:]
+                        angle = np.full(time.shape, 2)                        
+                    if len(dataset.keys() > 3):
+                        
+                        angle = dataset[dataset.keys()[3]][1:]      
+                    
+                    #Categories + XYTHW + Confidence + Angle
+                    for t in time:
+                       MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, defname + str(name), save_dir)
+                       name = name + 1
                
 
             
@@ -170,17 +173,21 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
     
 def CreateTrainingImages(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0, defname = ""):
 
-            Path(save_dir).mkdir(exist_ok=True)
-            name = 1
-            dataset = pd.read_csv(csv_file)
-            time = dataset[dataset.keys()[0]][1:]
-            y = dataset[dataset.keys()[1]][1:]
-            x = dataset[dataset.keys()[2]][1:]                        
-            
-            #Categories + XYHW + Confidence 
-            for t in x:
-               ImageMaker(time[t], y[t], x[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, str(name), save_dir)    
-               name = name + 1
+    
+    
+            #Check if the csv file exists
+            if os.path.exists(csv_file):
+                    Path(save_dir).mkdir(exist_ok=True)
+                    name = 1
+                    dataset = pd.read_csv(csv_file)
+                    time = dataset[dataset.keys()[0]][1:]
+                    y = dataset[dataset.keys()[1]][1:]
+                    x = dataset[dataset.keys()[2]][1:]                        
+                    
+                    #Categories + XYHW + Confidence 
+                    for t in x:
+                       ImageMaker(time[t], y[t], x[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, str(name), save_dir)    
+                       name = name + 1
 
 
 
