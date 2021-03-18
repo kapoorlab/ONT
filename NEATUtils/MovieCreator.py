@@ -44,6 +44,58 @@ csv file containing time, ylocation, xlocation of that event/cell type
 
 """    
     
+def MovieLabelDataSet(ImageDir, SegImageDir, CSVDir,SaveDir, StaticName, StaticLabel, CSVNameDiff,crop_size, gridX = 1, gridY = 1, offset = 0):
+    
+    
+            Raw_path = os.path.join(ImageDir, '*tif')
+            Seg_path = os.path.join(SegImageDir, '*tif')
+            Csv_path = os.path.join(CSVDir, '*csv')
+            filesRaw = glob.glob(Raw_path)
+            filesRaw.sort
+            filesSeg = glob.glob(Seg_path)
+            filesSeg.sort
+            filesCsv = glob.glob(Csv_path)
+            filesCsv.sort
+            Path(SaveDir).mkdir(exist_ok=True)
+            TotalCategories = len(StaticName)
+            count = 0
+            for csvfname in filesCsv:
+              print(csvfname)
+              CsvName =  os.path.basename(os.path.splitext(csvfname)[0])
+            
+              for fname in filesRaw:
+                  
+                 Name = os.path.basename(os.path.splitext(fname)[0])   
+                 for Segfname in filesSeg:
+                      
+                      SegName = os.path.basename(os.path.splitext(Segfname)[0])
+                        
+                      if Name == SegName:
+                          
+                          
+                         image = imread(fname)
+                         segimage = imread(Segfname)
+                         for i in  range(0, len(StaticName)):
+                             Eventname = StaticName[i]
+                             trainlabel = StaticLabel[i]
+                             if CsvName == CSVNameDiff + Name + Eventname:
+                                            dataset = pd.read_csv(csvfname)
+                                            if len(dataset.keys() >= 3):
+                        
+                                                time = dataset[dataset.keys()[0]][1:]
+                                                y = dataset[dataset.keys()[1]][1:]
+                                                x = dataset[dataset.keys()[2]][1:]
+                                                angle = np.full(time.shape, 2)                        
+                                            if len(dataset.keys() > 3):
+                                                
+                                                angle = dataset[dataset.keys()[3]][1:]                          
+                                            #Categories + XYHW + Confidence 
+                                            for t in range(1, len(time)):
+                                               MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, Name + str(count), SaveDir)
+                                               count = count + 1
+                                               
+
+
 def CreateTrainingMovies(csv_file, image, segimage, crop_size, TotalCategories, trainlabel, save_dir, gridX = 1, gridY = 1, offset = 0, defname = "" ):
 
             Path(save_dir).mkdir(exist_ok=True)
@@ -133,9 +185,9 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         crop_image = image[region]     
                
                         #X
-                        Label[TotalCategories] =  center[1]/sizeX
+                        Label[TotalCategories] =  (center[1] - crop_Xminus)/sizeX
                         #Y
-                        Label[TotalCategories + 1] = center[0]/sizeY
+                        Label[TotalCategories + 1] = (center[0] - crop_Yminus)/sizeY
                         #Height
                         Label[TotalCategories + 3] = height/ImagesizeY
                         #Width
