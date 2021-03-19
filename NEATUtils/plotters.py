@@ -157,15 +157,16 @@ def PrintStaticpredict(idx, model, data, Truelabel, KeyCatagories, gridX, gridY,
     img = Image[:,:,0]
     if plot:
         plt.imshow(img, cm.Spectral)
-     
+        
+    for b in range(nboxes): 
+                             print('Box: ' , b)  
+                             print('X Y T H W Confidence Angle',prediction[0,:,:,len(KeyCatagories) + b: len(KeyCatagories) + b + 5])
+                        
     for (Name, Label) in KeyCatagories.items():
         
              print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, Label])
                    
-             for b in range(nboxes): 
-                             print('Box: ' , b)  
-                             print('X Y T H W Confidence Angle',prediction[0,:,:,len(KeyCatagories) + b: len(KeyCatagories) + b + 5])
-                       
+             
             
     print('True Label : ', Truelabel)
 

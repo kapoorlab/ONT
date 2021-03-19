@@ -19,7 +19,7 @@ from skimage.util import invert as invertimage
 from scipy.ndimage.morphology import  binary_dilation    
 from skimage.measure import label
 from skimage.morphology import erosion, dilation, square
-
+import pandas as pd
 """
  @author: Varun Kapoor
 
@@ -96,43 +96,37 @@ def load_full_training_data(directory, categories, nboxes):
      
      Xtrain = []
      Ytrain = []
-     
      for fname in X:
          
-         image = imread(fname)
-         
-         Name = os.path.basename(os.path.splitext(fname)[0])
-    
-         csvfile = directory + Name + '.csv'
-         try:
-             
+             image = imread(fname)[0,:]
+             image = np.expand_dims(image, axis=-1)
+             Name = os.path.basename(os.path.splitext(fname)[0])
+
+             csvfname = directory + Name + '.csv'
+        
              y_t = []
-             reader = csv.reader(csvfile, delimiter = ',')
-         
-             for train_vec in reader:
-                   catarr = [float(s) for s in train_vec[0:categories]]
-                   xarr = [float(s) for s in train_vec[categories:]]
-                   newxarr = []
-                   for b in range(nboxes):
-                       newxarr+= [xarr[s] for s in range(len(xarr))]
-                       
-                   trainarr = catarr + newxarr    
-                   y_t.append(trainarr)
+             catarr = []
+             trainarr = []   
+             data = np.loadtxt(csvfname)
              
-                
+             train_vec = data   
+             catarr = [float(s) for s in train_vec[0:categories]]
+             xarr = [float(s) for s in train_vec[categories:]]
+             newxarr = []
+             for b in range(0,nboxes):
+                   newxarr+= [xarr[s] for s in range(len(xarr))]
+             trainarr = catarr + newxarr  
+             y_t.append(trainarr)
+             
              Ytrain.append(y_t)     
              Xtrain.append(image)
     
-         except:
-             
-             print('Matching label not found for:', Name ,  '.tif')
     
      Xtrain = np.array(Xtrain)
      Ytrain = np.array(Ytrain)
-  
-
+     Ytrain = np.expand_dims(Ytrain, axis=1)
      print('number of  images:\t', Xtrain.shape[0])
-     print('image size (%dD):\t\t',Xtrain.shape)
+     print('image size:\t\t',Xtrain.shape)
      print('Labels:\t\t\t\t', Ytrain.shape)
      traindata, validdata, trainlabel, validlabel = train_test_split(Xtrain, Ytrain, train_size=0.95,test_size=0.05, shuffle= True)
      

@@ -67,7 +67,7 @@ class NEATStaticDetection(object):
         self.box_vector = len(KeyCord)
         self.model_weights = None
         self.show = show
-        self.simple = staticconfig.simple
+       
         self.categories = len(KeyCatagories)
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel
@@ -92,7 +92,6 @@ class NEATStaticDetection(object):
         self.Trainingmodel = None
 
     def loadData(self):
-        
         (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.nboxes)
 
         self.X = X
@@ -209,7 +208,6 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         union_area = pred_area + true_area - intersect_area
         iou = intersect_area / union_area
         conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
-
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
         return combinedloss
