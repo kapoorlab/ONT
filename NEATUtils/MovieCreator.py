@@ -201,11 +201,9 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         Label[TotalCategories + 4] = width/ImagesizeX
                
                
-                        #Object confidence is 0 for background label else it is 1
-                        if trainlabel > 0:
-                            Label[TotalCategories + 5] = 1
-                        else:
-                            Label[TotalCategories + 5] = 0 
+                        #Object confidence is  1
+                        Label[TotalCategories + 5] = 1
+                         
                           
                         Label[TotalCategories + 6] = angle  
                       
@@ -343,11 +341,9 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     Label[TotalCategories + 2] = height/ImagesizeY
                                     Label[TotalCategories + 3] = width/ImagesizeX
                                    
-                                    #Object confidence is 0 for background label else it is 1
-                                    if trainlabel > 0:
-                                      Label[TotalCategories + 4] = 1
-                                    else:
-                                      Label[TotalCategories + 4] = 0 
+                                    #Object confidence is 1
+                                    Label[TotalCategories + 4] = 1
+                                    
                                   
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                              imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
