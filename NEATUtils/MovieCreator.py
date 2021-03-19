@@ -183,11 +183,18 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                               slice(int(crop_Xminus), int(crop_Xplus)))
                         #Define the movie region volume that was cut
                         crop_image = image[region]     
-               
-                        #X
-                        Label[TotalCategories] =  (center[1] - crop_Xminus)/sizeX
-                        #Y
-                        Label[TotalCategories + 1] = (center[0] - crop_Yminus)/sizeY
+                        seglocationX = (center[1] - crop_Xminus)
+                        seglocationY = (center[0] -  crop_Yminus)
+                        if seglocationX > 0.8 or seglocationX < 0.2:
+                            seglocationX = 0.5
+                        if seglocationY > 0.8 or seglocationY < 0.2:
+                            seglocationY = 0.5    
+                        Label[TotalCategories] =  seglocationX/sizeX
+                        Label[TotalCategories + 1] = seglocationY/sizeY
+                        if height/ImagesizeY > 0.9 or height/ImagesizeY < 0:
+                            height = ImagesizeY//2
+                        if width/ImagesizeX > 0.9 or width/ImagesizeX < 0:
+                            width = ImagesizeX//2    
                         #Height
                         Label[TotalCategories + 3] = height/ImagesizeY
                         #Width
@@ -319,8 +326,20 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
                                            slice(int(crop_Xminus), int(crop_Xplus)))
                                     crop_image = image[region]      
-                                    Label[TotalCategories] =  (center[1] - crop_Xminus)/sizeX
-                                    Label[TotalCategories + 1] = (center[0] -  crop_Yminus)/sizeY
+                                    
+                                    seglocationX = (center[1] - crop_Xminus)
+                                    seglocationY = (center[0] -  crop_Yminus)
+                                    if seglocationX > 0.8 or seglocationX < 0.2:
+                                        seglocationX = 0.5
+                                    if seglocationY > 0.8 or seglocationY < 0.2:
+                                        seglocationY = 0.5    
+                                    Label[TotalCategories] =  seglocationX/sizeX
+                                    Label[TotalCategories + 1] = seglocationY/sizeY
+                                    
+                                    if height/ImagesizeY > 0.9 or height/ImagesizeY < 0:
+                                        height = ImagesizeY//2
+                                    if width/ImagesizeX > 0.9 or width/ImagesizeX < 0:
+                                        width = ImagesizeX//2 
                                     Label[TotalCategories + 2] = height/ImagesizeY
                                     Label[TotalCategories + 3] = width/ImagesizeX
                                    
