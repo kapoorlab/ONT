@@ -192,7 +192,17 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
       
         #IOU computation for increasing localization accuracy
        
-        intersect_wh = K.maximum(K.zeros_like(y_pred_hw), (y_pred_hw + y_true_hw)/2 - K.square(y_pred_xy - y_true_xy) )
+        
+        true_min = y_true_xy - y_true_hw / 2
+        true_max = y_true_xy - y_true_hw / 2
+        
+        predicted_min = y_pred_xy - y_pred_hw / 2
+        predicted_max = y_pred_xy + y_pred_hw / 2
+        
+        intersect_mins = K.maximum(predicted_min, true_min)
+        intersect_maxes = K.maximum(predicted_max, true_max)
+        intersect_wh = K.maximum(intersect_maxes - intersect_mins, 0.)
+        
         intersect_area = intersect_wh[...,0] * intersect_wh[...,1]
         true_area = y_true_hw[...,0] * y_true_hw[...,1]
         pred_area = y_pred_hw[...,0] * y_pred_hw[...,1]
