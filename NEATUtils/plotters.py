@@ -1,6 +1,7 @@
 import keras
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import numpy as np
 import random
 """
 @author: Varun Kapoor
@@ -96,7 +97,7 @@ def Printpredict(idx, model, data, Truelabel, KeyCatagories, gridX, gridY, plot 
 class PlotStaticHistory(keras.callbacks.Callback):
     
     
-    def __init__(self, Trainingmodel, X, Y, KeyCatagories, gridX, gridY, plot = False, nboxes = 1):
+    def __init__(self, Trainingmodel, X, Y, KeyCatagories, KeyCord, gridX, gridY, plot = False, nboxes = 1):
        self.Trainingmodel = Trainingmodel 
        self.X = X
        self.Y = Y
@@ -104,7 +105,7 @@ class PlotStaticHistory(keras.callbacks.Callback):
        self.gridY = gridY
        self.plot = plot
        self.nboxes = nboxes
-      
+       self.KeyCord = KeyCord
        self.KeyCatagories = KeyCatagories
     def on_train_begin(self, logs={}):
         self.i = 0
@@ -144,9 +145,9 @@ class PlotStaticHistory(keras.callbacks.Callback):
          plt.show()
          #clear_output(True)
         idx = random.randint(1,self.X.shape[0] - 1)
-        PrintStaticpredict(idx,self.Trainingmodel, self.X, self.Y, self.KeyCatagories, self.gridX, self.gridY, plot = self.plot, nboxes = self.nboxes)
+        PrintStaticpredict(idx,self.Trainingmodel, self.X, self.Y, self.KeyCatagories, self.KeyCord, self.gridX, self.gridY, plot = self.plot, nboxes = self.nboxes)
         
-def PrintStaticpredict(idx, model, data, Truelabel, KeyCatagories, gridX, gridY, plot = False, nboxes = 1):
+def PrintStaticpredict(idx, model, data, Truelabel, KeyCategories, KeyCord, gridX, gridY, plot = False, nboxes = 1):
 
     Image = data[idx]
     Truelabel = Truelabel[idx]
@@ -158,17 +159,18 @@ def PrintStaticpredict(idx, model, data, Truelabel, KeyCatagories, gridX, gridY,
     if plot:
         plt.imshow(img, cm.Spectral)
         
-    for b in range(nboxes): 
-                             print('Box: ' , b)  
-                             print('X Y T H W Confidence Angle',prediction[0,:,:,len(KeyCatagories) + b: len(KeyCatagories) + b + 5])
-                        
-    for (Name, Label) in KeyCatagories.items():
+    #predictionsum = [prediction[0,:,:,len(KeyCategories) + b: len(KeyCategories) + b + 5] for b in range(nboxes)]
+    averageprediction = 0
+    for b in range(nboxes):
+      averageprediction = averageprediction + prediction[0,:,:,len(KeyCategories) + b: len(KeyCategories) + b + 5]
+    
+    print('XYHWC:' , averageprediction/nboxes)        
+    for (Name, Label) in KeyCategories.items():
         
              print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, Label])
                    
              
-            
-    print('True Label : ', Truelabel)
+    print('True Label : ', Truelabel[0,0,0:len(KeyCategories) + len(KeyCord) ])
 
     if plot:
               plt.show()          
