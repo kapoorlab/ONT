@@ -15,18 +15,8 @@ from NEATModels import nets
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
-try:
-    from pathlib import Path
-    Path().expanduser()
-except (ImportError,AttributeError):
-    from pathlib2 import Path
+from pathlib import Path
 
-try:
-    import tempfile
-    tempfile.TemporaryDirectory
-
-except (ImportError,AttributeError):
-    from backports import tempfile
 
 
 class NEATStaticDetection(object):
@@ -172,16 +162,16 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
     def loss(y_true, y_pred):
         
        
-       
+        grid = np.array([ [[float(x),float(y)]]*nboxes   for y in range(gridY) for x in range(gridX)])
         
         y_true_class = y_true[...,0:categories]
         y_pred_class = y_pred[...,0:categories]
         
         
-        pred_boxes = y_pred[...,categories:]
-        true_boxes = y_true[...,categories:]
+        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
+        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
         
-        y_pred_xy = pred_boxes[...,0:2] 
+        y_pred_xy = pred_boxes[...,0:2] +  K.variable(grid)
         y_true_xy = true_boxes[...,0:2]
         
         y_pred_hw = pred_boxes[...,2:4]
@@ -216,4 +206,43 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
     
     return loss
 
+def simple_static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, entropy):
+    
+    def loss(y_true, y_pred):
+        
+       
+        grid = np.array([ [[float(x),float(y)]]*nboxes   for y in range(gridY) for x in range(gridX)])
+        
+        y_true_class = y_true[...,0:categories]
+        y_pred_class = y_pred[...,0:categories]
+        
+        
+        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
+        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
+        
+        y_pred_xy = pred_boxes[...,0:2] +  K.variable(grid)
+        y_true_xy = true_boxes[...,0:2]
+        
+        y_pred_hw = pred_boxes[...,2:4]
+        y_true_hw = true_boxes[...,2:4]
+        
+        
+        
+        if entropy == 'notbinary':
+            class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        if entropy == 'binary':
+            class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
+        else:
+            class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+        xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1) , axis = -1)
+        hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1), axis=-1)
+      
+        #IOU computation for increasing localization accuracy
+       
+        combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss )
+        
+        return combinedloss
+    
+    
+    return loss
     
