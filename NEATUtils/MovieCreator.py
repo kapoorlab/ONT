@@ -8,7 +8,7 @@ from skimage.measure import regionprops
 from skimage import measure
 from scipy import spatial 
 from pathlib import Path
-from helpers import normalizeFloatZeroOne
+from .helpers import normalizeFloatZeroOne
     
 """
 @author: Varun Kapoor
