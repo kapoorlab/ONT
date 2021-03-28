@@ -172,16 +172,16 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
     def loss(y_true, y_pred):
         
        
-        grid = np.array([ [[float(x),float(y)]]*nboxes   for y in range(gridY) for x in range(gridX)])
+       
         
         y_true_class = y_true[...,0:categories]
         y_pred_class = y_pred[...,0:categories]
         
         
-        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
-        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
+        pred_boxes = y_pred[...,categories:]
+        true_boxes = y_true[...,categories:]
         
-        y_pred_xy = pred_boxes[...,0:2] +  (grid)
+        y_pred_xy = pred_boxes[...,0:2] 
         y_true_xy = true_boxes[...,0:2]
         
         y_pred_hw = pred_boxes[...,2:4]
