@@ -194,7 +194,7 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
        
         
         true_min = y_true_xy - y_true_hw / 2
-        true_max = y_true_xy - y_true_hw / 2
+        true_max = y_true_xy + y_true_hw / 2
         
         predicted_min = y_pred_xy - y_pred_hw / 2
         predicted_max = y_pred_xy + y_pred_hw / 2
