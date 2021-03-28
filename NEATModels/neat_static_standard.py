@@ -190,25 +190,44 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1) * y_true_conf, axis = -1)
         hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
       
-        #IOU computation for increasing localization accuracy
-       
         
-        true_min = y_true_xy - y_true_hw / 2
-        true_max = y_true_xy + y_true_hw / 2
-        
-        predicted_min = y_pred_xy - y_pred_hw / 2
-        predicted_max = y_pred_xy + y_pred_hw / 2
-        
-        intersect_mins = K.maximum(predicted_min, true_min)
-        intersect_maxes = K.maximum(predicted_max, true_max)
+        pred_wh_half = y_pred_hw / 2.
+        pred_mins = y_pred_xy - pred_wh_half
+        pred_maxes = y_pred_xy + pred_wh_half
+        # Find IOU of each predicted box with each ground truth box.
+        true_wh_half = y_true_hw / 2.
+        true_mins = y_true_xy - true_wh_half
+        true_maxes = y_true_xy + true_wh_half
+    
+        intersect_mins = K.maximum(pred_mins, true_mins)
+        intersect_maxes = K.minimum(pred_maxes, true_maxes)
         intersect_wh = K.maximum(intersect_maxes - intersect_mins, 0.)
-        
-        intersect_area = intersect_wh[...,0] * intersect_wh[...,1]
-        true_area = y_true_hw[...,0] * y_true_hw[...,1]
-        pred_area = y_pred_hw[...,0] * y_pred_hw[...,1]
-        union_area = pred_area + true_area - intersect_area
-        iou = intersect_area / union_area
-        conf_loss = K.sum(K.square(y_true_conf*iou - y_pred_conf), axis=-1)
+        intersect_areas = intersect_wh[..., 0] * intersect_wh[..., 1]
+    
+        pred_areas = y_pred_hw[..., 0] * y_pred_hw[..., 1]
+        true_areas = y_true_hw[..., 0] * y_true_hw[..., 1]
+    
+        union_areas = pred_areas + true_areas - intersect_areas
+        iou_scores = intersect_areas / union_areas
+    
+        # Best IOUs for each location.
+        best_ious = K.max(iou_scores, axis=4)  # Best IOU scores.
+        best_ious = K.expand_dims(best_ious)
+    
+        # A detector has found an object if IOU > thresh for some true box.
+        object_detections = K.cast(best_ious > 0.6, K.dtype(best_ious))
+    
+        # TODO: Darknet region training includes extra coordinate loss for early
+        # training steps to encourage predictions to match anchor priors.
+    
+        # Determine confidence weights from object and no_object weights.
+        # NOTE: YOLO does not use binary cross-entropy here.
+        no_object_weights =  (1 - object_detections) 
+        no_objects_loss = no_object_weights * K.square(-y_pred_conf)
+    
+        objects_loss = (K.square(best_ious - y_pred_conf))
+
+        conf_loss = objects_loss + no_objects_loss
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
         return combinedloss
