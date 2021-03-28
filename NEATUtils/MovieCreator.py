@@ -8,7 +8,7 @@ from skimage.measure import regionprops
 from skimage import measure
 from scipy import spatial 
 from pathlib import Path
-
+from helpers import normalizeFloatZeroOne
     
 """
 @author: Varun Kapoor
@@ -164,11 +164,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                                                 center = prop.centroid
                                                 height =  abs(maxc - minc)
                                                 width =  abs(maxr - minr)
-                            if Label == 0:
-                                
-                                center = TwoDLocation
-                                height = 10
-                                width = 10
+                           
                 
                 Label = np.zeros([TotalCategories + 7])
                 Label[trainlabel] = 1
@@ -185,21 +181,36 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                               slice(int(crop_Xminus), int(crop_Xplus)))
                         #Define the movie region volume that was cut
                         crop_image = image[region]     
+                        
+                        crop_image =  normalizeFloatZeroOne(crop_image ,1,99.8)
                         seglocationX = (center[1] - crop_Xminus)
                         seglocationY = (center[0] -  crop_Yminus)
-                         
-                        Label[TotalCategories] =  seglocationX/sizeX
-                        Label[TotalCategories + 1] = seglocationY/sizeY
                         
-                        #Height
-                        Label[TotalCategories + 3] = height/ImagesizeY
-                        #Width
-                        Label[TotalCategories + 4] = width/ImagesizeX
-               
+                        if trainlabel > 0:
+                                Label[TotalCategories] =  seglocationX/sizeX
+                                Label[TotalCategories + 1] = seglocationY/sizeY
+                                
+                                #Height
+                                Label[TotalCategories + 3] = height/ImagesizeY
+                                #Width
+                                Label[TotalCategories + 4] = width/ImagesizeX
+                                
+                        else:
+                            
+                                Label[TotalCategories] = 0.5
+                                Label[TotalCategories + 1] = 0.5
+                                
+                                #Height
+                                Label[TotalCategories + 3] = 1
+                                #Width
+                                Label[TotalCategories + 4] = 1
+                            
                
                         #Object confidence is  1
-                        Label[TotalCategories + 5] = 1
-                         
+                        if trainlabel > 0:
+                           Label[TotalCategories + 5] = 1
+                        else:
+                           Label[TotalCategories + 5] = 0 
                           
                         Label[TotalCategories + 6] = angle  
                       
@@ -304,11 +315,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                                             center = prop.centroid
                                                             height =  abs(maxc - minc)
                                                             width =  abs(maxr - minr)
-                                        if Label == 0:
-                                            
-                                            center = TwoDLocation
-                                            height = 10
-                                            width = 10
+                                 
                                     
                         Label = np.zeros([TotalCategories + 5])
                         Label[trainlabel] = 1
@@ -322,19 +329,32 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
                                            slice(int(crop_Xminus), int(crop_Xplus)))
                                     crop_image = image[region]      
-                                    
+                                    crop_image =  normalizeFloatZeroOne(crop_image ,1,99.8)
                                     seglocationX = (center[1] - crop_Xminus)
                                     seglocationY = (center[0] -  crop_Yminus)
                                       
-                                    Label[TotalCategories] =  seglocationX/sizeX
-                                    Label[TotalCategories + 1] = seglocationY/sizeY
-                                    
-                                    
-                                    Label[TotalCategories + 2] = height/ImagesizeY
-                                    Label[TotalCategories + 3] = width/ImagesizeX
+                                    if trainlabel > 0:
+                                            Label[TotalCategories] =  seglocationX/sizeX
+                                            Label[TotalCategories + 1] = seglocationY/sizeY
+                                            
+                                            
+                                            Label[TotalCategories + 2] = height/ImagesizeY
+                                            Label[TotalCategories + 3] = width/ImagesizeX
+                                    else:
+                                        
+                                            Label[TotalCategories] =  0.5
+                                            Label[TotalCategories + 1] = 0.5
+                                            
+                                            
+                                            Label[TotalCategories + 2] = 1
+                                            Label[TotalCategories + 3] = 1
+                                        
                                    
                                     #Object confidence is 1
-                                    Label[TotalCategories + 4] = 1
+                                    if trainlabel > 0:
+                                       Label[TotalCategories + 4] = 1
+                                    else:
+                                       Label[TotalCategories + 4] = 0
                                     
                                   
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
