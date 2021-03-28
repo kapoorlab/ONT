@@ -65,6 +65,7 @@ class NEATStaticDetection(object):
         self.model_name = model_name
         self.KeyCatagories = KeyCatagories
         self.box_vector = len(KeyCord)
+        self.KeyCord = KeyCord
         self.model_weights = None
         self.show = show
        
@@ -148,7 +149,7 @@ class NEATStaticDetection(object):
         lrate = callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=4, verbose=1)
         hrate = callbacks.History()
         srate = callbacks.ModelCheckpoint(self.model_dir + self.model_name, monitor='loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.KeyCatagories, self.gridX, self.gridY, plot = self.show, nboxes = self.nboxes)
+        prate = plotters.PlotStaticHistory(self.Trainingmodel, self.X_val, self.Y_val, self.KeyCatagories, self.KeyCord, self.gridX, self.gridY, plot = self.show, nboxes = self.nboxes)
         
         
         #Train the model and save as a h5 file
