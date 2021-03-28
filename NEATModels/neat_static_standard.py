@@ -187,7 +187,7 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
             class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
         else:
             class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
-        xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1) * y_true_conf, axis = -1)
+        xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1)*y_true_conf , axis = -1)
         hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
       
         
@@ -211,23 +211,10 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         iou_scores = intersect_areas / union_areas
     
         # Best IOUs for each location.
-        best_ious = K.max(iou_scores, axis=4)  # Best IOU scores.
+        best_ious = K.max(iou_scores, axis=-1)  # Best IOU scores.
         best_ious = K.expand_dims(best_ious)
-    
-        # A detector has found an object if IOU > thresh for some true box.
-        object_detections = K.cast(best_ious > 0.6, K.dtype(best_ious))
-    
-        # TODO: Darknet region training includes extra coordinate loss for early
-        # training steps to encourage predictions to match anchor priors.
-    
-        # Determine confidence weights from object and no_object weights.
-        # NOTE: YOLO does not use binary cross-entropy here.
-        no_object_weights =  (1 - object_detections) 
-        no_objects_loss = no_object_weights * K.square(-y_pred_conf)
-    
-        objects_loss = (K.square(best_ious - y_pred_conf))
 
-        conf_loss = objects_loss + no_objects_loss
+        conf_loss = K.sum(K.square(y_true_conf * best_ious - y_pred_conf) * y_true_conf , axis=-1)
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
         return combinedloss
