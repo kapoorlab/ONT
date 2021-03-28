@@ -161,7 +161,11 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
     
     def loss(y_true, y_pred):
         
+        
+        ANCHORS          = [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828]
+
        
+        
         grid = np.array([ [[float(x),float(y)]]*nboxes   for y in range(gridY) for x in range(gridX)])
         
         y_true_class = y_true[...,0:categories]
@@ -170,15 +174,16 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         
         pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
         true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
-        
+
         y_pred_xy = pred_boxes[...,0:2] +  K.variable(grid)
         y_true_xy = true_boxes[...,0:2]
         
-        y_pred_hw = pred_boxes[...,2:4]
+        y_pred_hw = tf.exp(pred_boxes[...,2:4]) * np.reshape(ANCHORS, [1,1,1,nboxes,2])
         y_true_hw = true_boxes[...,2:4]
         
         y_pred_conf = pred_boxes[...,4]
         y_true_conf = true_boxes[...,4]
+        
         
         
         if entropy == 'notbinary':
@@ -214,7 +219,15 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         best_ious = K.max(iou_scores, axis=-1)  # Best IOU scores.
         best_ious = K.expand_dims(best_ious)
 
-        conf_loss = K.sum(K.square(y_true_conf * best_ious - y_pred_conf) * y_true_conf , axis=-1)
+        true_box_conf = iou_scores * y_true_conf
+        pred_box_conf = y_pred_conf
+        conf_mask = conf_mask + tf.to_float(best_ious < 0.6) * (1 - y_true_conf) 
+    
+        # penalize the confidence of the boxes, which are reponsible for corresponding ground truth box
+        conf_mask = conf_mask + y_true_conf 
+        
+        
+        conf_loss = K.sum(K.square(true_box_conf-pred_box_conf) * conf_mask  , axis=-1)
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
         return combinedloss
