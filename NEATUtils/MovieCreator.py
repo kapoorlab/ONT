@@ -152,21 +152,23 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
                 
-                #Get the closest centroid to the clicked point
+                
                 properties = measure.regionprops(currentsegimage, currentsegimage)
-                TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
-                TwoDtree = spatial.cKDTree(TwoDCoordinates)
                 TwoDLocation = (defaultY,defaultX)
-                closestpoint = TwoDtree.query(TwoDLocation)
+                Label = currentsegimage[TwoDLocation]
                 for prop in properties:
                                    
                                    
-                            if int(prop.centroid[0]) == int(TwoDCoordinates[closestpoint[1]][0]) and int(prop.centroid[1]) == int(TwoDCoordinates[closestpoint[1]][1]):
+                            if Label > 0 and prop.label == Label:
                                                 minr, minc, maxr, maxc = prop.bbox
                                                 center = prop.centroid
                                                 height =  abs(maxc - minc)
                                                 width =  abs(maxr - minr)
-                                                break
+                            if Label == 0:
+                                
+                                center = TwoDLocation
+                                height = 10
+                                width = 10
                 
                 Label = np.zeros([TotalCategories + 7])
                 Label[trainlabel] = 1
@@ -296,22 +298,24 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                    
                         defaultX = int(x + shift[0])  
                         defaultY = int(y + shift[1])
-                        #Get the closest centroid to the clicked point
-                        properties = measure.regionprops(currentsegimage, currentsegimage)
-                        TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
-                        TwoDtree = spatial.cKDTree(TwoDCoordinates)
-                        TwoDLocation = (defaultY,defaultX)
-                        closestpoint = TwoDtree.query(TwoDLocation)
-                        for prop in properties:
-                                           
-                                           
-                                    if int(prop.centroid[0]) == int(TwoDCoordinates[closestpoint[1]][0]) and int(prop.centroid[1]) == int(TwoDCoordinates[closestpoint[1]][1]):
-                                                        minr, minc, maxr, maxc = prop.bbox
-                                                        center = prop.centroid
-                                                        height =  abs(maxc - minc)
-                                                        width =  abs(maxr - minr)
-                                                        break
                         
+                        properties = measure.regionprops(currentsegimage, currentsegimage)
+                        TwoDLocation = (defaultY,defaultX)
+                        Label = currentsegimage[TwoDLocation]
+                        for prop in properties:
+                                               
+                                               
+                                        if Label > 0 and prop.label == Label:
+                                                            minr, minc, maxr, maxc = prop.bbox
+                                                            center = prop.centroid
+                                                            height =  abs(maxc - minc)
+                                                            width =  abs(maxr - minr)
+                                        if Label == 0:
+                                            
+                                            center = TwoDLocation
+                                            height = 10
+                                            width = 10
+                                    
                         Label = np.zeros([TotalCategories + 5])
                         Label[trainlabel] = 1
                         
