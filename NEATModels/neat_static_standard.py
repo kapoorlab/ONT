@@ -230,6 +230,11 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         conf_loss = K.sum(K.square(true_box_conf-pred_box_conf) * conf_mask  , axis=-1)
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
+        tf.Print(loss, [xy_loss], message='Loss XY \t', summarize=1000)
+        tf.Print(loss, [hw_loss], message='Loss WH \t', summarize=1000)
+        tf.Print(loss, [conf_loss], message='Loss Conf \t', summarize=1000)
+        tf.Print(loss, [class_loss], message='Loss Class \t', summarize=1000)
+        
         return combinedloss
     
     
