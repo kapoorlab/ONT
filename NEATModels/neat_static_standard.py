@@ -214,7 +214,7 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         true_areas = y_true_hw[..., 0] * y_true_hw[..., 1]
     
         union_areas = pred_areas + true_areas - intersect_areas
-        iou_scores = intersect_areas / union_areas
+        iou_scores = tf.truediv(intersect_areas, union_areas)
     
         # Best IOUs for each location.
         best_ious = K.max(iou_scores, axis=-1)  # Best IOU scores.
@@ -223,18 +223,19 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         true_box_conf = iou_scores * y_true_conf
         pred_box_conf = y_pred_conf
         conf_mask = conf_mask + tf.to_float(best_ious < 0.6) * (1 - y_true_conf) 
-    
+        nb_conf_box  = tf.reduce_sum(tf.to_float(conf_mask  > 0.0))
         # penalize the confidence of the boxes, which are reponsible for corresponding ground truth box
         conf_mask = conf_mask + y_true_conf 
         
         
         conf_loss = K.sum(K.square(true_box_conf-pred_box_conf) * conf_mask  , axis=-1)
+        conf_loss = conf_loss / (nb_conf_box  + 1e-6) / 2
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
-        tf.Print(combinedloss, [xy_loss], message='Loss XY \t', summarize=1000)
-        tf.Print(combinedloss, [hw_loss], message='Loss WH \t', summarize=1000)
-        tf.Print(combinedloss, [conf_loss], message='Loss Conf \t', summarize=1000)
-        tf.Print(combinedloss, [class_loss], message='Loss Class \t', summarize=1000)
+        tf.Print(combinedloss, [xy_loss], message='Loss XY \t', summarize=1)
+        tf.Print(combinedloss, [hw_loss], message='Loss WH \t', summarize=1)
+        tf.Print(combinedloss, [conf_loss], message='Loss Conf \t', summarize=1)
+        tf.Print(combinedloss, [class_loss], message='Loss Class \t', summarize=1)
         
         return combinedloss
     
