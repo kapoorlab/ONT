@@ -131,7 +131,7 @@ class NEATStaticDetection(object):
             
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.lambdacord, self.entropy), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.lambdacord, self.entropy, self.batch_size), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -157,13 +157,15 @@ class NEATStaticDetection(object):
 
 
 
-def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, entropy):
+def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, entropy, batch_size):
     
     def loss(y_true, y_pred):
         
         
         ANCHORS          = [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828]
 
+        seen = tf.Variable(0.)
+        total_recall = tf.Variable(0.)
         mask_shape = tf.shape(y_true)[categories:categories + 4]
         
         coord_mask = tf.zeros(mask_shape)
@@ -229,6 +231,20 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         
         # penalize the confidence of the boxes, which are reponsible for corresponding ground truth box
         conf_mask = conf_mask + y_true_conf 
+        
+        
+        no_boxes_mask = tf.to_float(coord_mask < lambdacord/2.)
+        seen = tf.assign_add(seen, 1.)
+    
+        true_box_xy, true_box_wh, coord_mask = tf.cond(tf.less(seen, batch_size), 
+                          lambda: [y_true_xy + (0.5 + grid) * no_boxes_mask, 
+                                   y_true_hw + tf.ones_like(y_true_hw) * np.reshape(ANCHORS, [1,1,1,nboxes,2]) * no_boxes_mask, 
+                                   tf.ones_like(coord_mask)],
+                          lambda: [y_true_xy, 
+                                   y_true_hw,
+                                   coord_mask])
+        
+        
         
         nb_conf_box  = tf.reduce_sum(tf.to_float(conf_mask  > 0.0))
         nb_coord_box = tf.reduce_sum(tf.to_float(coord_mask > 0.0))
