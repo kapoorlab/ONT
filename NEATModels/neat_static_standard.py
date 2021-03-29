@@ -317,7 +317,7 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
             loss_class = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
         loss_class = tf.reduce_sum(loss_class * class_mask) / (nb_class_box + 1e-6)
         
-        loss = loss_xy + loss_wh + loss_conf + loss_class
+        combinedloss = loss_xy + loss_wh + loss_conf + loss_class
         print(loss_xy, loss_wh, loss_conf, loss_class)
         nb_true_box = tf.reduce_sum(y_true[..., 4])
         nb_pred_box = tf.reduce_sum(tf.to_float(true_box_conf > 0.5) * tf.to_float(pred_box_conf > 0.3))
@@ -327,15 +327,8 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         """    
         current_recall = nb_pred_box/(nb_true_box + 1e-6)
         total_recall = tf.assign_add(total_recall, current_recall) 
-    
-        loss = tf.print(loss, [tf.zeros((1))], 'Dummy Line', summarize=1000)
-        loss = tf.print(loss, [loss_xy],'Loss XY', summarize=1000)
-        loss = tf.print(loss, [loss_wh],'Loss WH', summarize=1000)
-        loss = tf.print(loss, [loss_conf],'Loss Conf', summarize=1000)
-        loss = tf.print(loss, [loss_class],'Loss Class', summarize=1000)
-        loss = tf.print(loss, [loss],'Total Loss', summarize=1000)
-        loss = tf.print(loss, [current_recall],'Current Recall', summarize=1000)
-        loss = tf.print(loss, [total_recall/seen], 'Average Recall', summarize=1000)
+     
+        return combinedloss 
         
     return loss
     
