@@ -1,10 +1,9 @@
 import random
 import argparse
 import numpy as np
-
-from preprocessing import parse_annotation
+import os
 import json
-
+import glob
 
 
 def IOU(ann, centroids):
@@ -88,12 +87,12 @@ def run_kmeans(ann_dims, anchor_num):
         prev_assignments = assignments.copy()
         old_distances = distances.copy()
 
-def main(argv):
-    CSVDir = '/home/sancere/Kepler/FinalONEATTraining/NEATCSV/'
+def main():
+    CSVDir = '/home/sancere/Kepler/FinalONEATTraining/StaticCenterTrainData/'
     Csv_path = os.path.join(CSVDir, '*csv')
     filesCsv = glob.glob(Csv_path)
     filesCsv.sort
-    num_anchors = 10
+    num_anchors = 5
 
 
     grid_w = 1
@@ -103,11 +102,11 @@ def main(argv):
     annotation_dims = []
     for csvfname in filesCsv:
              train_vec = np.loadtxt(csvfname)
-             catarr = float(s) for s in train_vec[0:categories]
-             xarr = float(s) for s in train_vec[categories:]
-             relative_w = xarr[2]
-             relative_h = xarr[3]
-             annotation_dims.append(tuple(map(float, (relative_w,relatice_h))))
+            
+             
+             relative_w = float(train_vec[categories + 2])
+             relative_h = float(train_vec[categories + 3])
+             annotation_dims.append(tuple(map(float, (relative_w,relative_h))))
 
     annotation_dims = np.array(annotation_dims)
     centroids = run_kmeans(annotation_dims, num_anchors)
@@ -117,5 +116,5 @@ def main(argv):
     print_anchors(centroids)
 
 if __name__ == '__main__':
-    args = argparser.parse_args()
-    main(args)
+    
+    main()
