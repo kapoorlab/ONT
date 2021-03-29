@@ -531,7 +531,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
       
     
 
-    output_cat = (Conv2D(gridX * gridY  * categories, (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_cat = (Conv2D(gridX * gridY * categories, (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
     output_box = (Conv2D((gridX * gridY * nboxes * box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
