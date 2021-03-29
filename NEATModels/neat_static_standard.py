@@ -201,8 +201,6 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         pred_box_class = y_pred[..., :categories]
         
         
-        y_true_class = y_true[...,0:categories]
-        y_pred_class = y_pred[...,0:categories]
         
         """
         Adjust ground truth
@@ -247,12 +245,10 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         ### confidence mask: penelize predictors + penalize boxes with low IOU
         # penalize the confidence of the boxes, which have IOU with some ground truth box < 0.6
         
-        pred_boxes = K.reshape(y_pred[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
-        true_boxes = K.reshape(y_true[...,categories:], (-1, gridY * gridX, nboxes, box_vector))
         
         
-        true_xy = true_boxes[..., 0:2]
-        true_wh = true_boxes[..., 2:4]
+        true_xy = true_box_xy
+        true_wh = true_box_wh
         
         true_wh_half = true_wh / 2.
         true_mins    = true_xy - true_wh_half
