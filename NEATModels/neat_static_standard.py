@@ -200,6 +200,10 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         ### adjust class probabilities
         pred_box_class = y_pred[..., :categories]
         
+        
+        y_true_class = y_true[...,0:categories]
+        y_pred_class = y_pred[...,0:categories]
+        
         """
         Adjust ground truth
         """
@@ -287,6 +291,8 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         no_boxes_mask = tf.to_float(coord_mask < COORD_SCALE/2.)
         seen = tf.assign_add(seen, 1.)
         
+        
+        
         true_box_xy, true_box_wh, coord_mask = tf.cond(tf.less(seen, WARM_UP_BATCHES), 
                               lambda: [true_box_xy + (0.5 + cell_grid) * no_boxes_mask, 
                                        true_box_wh + tf.ones_like(true_box_wh) * np.reshape(ANCHORS, [1,1,1,nboxes,2]) * no_boxes_mask, 
@@ -305,11 +311,14 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         loss_xy    = tf.reduce_sum(tf.square(true_box_xy-pred_box_xy)     * coord_mask) / (nb_coord_box + 1e-6) / 2.
         loss_wh    = tf.reduce_sum(tf.square(true_box_wh-pred_box_wh)     * coord_mask) / (nb_coord_box + 1e-6) / 2.
         loss_conf  = tf.reduce_sum(tf.square(true_box_conf-pred_box_conf) * conf_mask)  / (nb_conf_box  + 1e-6) / 2.
-        loss_class = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_box_class, logits=pred_box_class)
+        if entropy == 'binary':
+            loss_class = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
+        else:
+            loss_class = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
         loss_class = tf.reduce_sum(loss_class * class_mask) / (nb_class_box + 1e-6)
         
         loss = loss_xy + loss_wh + loss_conf + loss_class
-        
+        print(loss_xy, loss_wh, loss_conf, loss_class)
         nb_true_box = tf.reduce_sum(y_true[..., 4])
         nb_pred_box = tf.reduce_sum(tf.to_float(true_box_conf > 0.5) * tf.to_float(pred_box_conf > 0.3))
     
@@ -319,14 +328,14 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         current_recall = nb_pred_box/(nb_true_box + 1e-6)
         total_recall = tf.assign_add(total_recall, current_recall) 
     
-        loss = tf.Print(loss, [tf.zeros((1))], message='Dummy Line \t', summarize=1000)
-        loss = tf.Print(loss, [loss_xy], message='Loss XY \t', summarize=1000)
-        loss = tf.Print(loss, [loss_wh], message='Loss WH \t', summarize=1000)
-        loss = tf.Print(loss, [loss_conf], message='Loss Conf \t', summarize=1000)
-        loss = tf.Print(loss, [loss_class], message='Loss Class \t', summarize=1000)
-        loss = tf.Print(loss, [loss], message='Total Loss \t', summarize=1000)
-        loss = tf.Print(loss, [current_recall], message='Current Recall \t', summarize=1000)
-        loss = tf.Print(loss, [total_recall/seen], message='Average Recall \t', summarize=1000)
+        loss = tf.print(loss, [tf.zeros((1))], 'Dummy Line', summarize=1000)
+        loss = tf.print(loss, [loss_xy],'Loss XY', summarize=1000)
+        loss = tf.print(loss, [loss_wh],'Loss WH', summarize=1000)
+        loss = tf.print(loss, [loss_conf],'Loss Conf', summarize=1000)
+        loss = tf.print(loss, [loss_class],'Loss Class', summarize=1000)
+        loss = tf.print(loss, [loss],'Total Loss', summarize=1000)
+        loss = tf.print(loss, [current_recall],'Current Recall', summarize=1000)
+        loss = tf.print(loss, [total_recall/seen], 'Average Recall', summarize=1000)
         
     return loss
     
