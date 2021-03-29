@@ -162,7 +162,7 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
     def loss(y_true, y_pred):
         
         
-        ANCHORS          = [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828]
+        ANCHORS          = [0.11,0.11, 0.18,0.16, 0.27,0.24, 0.36,0.35, 0.54,0.61]
 
         seen = tf.Variable(0.)
         total_recall = tf.Variable(0.)
