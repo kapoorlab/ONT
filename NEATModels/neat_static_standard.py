@@ -168,6 +168,9 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         total_recall = tf.Variable(0.)
         mask_shape = tf.shape(y_true)[categories:categories + 4]
         
+        
+        CLASS_WEIGHTS    = np.ones(categories, dtype='float32')
+        
         coord_mask = tf.zeros(mask_shape)
         conf_mask  = tf.zeros(mask_shape)
         class_mask = tf.zeros(mask_shape)
@@ -190,8 +193,9 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         y_pred_conf = pred_boxes[...,4]
         y_true_conf = true_boxes[...,4]
         
-        coord_mask = tf.expand_dims(pred_boxes[..., 4], axis=-1) * lambdacord
-        
+        true_box_class = tf.argmax(y_true[...,0:categories], -1)
+        coord_mask = tf.expand_dims(true_boxes[..., 4], axis=-1) * lambdacord
+        class_mask = true_boxes[..., 4] * tf.gather(CLASS_WEIGHTS, true_box_class) 
         
         if entropy == 'notbinary':
             class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
