@@ -16,7 +16,7 @@ from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
 from pathlib import Path
-
+import tensorflow as tf
 
 
 class NEATStaticDetection(object):
@@ -164,7 +164,8 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         
         ANCHORS          = [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828]
 
-       
+        mask_shape = tf.shape(y_true)[categories:categories + 4]
+        conf_mask = tf.zeros(mask_shape)
         
         grid = np.array([ [[float(x),float(y)]]*nboxes   for y in range(gridY) for x in range(gridX)])
         
@@ -230,10 +231,10 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         conf_loss = K.sum(K.square(true_box_conf-pred_box_conf) * conf_mask  , axis=-1)
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
         
-        tf.Print(loss, [xy_loss], message='Loss XY \t', summarize=1000)
-        tf.Print(loss, [hw_loss], message='Loss WH \t', summarize=1000)
-        tf.Print(loss, [conf_loss], message='Loss Conf \t', summarize=1000)
-        tf.Print(loss, [class_loss], message='Loss Class \t', summarize=1000)
+        tf.Print(combinedloss, [xy_loss], message='Loss XY \t', summarize=1000)
+        tf.Print(combinedloss, [hw_loss], message='Loss WH \t', summarize=1000)
+        tf.Print(combinedloss, [conf_loss], message='Loss Conf \t', summarize=1000)
+        tf.Print(combinedloss, [class_loss], message='Loss Class \t', summarize=1000)
         
         return combinedloss
     
