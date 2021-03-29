@@ -252,7 +252,9 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         
         nb_conf_box  = tf.reduce_sum(tf.to_float(conf_mask  > 0.0))
         nb_coord_box = tf.reduce_sum(tf.to_float(coord_mask > 0.0))
-         
+        nb_class_box = tf.reduce_sum(tf.to_float(class_mask > 0.0))
+        
+        
         xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1)*coord_mask , axis = -1)
         xy_loss = xy_loss /  (nb_coord_box + 1e-6) / 2
         
@@ -261,6 +263,8 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         
         conf_loss = K.sum(K.square(true_box_conf-pred_box_conf) * conf_mask  , axis=-1)
         conf_loss = conf_loss / (nb_conf_box  + 1e-6) / 2
+        
+        class_loss = tf.reduce_sum(class_loss * class_mask) / (nb_class_box + 1e-6)
         combinedloss =  class_loss +  xy_loss + hw_loss  + conf_loss
         
         tf.Print(combinedloss, [xy_loss], message='Loss XY \t', summarize=1)
