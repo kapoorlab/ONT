@@ -106,6 +106,7 @@ def main():
              
              relative_w = float(train_vec[categories + 2])
              relative_h = float(train_vec[categories + 3])
+             
              annotation_dims.append(tuple(map(float, (relative_w,relative_h))))
 
     annotation_dims = np.array(annotation_dims)
