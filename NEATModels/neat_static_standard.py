@@ -165,8 +165,11 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         ANCHORS          = [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828]
 
         mask_shape = tf.shape(y_true)[categories:categories + 4]
-        conf_mask = tf.zeros(mask_shape)
         
+        coord_mask = tf.zeros(mask_shape)
+        conf_mask  = tf.zeros(mask_shape)
+        class_mask = tf.zeros(mask_shape)
+            
         grid = np.array([ [[float(x),float(y)]]*nboxes   for y in range(gridY) for x in range(gridX)])
         
         y_true_class = y_true[...,0:categories]
@@ -185,6 +188,7 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         y_pred_conf = pred_boxes[...,4]
         y_true_conf = true_boxes[...,4]
         
+        coord_mask = tf.expand_dims(pred_boxes[..., 4], axis=-1) * lambdacord
         
         
         if entropy == 'notbinary':
@@ -193,8 +197,7 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
             class_loss = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
         else:
             class_loss = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
-        xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1)*y_true_conf , axis = -1)
-        hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*y_true_conf, axis=-1)
+        
       
         
         pred_wh_half = y_pred_hw / 2.
@@ -228,9 +231,17 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         conf_mask = conf_mask + y_true_conf 
         
         nb_conf_box  = tf.reduce_sum(tf.to_float(conf_mask  > 0.0))
+        nb_coord_box = tf.reduce_sum(tf.to_float(coord_mask > 0.0))
+         
+        xy_loss = K.sum(K.sum(K.square(y_true_xy - y_pred_xy), axis = -1)*coord_mask , axis = -1)
+        xy_loss = xy_loss /  (nb_coord_box + 1e-6) / 2
+        
+        hw_loss = K.sum(K.sum(K.square(K.sqrt(y_true_hw) - K.sqrt(y_pred_hw)), axis=-1)*coord_mask, axis=-1)
+        hw_loss = hw_loss /  (nb_coord_box + 1e-6) / 2
+        
         conf_loss = K.sum(K.square(true_box_conf-pred_box_conf) * conf_mask  , axis=-1)
         conf_loss = conf_loss / (nb_conf_box  + 1e-6) / 2
-        combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
+        combinedloss =  class_loss +  xy_loss + hw_loss  + conf_loss
         
         tf.Print(combinedloss, [xy_loss], message='Loss XY \t', summarize=1)
         tf.Print(combinedloss, [hw_loss], message='Loss WH \t', summarize=1)
