@@ -312,13 +312,12 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         loss_wh    = tf.reduce_sum(tf.square(true_box_wh-pred_box_wh)     * coord_mask) / (nb_coord_box + 1e-6) / 2.
         loss_conf  = tf.reduce_sum(tf.square(true_box_conf-pred_box_conf) * conf_mask)  / (nb_conf_box  + 1e-6) / 2.
         if entropy == 'binary':
-            loss_class = K.mean(K.binary_crossentropy(y_true_class, y_pred_class), axis=-1)
+            loss_class = tf.nn.sparse_sigmoid_binary_entropy_with_logits(labels=true_box_class, logits=pred_box_class)
         else:
-            loss_class = K.mean(K.categorical_crossentropy(y_true_class, y_pred_class), axis=-1)
+            loss_class = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=true_box_class, logits=pred_box_class)
         loss_class = tf.reduce_sum(loss_class * class_mask) / (nb_class_box + 1e-6)
         
         combinedloss = loss_xy + loss_wh + loss_conf + loss_class
-        print(loss_xy, loss_wh, loss_conf, loss_class)
         nb_true_box = tf.reduce_sum(y_true[..., 4])
         nb_pred_box = tf.reduce_sum(tf.to_float(true_box_conf > 0.5) * tf.to_float(pred_box_conf > 0.3))
     
