@@ -223,11 +223,11 @@ def static_yolo_loss(categories, gridX, gridY, nboxes, box_vector, lambdacord, e
         true_box_conf = iou_scores * y_true_conf
         pred_box_conf = y_pred_conf
         conf_mask = conf_mask + tf.to_float(best_ious < 0.6) * (1 - y_true_conf) 
-        nb_conf_box  = tf.reduce_sum(tf.to_float(conf_mask  > 0.0))
+        
         # penalize the confidence of the boxes, which are reponsible for corresponding ground truth box
         conf_mask = conf_mask + y_true_conf 
         
-        
+        nb_conf_box  = tf.reduce_sum(tf.to_float(conf_mask  > 0.0))
         conf_loss = K.sum(K.square(true_box_conf-pred_box_conf) * conf_mask  , axis=-1)
         conf_loss = conf_loss / (nb_conf_box  + 1e-6) / 2
         combinedloss =  class_loss + lambdacord * ( xy_loss + hw_loss ) + conf_loss
