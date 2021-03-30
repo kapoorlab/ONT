@@ -171,7 +171,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                                 width = ImagesizeX
                 
                 Label = np.zeros([TotalCategories + 7])
-                Label[trainlabel] = 1
+                Label[7 + trainlabel] = 1
                 #T co ordinate
                 Label[TotalCategories + 2] = (sizeTminus) / (sizeTminus + sizeTplus)
                 if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1] and time > sizeTminus and time + sizeTplus + 1 < image.shape[0]:
@@ -189,23 +189,23 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         seglocationX = (center[1] - crop_Xminus)
                         seglocationY = (center[0] -  crop_Yminus)
                          
-                        Label[TotalCategories] =  seglocationX/sizeX
-                        Label[TotalCategories + 1] = seglocationY/sizeY
+                        Label[0] =  seglocationX/sizeX
+                        Label[1] = seglocationY/sizeY
                         
                         #Height
-                        Label[TotalCategories + 3] = height/ImagesizeY
+                        Label[3] = height/ImagesizeY
                         #Width
-                        Label[TotalCategories + 4] = width/ImagesizeX
+                        Label[4] = width/ImagesizeX
                
                
                         #Object confidence is  1
-                        Label[TotalCategories + 5] = 0
+                        Label[5] = 0
                         if Label > 0:
-                           Label[TotalCategories + 5] = 1
+                           Label[5] = 1
                             
                          
                           
-                        Label[TotalCategories + 6] = angle  
+                        Label[6] = angle  
                       
                         #Write the image as 32 bit tif file 
                         if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
@@ -315,7 +315,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                             width = ImagesizeX
                                     
                         Label = np.zeros([TotalCategories + 5])
-                        Label[trainlabel] = 1
+                        Label[5 + trainlabel] = 1
                         
                         if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
                                     crop_Xminus = x + shift[0] - int(ImagesizeX/2)
@@ -330,17 +330,17 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     seglocationX = (center[1] - crop_Xminus)
                                     seglocationY = (center[0] -  crop_Yminus)
                                       
-                                    Label[TotalCategories] =  seglocationX/sizeX
-                                    Label[TotalCategories + 1] = seglocationY/sizeY
+                                    Label[0] =  seglocationX/sizeX
+                                    Label[1] = seglocationY/sizeY
                                     
                                     
-                                    Label[TotalCategories + 2] = height/ImagesizeY
-                                    Label[TotalCategories + 3] = width/ImagesizeX
+                                    Label[2] = height/ImagesizeY
+                                    Label[3] = width/ImagesizeX
                                    
                                     #Object confidence is 1
-                                    Label[TotalCategories + 4] = 0
+                                    Label[4] = 0
                                     if Label > 0:
-                                       Label[TotalCategories + 4] = 1
+                                       Label[4] = 1
                                     
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                              imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
