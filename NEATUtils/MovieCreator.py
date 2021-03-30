@@ -155,16 +155,16 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                 
                 properties = measure.regionprops(currentsegimage, currentsegimage)
                 TwoDLocation = (defaultY,defaultX)
-                Label = currentsegimage[TwoDLocation]
+                SegLabel = currentsegimage[TwoDLocation]
                 for prop in properties:
                                    
                                    
-                            if Label > 0 and prop.label == Label:
+                            if SegLabel > 0 and prop.label == SegLabel:
                                                 minr, minc, maxr, maxc = prop.bbox
                                                 center = prop.centroid
                                                 height =  abs(maxc - minc)
                                                 width =  abs(maxr - minr)
-                            if Label == 0:
+                            if SegLabel == 0:
                                 
                                 center = TwoDLocation
                                 height = ImagesizeY
@@ -200,7 +200,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                
                         #Object confidence is  1
                         Label[5] = 0
-                        if Label > 0:
+                        if SegLabel > 0:
                            Label[5] = 1
                             
                          
@@ -299,16 +299,16 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                         
                         properties = measure.regionprops(currentsegimage, currentsegimage)
                         TwoDLocation = (defaultY,defaultX)
-                        Label = currentsegimage[TwoDLocation]
+                        SegLabel = currentsegimage[TwoDLocation]
                         for prop in properties:
                                                
                                                
-                                        if Label > 0 and prop.label == Label:
+                                        if SegLabel > 0 and prop.label == SegLabel:
                                                             minr, minc, maxr, maxc = prop.bbox
                                                             center = prop.centroid
                                                             height =  abs(maxc - minc)
                                                             width =  abs(maxr - minr)
-                                        if Label == 0:
+                                        if SegLabel == 0:
                                             
                                             center = TwoDLocation
                                             height = ImagesizeY
@@ -316,7 +316,6 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     
                         Label = np.zeros([TotalCategories + 5])
                         Label[5 + trainlabel] = 1
-                        
                         if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
                                     crop_Xminus = x + shift[0] - int(ImagesizeX/2)
                                     crop_Xplus = x + shift[0] + int(ImagesizeX/2)
@@ -339,9 +338,8 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                    
                                     #Object confidence is 1
                                     Label[4] = 0
-                                    if Label > 0:
+                                    if SegLabel > 0:
                                        Label[4] = 1
-                                    
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                              imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
                                    
