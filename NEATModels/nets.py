@@ -541,7 +541,6 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     print('before yolo')
     x = Conv2D(int(nboxes) * (box_vector + categories),(round(input_shape[0]/4),round(input_shape[1]/4)), padding = 'valid', name = "yolo" )(x)
     print('before reshape')
-    print(x.shape)
     outputs = Reshape((gridX, gridY, int(nboxes), box_vector + categories),name="final_output")(x)
     inputs = img_input
    
@@ -683,17 +682,13 @@ def resnet_layer(inputs,
                   padding='same',
                   kernel_initializer='he_normal',
                   kernel_regularizer=regularizers.l2(1e-4))
-    print(inputs.shape)
     x = inputs
     if conv_first:
         x = conv(x)
-        print(x.shape)
         if batch_normalization:
             x = BatchNormalization()(x)
-            print('batch', x.shape)
         if activation is not None:
             x = Activation(activation)(x)
-            print('Activ',x.shape)
     else:
         if batch_normalization:
             x = BatchNormalization()(x)
