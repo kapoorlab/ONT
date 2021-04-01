@@ -208,14 +208,15 @@ def load_full_training_data(directory, categories, box_vector, train_image_size,
              
              best_anchor,max_iou = bestAnchorBoxFinder.find(center_w, center_h)
              
+             #Categories
+             Ytrain[instance_count, 0, 0, best_anchor,box_vector:] = train_vec[box_vector:]
              #Box
              Ytrain[instance_count, 0, 0, best_anchor, 0:box_vector - 1] = box
              #Confidence
-             Ytrain[instance_count, 0, 0, best_anchor,box_vector] = 1
-             #Categories
-             Ytrain[instance_count, 0, 0, best_anchor,box_vector:] = train_vec[box_vector:]
+             Ytrain[instance_count, 0, 0, best_anchor,box_vector-1:box_vector] = 1
+
              instance_count = instance_count + 1
-    
+              
     
      #Ytrain = np.expand_dims(Ytrain, axis=1)
      print('number of  images:\t', Xtrain.shape[0])

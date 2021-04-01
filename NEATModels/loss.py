@@ -13,7 +13,7 @@ from keras import backend as K
 
 lambdaobject = 1
 lambdanoobject = 1
-lambdacoord = 5
+lambdacoord = 2
 lambdaclass = 1
 grid_h = 1
 grid_w = 1
@@ -45,7 +45,7 @@ def extract_ground_truth(y_true):
     true_box_xy    = y_true[..., 0:2]  
     true_box_wh    = y_true[..., 2:4] 
     true_box_conf  = y_true[...,4]
-    true_box_class = tf.argmax(y_true[..., 5:], -1)
+    true_box_class = y_true[..., 5:]
 
     return true_box_xy, true_box_wh, true_box_conf, true_box_class
     
@@ -122,11 +122,10 @@ def calc_loss_class(true_box_conf, lambdaclass, true_box_class, pred_box_class, 
     
     
     if entropy == 'binary':
-        loss_class = tf.nn.sparse_sigmoid_binary_entropy_with_logits(labels = true_box_class, 
-                                                                  logits = pred_box_class)
-    else:
-        loss_class   = tf.nn.sparse_softmax_cross_entropy_with_logits(labels = true_box_class, 
-                                                                  logits = pred_box_class)
+        loss_class = K.mean(K.binary_crossentropy(true_box_class, pred_box_class), axis=-1)
+    if entropy == 'notbinary':
+         
+        loss_class   = K.mean(K.categorical_crossentropy(true_box_class, pred_box_class), axis=-1)
     loss_class   = tf.reduce_sum(loss_class * class_mask) / (nb_class_box + 1e-6)
 
     return loss_class
