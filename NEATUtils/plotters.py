@@ -78,15 +78,7 @@ def Printpredict(idx, model, data, Truelabel, KeyCatagories, gridX, gridY, plot 
             img = Image[j,:,:,0]
             if plot:
               ax[j].imshow(img, cm.Spectral)
-              
-    for (Name, Label) in KeyCatagories.items():
-        
-             print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, Label])
-                   
-             for b in range(nboxes): 
-                             print('Box: ' , b)  
-                             print('X Y T H W Confidence Angle',prediction[0,:,:,len(KeyCatagories) + b: len(KeyCatagories) + b + 7])
-                       
+    print('Prediction :', prediction[0,:,:,0:len(KeyCategories) + len(KeyCord) ]) 
             
     print('True Label : ', Truelabel)
 
@@ -158,18 +150,9 @@ def PrintStaticpredict(idx, model, data, Truelabel, KeyCategories, KeyCord, grid
     img = Image[:,:,0]
     if plot:
         plt.imshow(img, cm.Spectral)
-        
-    #predictionsum = [prediction[0,:,:,len(KeyCategories) + b: len(KeyCategories) + b + 5] for b in range(nboxes)]
-    averageprediction = 0
-    for b in range(nboxes):
-      averageprediction = averageprediction + prediction[0,:,:,len(KeyCategories) + b: len(KeyCategories) + b + 5]
-    
-    print('XYHWC:' , averageprediction/nboxes)        
-    for (Name, Label) in KeyCategories.items():
-        
-             print('Top predictions : ' , Name, 'Probability', ':' , prediction[0,:,:, Label])
+
                    
-             
+    print('Prediction :', prediction[0,:,:,0:len(KeyCategories) + len(KeyCord) ])         
     print('True Label : ', Truelabel[0,0,0:len(KeyCategories) + len(KeyCord) ])
 
     if plot:

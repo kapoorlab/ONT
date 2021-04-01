@@ -214,10 +214,7 @@ def load_full_training_data(directory, categories, box_vector, train_image_size,
              Ytrain[instance_count, 0, 0, best_anchor,box_vector] = 1
              #Categories
              Ytrain[instance_count, 0, 0, best_anchor,box_vector:] = train_vec[box_vector:]
-             #newxarr = []
-             #for b in range(0,nboxes):
-                   #newxarr+= [xarr[s] for s in range(len(xarr))]
-             #trainarr = catarr + newxarr
+             instance_count = instance_count + 1
     
     
      #Ytrain = np.expand_dims(Ytrain, axis=1)

@@ -15,8 +15,6 @@ lambdaobject = 1
 lambdanoobject = 1
 lambdacoord = 5
 lambdaclass = 1
-anchors = [0.11,0.11, 0.17,0.19, 0.26,0.29, 0.37,0.37, 0.62,0.55]
-boxes = len(anchors)//2
 grid_h = 1
 grid_w = 1
 
@@ -29,6 +27,8 @@ def get_cell_grid(grid_h, grid_w, batch_size, boxes):
     return cell_grid
     
 def adjust_scale_prediction(y_pred, cell_grid, anchors):
+    
+    boxes = int(len(anchors)/2)
     
     pred_box_xy = tf.sigmoid(y_pred[..., :2]) + cell_grid
     
@@ -143,7 +143,8 @@ def static_yolo_loss(categories, grid_h, grid_w, anchors, box_vector, entropy, b
     
     def loss(y_true, y_pred):    
 
-
+            boxes = int(len(anchors)/2)
+            
             # Get the cell grid
             cell_grid = get_cell_grid(grid_h, grid_w, batch_size, boxes)  
             

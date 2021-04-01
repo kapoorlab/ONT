@@ -88,11 +88,11 @@ def run_kmeans(ann_dims, anchor_num):
         old_distances = distances.copy()
 
 def main():
-    CSVDir = '/home/sancere/Kepler/FinalONEATTraining/StaticCenterTrainData/'
+    CSVDir = '/data/u934/service_imagerie/v_kapoor/FinalONEATTraining/StaticCenterTrainData/'
     Csv_path = os.path.join(CSVDir, '*csv')
     filesCsv = glob.glob(Csv_path)
     filesCsv.sort
-    num_anchors = 5
+    num_anchors = 2
 
 
     grid_w = 1
@@ -104,8 +104,8 @@ def main():
              train_vec = np.loadtxt(csvfname)
             
              
-             relative_w = float(train_vec[categories + 2])
-             relative_h = float(train_vec[categories + 3])
+             relative_w = float(train_vec[2])
+             relative_h = float(train_vec[3])
              
              annotation_dims.append(tuple(map(float, (relative_w,relative_h))))
 

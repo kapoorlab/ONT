@@ -15,6 +15,7 @@ import numpy as np
 
 reg_weight = 1.e-4
 
+
 """
 @author: Varun Kapoor
 
@@ -463,8 +464,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     # Returns
         model (Model): Keras model instance
     """
-    img_input = layers.Input(shape = (input_shape[0], input_shape[1], input_shape[2]))
-    print(img_input)
+    img_input = layers.Input(shape = (None, None, input_shape[2]), name = "input_image")
     if (depth - 2) % 9 != 0:
         raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
     # Start model definition.
@@ -529,20 +529,21 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     
 
     
-    #input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
-    #input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+    input_box = Lambda(lambda x:x[:,:,:,0:box_vector])(x)
+    input_cat = Lambda(lambda x:x[:,:,:,box_vector:])(x)
 
-    #output_cat = (Conv2D(gridX * gridY * categories, (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    #output_box = (Conv2D((gridX * gridY * nboxes * box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+    output_cat = (Conv2D(int(nboxes) * (categories), (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((int(nboxes) * (box_vector )), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
-    #block = Concat(-1)
-    #outputs = block([output_cat,output_box])
-    x = Conv2D(int(nboxes) * (box_vector + categories),(round(input_shape[0]/4),round(input_shape[1]/4)), padding = 'valid', name = "yolo" )(x)
-    outputs = Reshape((gridX, gridY, int(nboxes), box_vector + categories),name="final_output")(x)
+    block = Concat(-1)
+    outputs = block([output_cat,output_box])
+    
+    #x = Conv2D(int(nboxes) * (box_vector + categories),(round(input_shape[0]/4),round(input_shape[1]/4)), padding = 'valid', name = "yolo" )(x)
+    outputs = Reshape((gridX, gridY, int(nboxes), box_vector + categories),name="final_output")(outputs)
     inputs = img_input
    
-     
+    
     # Create model.
     model = models.Model(inputs, outputs)
     
