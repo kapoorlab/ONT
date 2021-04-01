@@ -181,6 +181,8 @@ def load_full_training_data(directory, categories, box_vector, train_image_size,
          Xtrain = np.zeros([TrainInstances, train_image_size[0], train_image_size[1], train_image_size[3], 1])
          
      Ytrain = np.zeros([TrainInstances, gridX, gridY, nboxes, box_vector + categories ])
+    
+     print(Ytrain.shape, Xtrain.shape)
      instance_count = 0
      for fname in X:
          
@@ -207,11 +209,11 @@ def load_full_training_data(directory, categories, box_vector, train_image_size,
              best_anchor,max_iou = bestAnchorBoxFinder.find(center_w, center_h)
              
              #Box
-             Ytrain[instance_count, gridY, gridX, best_anchor, 0:box_vector - 1] = box
+             Ytrain[instance_count, 0, 0, best_anchor, 0:box_vector - 1] = box
              #Confidence
-             Ytrain[instance_count, gridY, gridX, best_anchor,box_vector] = 1
+             Ytrain[instance_count, 0, 0, best_anchor,box_vector] = 1
              #Categories
-             Ytrain[instance_count, gridY, gridX, best_anchor,box_vector:] = train_vec[box_vector:]
+             Ytrain[instance_count, 0, 0, best_anchor,box_vector:] = train_vec[box_vector:]
              #newxarr = []
              #for b in range(0,nboxes):
                    #newxarr+= [xarr[s] for s in range(len(xarr))]

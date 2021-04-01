@@ -538,9 +538,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
 
     #block = Concat(-1)
     #outputs = block([output_cat,output_box])
-    print('before yolo')
     x = Conv2D(int(nboxes) * (box_vector + categories),(round(input_shape[0]/4),round(input_shape[1]/4)), padding = 'valid', name = "yolo" )(x)
-    print('before reshape')
     outputs = Reshape((gridX, gridY, int(nboxes), box_vector + categories),name="final_output")(x)
     inputs = img_input
    
@@ -639,7 +637,6 @@ def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     #outputs = block([output_cat,output_box])
     x = Conv2D(nboxes * (box_vector + categories),(round(input_shape[1]/4),round(input_shape[2]/4)), padding = 'valid', name = "yolo" )(x)
     outputs = Reshape((gridX, gridY, nboxes, box_vector + categories),name="final_output")(x)
-    inputs = img_input
     inputs = img_input
     # Create model.
     model = models.Model(inputs, outputs)
