@@ -481,13 +481,13 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     for stage in range(3):
         for res_block in range(num_res_blocks):
             activation = 'relu'
-            batch_normalization = False
+            batch_normalization = True
             strides = 1
             if stage == 0:
                 num_filters_out = num_filters_in * 4
                 if res_block == 0:  # first layer and first stage
                     activation = None
-                    batch_normalization = False
+                    batch_normalization = True
             else:
                 num_filters_out = num_filters_in * 2
                 if res_block == 0:  # not first layer and not first stage
@@ -517,7 +517,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
                                  kernel_size=1,
                                  strides=strides,
                                  activation=None,
-                                 batch_normalization=False)
+                                 batch_normalization=True)
               
             x = K.layers.add([x, y])
         num_filters_in = num_filters_out
@@ -592,7 +592,7 @@ def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
                      conv_first=True)
 
     # Instantiate the stack of residual units
-    for stage in range(4):
+    for stage in range(3):
         for res_block in range(num_res_blocks):
             activation = 'relu'
             batch_normalization = True
@@ -662,7 +662,7 @@ def resnet_layer(inputs,
                  kernel_size=3,
                  strides=1,
                  activation='relu',
-                 batch_normalization=False,
+                 batch_normalization=True,
                  conv_first=True):
     """2D Convolution-Batch Normalization-Activation stack builder
     # Arguments
