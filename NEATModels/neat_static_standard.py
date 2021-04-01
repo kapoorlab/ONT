@@ -85,7 +85,6 @@ class NEATStaticDetection(object):
 
     def loadData(self):
         
-        directory, categories, box_vector, train_image_size, gridX, gridY, anchors
         self.train_image_size = (self.ImageX, self.ImageY)
         (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.box_vector, self.train_image_size, self.gridX, self.gridY, self.anchors  )
 
