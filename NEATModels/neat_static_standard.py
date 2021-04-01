@@ -49,7 +49,7 @@ class NEATStaticDetection(object):
     """
     
     
-    def __init__(self, staticconfig, Anchors, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
+    def __init__(self, staticconfig, anchors, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
@@ -59,7 +59,7 @@ class NEATStaticDetection(object):
         self.KeyCord = KeyCord
         self.model_weights = None
         self.show = show
-        self.Anchors = Anchors
+        self.anchors = anchors
         self.categories = len(KeyCatagories)
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel
@@ -70,7 +70,8 @@ class NEATStaticDetection(object):
         self.startfilter = staticconfig.startfilter
         self.batch_size = staticconfig.batch_size
         self.multievent = staticconfig.multievent
-        
+        self.ImageX = staticconfig.ImageX
+        self.ImageY = staticconfig.ImageY
         self.nboxes = staticconfig.nboxes
         self.gridX = staticconfig.gridX
         self.gridY = staticconfig.gridY
@@ -83,7 +84,10 @@ class NEATStaticDetection(object):
         self.Trainingmodel = None
 
     def loadData(self):
-        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.nboxes)
+        
+        directory, categories, box_vector, train_image_size, gridX, gridY, anchors
+        self.train_image_size = (self.ImageX, self.ImageY)
+        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.box_vector, self.train_image_size, self.gridX, self.gridY, self.anchors  )
 
         self.X = X
         self.Y = Y

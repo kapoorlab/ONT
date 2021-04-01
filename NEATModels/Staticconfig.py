@@ -17,7 +17,7 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, gridX = 1, gridY = 1, nboxes = 1,  depth = 29, start_kernel = 3, mid_kernel = 3,
+    def __init__(self, residual = True, gridX = 1, gridY = 1, ImageX = 128, ImageY = 128, nboxes = 1,  depth = 29, start_kernel = 3, mid_kernel = 3,
                  
                  startfilter = 48,  epochs =100,categories = 6, box_vector = 5, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
         
@@ -28,6 +28,8 @@ class StaticNeatConfig(argparse.Namespace):
            self.startfilter = startfilter
            self.gridX = gridX
            self.gridY = gridY
+           self.ImageX = ImageX
+           self.ImageY = ImageY
            self.nboxes = nboxes
            self.epochs = epochs
            self.categories = categories
@@ -49,6 +51,8 @@ class StaticNeatConfig(argparse.Namespace):
                  'startfilter' : self.startfilter,
                  'gridX' : self.gridX,
                  'gridY' : self.gridY,
+                 'ImageX' : self.ImageX,
+                 'ImageY' : self.ImageY,
                  'nboxes' : self.nboxes,
                  'epochs' : self.epochs,
                  'categories' : self.categories,
@@ -88,6 +92,8 @@ class StaticNeatConfig(argparse.Namespace):
             ok['nboxes']       = _is_int(self.nboxes, 1)
             ok['gridX'] = _is_int(self.gridX, 1)
             ok['gridY'] = _is_int(self.gridY, 1)
+            ok['ImageX'] = _is_int(self.ImageX, 1)
+            ok['ImageY'] = _is_int(self.ImageY, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
             ok['multievent'] = isinstance(self.multievent,bool)
             ok['categories'] =  _is_int(self.categories, 1)
