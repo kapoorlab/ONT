@@ -17,9 +17,9 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, gridX = 1, gridY = 1, nboxes = 1, lambdacord = 1, depth = 29, start_kernel = 3, mid_kernel = 3,
+    def __init__(self, residual = True, gridX = 1, gridY = 1, nboxes = 1,  depth = 29, start_kernel = 3, mid_kernel = 3,
                  
-                 startfilter = 48, lstm = 16, epochs =100,categories = 6, box_vector = 5, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
+                 startfilter = 48,  epochs =100,categories = 6, box_vector = 5, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
         
            self.residual = residual
            self.depth = depth
@@ -29,7 +29,6 @@ class StaticNeatConfig(argparse.Namespace):
            self.gridX = gridX
            self.gridY = gridY
            self.nboxes = nboxes
-           self.lambdacord = lambdacord
            self.epochs = epochs
            self.categories = categories
            self.box_vector = box_vector
@@ -51,7 +50,6 @@ class StaticNeatConfig(argparse.Namespace):
                  'gridX' : self.gridX,
                  'gridY' : self.gridY,
                  'nboxes' : self.nboxes,
-                 'lambdacord' : self.lambdacord,
                  'epochs' : self.epochs,
                  'categories' : self.categories,
                  'box_vector' : self.box_vector,
@@ -90,7 +88,6 @@ class StaticNeatConfig(argparse.Namespace):
             ok['nboxes']       = _is_int(self.nboxes, 1)
             ok['gridX'] = _is_int(self.gridX, 1)
             ok['gridY'] = _is_int(self.gridY, 1)
-            ok['lambdacord'] = _is_int(self.lambdacord, 1)
             ok['learning_rate'] = np.isscalar(self.learning_rate) and self.learning_rate > 0
             ok['multievent'] = isinstance(self.multievent,bool)
             ok['categories'] =  _is_int(self.categories, 1)

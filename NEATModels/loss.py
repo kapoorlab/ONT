@@ -139,7 +139,7 @@ def compute_conf_loss(conf_mask, true_box_conf_iou, pred_box_conf):
 
     return loss_conf
 
-def static_yolo_loss(categories, grid_h, grid_w, anchors, box_vector, lambdacoord, entropy, batch_size):
+def static_yolo_loss(categories, grid_h, grid_w, anchors, box_vector, entropy, batch_size):
     
     def loss(y_true, y_pred):    
 

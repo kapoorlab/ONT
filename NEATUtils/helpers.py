@@ -112,10 +112,11 @@ def load_full_training_data(directory, categories, nboxes):
              train_vec = data   
              catarr = [float(s) for s in train_vec[0:categories]]
              xarr = [float(s) for s in train_vec[categories:]]
-             newxarr = []
-             for b in range(0,nboxes):
-                   newxarr+= [xarr[s] for s in range(len(xarr))]
-             trainarr = catarr + newxarr  
+             #newxarr = []
+             #for b in range(0,nboxes):
+                   #newxarr+= [xarr[s] for s in range(len(xarr))]
+             #trainarr = catarr + newxarr
+             trainarr = catarr + xarr
              y_t.append(trainarr)
              
              Ytrain.append(y_t)     

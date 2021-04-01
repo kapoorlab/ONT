@@ -49,7 +49,7 @@ class NEATStaticDetection(object):
     """
     
     
-    def __init__(self, staticconfig, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
+    def __init__(self, staticconfig, Anchors, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
@@ -59,7 +59,7 @@ class NEATStaticDetection(object):
         self.KeyCord = KeyCord
         self.model_weights = None
         self.show = show
-       
+        self.Anchors = Anchors
         self.categories = len(KeyCatagories)
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel
@@ -74,7 +74,6 @@ class NEATStaticDetection(object):
         self.nboxes = staticconfig.nboxes
         self.gridX = staticconfig.gridX
         self.gridY = staticconfig.gridY
-        self.lambdacord = staticconfig.lambdacord
         self.last_activation = None
         self.entropy = None
         self.X = None
@@ -124,15 +123,13 @@ class NEATStaticDetection(object):
         else:
            
             self.model_weights = None    
-           
         
         self.Trainingmodel = model_keras(input_shape, self.categories, box_vector = self.box_vector , depth = self.depth, start_kernel = self.start_kernel, mid_kernel = self.mid_kernel, startfilter = self.startfilter, 
                                          gridX = self.gridX, gridY = self.gridY, nboxes = self.nboxes,  last_activation = self.last_activation, input_weights  =  self.model_weights)
         
-            
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.lambdacord, self.entropy, self.batch_size), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.Anchors, self.box_vector, self.entropy, self.batch_size), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
