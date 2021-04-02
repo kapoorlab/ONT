@@ -167,57 +167,49 @@ class BoundBox:
         return(self.classes[self.label])
         
         
-def load_full_training_data(directory, categories, box_vector, train_image_size, gridX, gridY, anchors):
+def load_full_training_data(directory, categories, box_vector, train_image_size, gridX, gridY, nboxes):
     
      #Generate npz file with data and label attributes   
      Raw_path = os.path.join(directory, '*tif')
      X = glob.glob(Raw_path)
-     TrainInstances = len(X)
-     bestAnchorBoxFinder = BestAnchorBoxFinder(anchors)
-     nboxes = int(len(anchors)/2)
-     if len(train_image_size) == 2:
-         Xtrain = np.zeros([TrainInstances, train_image_size[0], train_image_size[1], 1])
-     if len(train_image_size) == 3:
-         Xtrain = np.zeros([TrainInstances, train_image_size[0], train_image_size[1], train_image_size[3], 1])
-         
-     Ytrain = np.zeros([TrainInstances, gridX, gridY, nboxes, box_vector + categories ])
-    
-     print(Ytrain.shape, Xtrain.shape)
-     instance_count = 0
+     Xtrain = []
+     Ytrain = []
      for fname in X:
          
              image = imread(fname)[0,:]
              
              image = np.expand_dims(image, axis=-1)
-             Xtrain[instance_count] = image
-             
              
              Name = os.path.basename(os.path.splitext(fname)[0])
 
              csvfname = directory + Name + '.csv'
-        
-             data = np.loadtxt(csvfname)
-             train_vec = data   
-             xarr = [float(s) for s in train_vec[:box_vector]]
-             
-             center_x = xarr[0]
-             center_y = xarr[1]
-             center_h = xarr[2]
-             center_w = xarr[3]
-             box = [center_x, center_y, center_w, center_h]
-             
-             best_anchor,max_iou = bestAnchorBoxFinder.find(center_w, center_h)
-             #Categories
-             Ytrain[instance_count, gridY - 1, gridX - 1, best_anchor,box_vector:] = train_vec[box_vector:]
-             #Box
-             Ytrain[instance_count, gridY - 1, gridX - 1, best_anchor, 0:box_vector - 1] = box
-             #Confidence
-             Ytrain[instance_count, gridY - 1, gridX - 1, best_anchor,box_vector-1:box_vector] = 1
+             y_t = []
+             catarr = []
+             trainarr = [] 
+             with open(csvfname) as csvfile:
+                 reader = csv.reader(csvfile, delimiter = ','
+                                    )
+                 for train_vec in reader:
+                         
+                         catarr =  [float(s) for s in train_vec[0:categories]]
+                         xarr = [float(s) for s in train_vec[categories:]]
+                         newxarr = []
+                         print(Name, xarr)
+                         for b in range(nboxes):
+                               newxarr+= [xarr[s] for s in range(len(xarr))]
 
-             instance_count = instance_count + 1
-              
+                         trainarr = catarr + newxarr    
+               
+                         y_t.append(trainarr)   
+                
+             Ytrain.append(y_t)     
+             Xtrain.append(image)
     
-     #Ytrain = np.expand_dims(Ytrain, axis=1)
+    
+     Xtrain = np.array(Xtrain)
+     Ytrain = np.array(Ytrain)
+     Ytrain = np.expand_dims(Ytrain, axis=1)
+    
      print('number of  images:\t', Xtrain.shape[0])
      print('image size:\t\t',Xtrain.shape)
      print('Labels:\t\t\t\t', Ytrain.shape)

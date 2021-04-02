@@ -13,13 +13,9 @@ from .helpers import  normalizeFloatZeroOne
 """
 @author: Varun Kapoor
 In this program we create training movies and training images for ONEAT. The training data comprises of images and text labels attached to them.
-
 TrainingMovies: This program is for action recognition training data creation. The inputs are the training image, the corresponding integer labelled segmentation image,
-
 csv file containing time, ylocation, xlocation, angle (optional)
-
 Additional parameters to be supplied are the 
-
 1) sizeTminus: action events are centered at the time location, this parameter is the start time of the time volume the network carved out from the image.
 2) sizeTplus: this parameter is the end of the time volume to be carved out from the image.
 3) TotalCategories: It is the number of total action categories the network is supposed to predict, Vanilla ONEAT has these labels:
@@ -38,10 +34,7 @@ Total categories for cell classification part of vanilla ONEAT are:
     3: Macrocheates
     4: Non MatureP1 cells
     5: MatureP1 cells
-
-
 csv file containing time, ylocation, xlocation of that event/cell type
-
 """    
     
 def MovieLabelDataSet(ImageDir, SegImageDir, CSVDir,SaveDir, StaticName, StaticLabel, CSVNameDiff,crop_size, gridX = 1, gridY = 1, offset = 0):
@@ -152,7 +145,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
                 
-                
+                Event_data = []
                 properties = measure.regionprops(currentsegimage, currentsegimage)
                 TwoDLocation = (defaultY,defaultX)
                 SegLabel = currentsegimage[TwoDLocation]
@@ -171,7 +164,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                                 width = 10
                 
                 Label = np.zeros([TotalCategories + 7])
-                Label[7 + trainlabel] = 1
+                Label[trainlabel] = 1
                 #T co ordinate
                 Label[TotalCategories + 2] = (sizeTminus) / (sizeTminus + sizeTplus)
                 if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1] and time > sizeTminus and time + sizeTplus + 1 < image.shape[0]:
@@ -189,29 +182,24 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         seglocationX = (center[1] - crop_Xminus)
                         seglocationY = (center[0] -  crop_Yminus)
                          
-                        Label[0] =  seglocationX/sizeX
-                        Label[1] = seglocationY/sizeY
+                        Label[TotalCategories] =  seglocationX/sizeX
+                        Label[TotalCategories + 1] = seglocationY/sizeY
                         
                         #Height
-                        Label[3] = height/ImagesizeY
+                        Label[TotalCategories + 3] = height/ImagesizeY
                         #Width
-                        Label[4] = width/ImagesizeX
-               
-               
-                        #Object confidence is  1
-                        Label[5] = 1
-                            
+                        Label[TotalCategories + 4] = width/ImagesizeX
+                         
                           
-                        Label[6] = angle  
+                        Label[TotalCategories + 6] = angle  
                       
                         #Write the image as 32 bit tif file 
                         if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
-                                                                imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))    
+                                   imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))    
         
-          
-                       #Write the corresponding csv file of labels 
-                        writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
-                        for l in Label : writer.writerow ([l])
+                                   Event_data.append([Label[i] for i in range(0,len(Label))])
+                                   writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "a"))
+                                   writer.writerows(Event_data)
 
        
    
@@ -293,7 +281,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                    
                         defaultX = int(x + shift[0])  
                         defaultY = int(y + shift[1])
-                        
+                        Event_data = []
                         properties = measure.regionprops(currentsegimage, currentsegimage)
                         TwoDLocation = (defaultY,defaultX)
                         SegLabel = currentsegimage[TwoDLocation]
@@ -311,8 +299,9 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                             height = 10
                                             width = 10
                                     
-                        Label = np.zeros([TotalCategories + 5])
-                        Label[5 + trainlabel] = 1
+                        Label = np.zeros([TotalCategories + 4])
+                        Label[trainlabel] = 1
+                        
                         if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
                                     crop_Xminus = x + shift[0] - int(ImagesizeX/2)
                                     crop_Xplus = x + shift[0] + int(ImagesizeX/2)
@@ -326,27 +315,20 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     seglocationX = (center[1] - crop_Xminus)
                                     seglocationY = (center[0] -  crop_Yminus)
                                       
-                                    Label[0] =  seglocationX/sizeX
-                                    Label[1] = seglocationY/sizeY
+                                    Label[TotalCategories] =  seglocationX/sizeX
+                                    Label[TotalCategories + 1] = seglocationY/sizeY
                                     
                                     
-                                    Label[2] = height/ImagesizeY
-                                    Label[3] = width/ImagesizeX
+                                    Label[TotalCategories + 2] = height/ImagesizeY
+                                    Label[TotalCategories + 3] = width/ImagesizeX
                                    
-                                    #Object confidence is 1
                                     
-                                    Label[4] = 1
+                                    
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                              imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
-                                   
-                                    writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "w"))
-                                    for l in Label : writer.writerow ([l])
-
-       
+                                             Event_data.append([Label[i] for i in range(0,len(Label))])
+                                             writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "a"))
+                                             writer.writerows(Event_data)
 
        except:
-          
-          pass
-
-
-
+              pass

@@ -4,7 +4,7 @@ from __future__ import print_function
 import keras as K
 from keras import regularizers
 from keras.layers import BatchNormalization, Activation
-from keras.layers import Conv2D, Conv3D, Reshape
+from keras.layers import Conv2D, Conv3D
 from keras.layers.convolutional_recurrent import ConvLSTM2D
 from keras import layers
 from keras import models
@@ -15,10 +15,8 @@ import numpy as np
 
 reg_weight = 1.e-4
 
-
 """
 @author: Varun Kapoor
-
 Using RESNET and stacked layer style architechtures to define NEAT architecture
 """
 
@@ -195,21 +193,18 @@ def OSNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, nboxes
 
 
 
-    #input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
-    #input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
 
         
-    #output_cat = (Conv2D(gridX * gridY  * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
-    #output_box = (Conv2D(gridX * gridY * nboxes * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
+    output_cat = (Conv2D(gridX * gridY  * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation, kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
+    output_box = (Conv2D(gridX * gridY * nboxes * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
 
 
 
 
-    #block = Concat(-1)
-    #outputs = block([output_cat,output_box])
-    
-    x = Conv2D(nboxes * (box_vector + categories),(round(input_shape[1]/4),round(input_shape[2]/4)), padding = 'valid', name = "yolo" )(x)
-    outputs = Reshape((gridX, gridY, nboxes, box_vector + categories),name="final_output")(x)
+    block = Concat(-1)
+    outputs = block([output_cat,output_box]) 
     inputs = img_input
    
     # Create model.
@@ -363,20 +358,18 @@ def ORNET(input_shape, categories,unit, box_vector, gridX = 1, gridY = 1, nboxes
 
 
 
-    #input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
-    #input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
 
         
-    #output_cat = (Conv2D(gridX * gridY  * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation  , kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
-    #output_box = (Conv2D(gridX * gridY * nboxes * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
+    output_cat = (Conv2D(gridX * gridY  * categories, (round(input_shape[1]/4),round(input_shape[2]/4)),activation = last_activation  , kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'yolo'))(input_cat)
+    output_box = (Conv2D(gridX * gridY * nboxes * box_vector, (round(input_shape[1]/4),round(input_shape[2]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid', name = 'secyolo'))(input_box)
 
 
 
 
-    #block = Concat(-1)
-    #outputs = block([output_cat,output_box])
-    x = Conv2D(nboxes * (box_vector + categories),(round(input_shape[1]/4),round(input_shape[2]/4)), padding = 'valid', name = "yolo" )(x)
-    outputs = Reshape((gridX, gridY, nboxes, box_vector + categories),name="final_output")(x)
+    block = Concat(-1)
+    outputs = block([output_cat,output_box]) 
     inputs = img_input
    
     # Create model.
@@ -442,6 +435,7 @@ def ThreeDresnet_layer(inputs,
 
 
 
+
 def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes = 1,  depth = 38,  start_kernel = 3, mid_kernel = 3, startfilter = 48,  input_weights = None, last_activation = 'softmax'):
     """ResNet Version 2 Model builder [b]
     Stacks of (1 x 1)-(3 x 3)-(1 x 1) BN-ReLU-Conv2D or also known as
@@ -464,7 +458,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     # Returns
         model (Model): Keras model instance
     """
-    img_input = layers.Input(shape = (None, None, input_shape[2]), name = "input_image")
+    img_input = layers.Input(shape = (None, None, input_shape[2]))
     if (depth - 2) % 9 != 0:
         raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
     # Start model definition.
@@ -487,7 +481,7 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
                 num_filters_out = num_filters_in * 4
                 if res_block == 0:  # first layer and first stage
                     activation = None
-                    batch_normalization = True
+                    batch_normalization = False
             else:
                 num_filters_out = num_filters_in * 2
                 if res_block == 0:  # not first layer and not first stage
@@ -517,9 +511,10 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
                                  kernel_size=1,
                                  strides=strides,
                                  activation=None,
-                                 batch_normalization=True)
+                                 batch_normalization=False)
               
             x = K.layers.add([x, y])
+        
         num_filters_in = num_filters_out
 
     # Add classifier on top.
@@ -529,21 +524,22 @@ def resnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     
 
     
-    input_box = Lambda(lambda x:x[:,:,:,0:box_vector])(x)
-    input_cat = Lambda(lambda x:x[:,:,:,box_vector:])(x)
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+    
+      
+    
 
-    output_cat = (Conv2D(int(nboxes) * (categories), (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    output_box = (Conv2D((int(nboxes) * (box_vector )), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+    output_cat = (Conv2D(gridX * gridY  * categories, (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((gridX * gridY * nboxes * box_vector), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
     block = Concat(-1)
-    outputs = block([output_box,output_cat])
-    
-    #x = Conv2D(int(nboxes) * (box_vector + categories),(round(input_shape[0]/4),round(input_shape[1]/4)), padding = 'valid', name = "yolo" )(x)
-    outputs = Reshape((gridX, gridY, int(nboxes), box_vector + categories),name="final_output")(outputs)
+    outputs = block([output_cat,output_box])
+
     inputs = img_input
    
-    
+     
     # Create model.
     model = models.Model(inputs, outputs)
     
@@ -576,7 +572,7 @@ def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     # Returns
         model (Model): Keras model instance
     """
-    img_input = layers.Input(shape = (None, None, input_shape[2]), name = "input_image")
+    img_input = layers.Input(shape = (input_shape[0], input_shape[1], input_shape[2]))
     if (depth - 2) % 9 != 0:
         raise ValueError('depth should be 9n+2 (eg 56 or 110 in [b])')
     # Start model definition.
@@ -590,7 +586,7 @@ def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
                      conv_first=True)
 
     # Instantiate the stack of residual units
-    for stage in range(3):
+    for stage in range(4):
         for res_block in range(num_res_blocks):
             activation = 'relu'
             batch_normalization = True
@@ -627,21 +623,19 @@ def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
     
 
     
-    input_box = Lambda(lambda x:x[:,:,:,0:box_vector])(x)
-    input_cat = Lambda(lambda x:x[:,:,:,box_vector:])(x)
+    input_cat = Lambda(lambda x:x[:,:,:,0:categories])(x)
+    input_box = Lambda(lambda x:x[:,:,:,categories:])(x)
+    
+      
+    
 
-    output_cat = (Conv2D(int(nboxes) * (categories), (round(input_shape[0]/4),round(input_shape[1]/4)), activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
-    output_box = (Conv2D((int(nboxes) * (box_vector )), (round(input_shape[0]/4),round(input_shape[1]/4)),activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
+    output_cat = (Conv2D(gridX * gridY *  categories, (round(input_shape[0]/8),round(input_shape[1]/8)),activation = last_activation ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_cat)
+    output_box = (Conv2D((gridX * gridY * (nboxes) *  (box_vector)), (round(input_shape[0]/8),round(input_shape[1]/8)), activation= 'sigmoid' ,kernel_regularizer=regularizers.l2(reg_weight), padding = 'valid'))(input_box)
     
 
     block = Concat(-1)
-    outputs = block([output_box,output_cat])
-    
-    #x = Conv2D(int(nboxes) * (box_vector + categories),(round(input_shape[0]/4),round(input_shape[1]/4)), padding = 'valid', name = "yolo" )(x)
-    #outputs = Reshape((gridX, gridY, int(nboxes), box_vector + categories),name="final_output")(outputs)
+    outputs = block([output_cat,output_box])
     inputs = img_input
-   
-    
     # Create model.
     model = models.Model(inputs, outputs)
     
@@ -651,6 +645,7 @@ def seqnet_v2(input_shape, categories, box_vector, gridX = 1, gridY = 1, nboxes 
         model.load_weights(input_weights, by_name =True)
         
     return model
+      
 
 
 
@@ -682,6 +677,7 @@ def resnet_layer(inputs,
                   padding='same',
                   kernel_initializer='he_normal',
                   kernel_regularizer=regularizers.l2(1e-4))
+
     x = inputs
     if conv_first:
         x = conv(x)
@@ -695,8 +691,4 @@ def resnet_layer(inputs,
         if activation is not None:
             x = Activation(activation)(x)
         x = conv(x)
-    
-        
     return x
-    
-

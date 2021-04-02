@@ -152,8 +152,8 @@ def PrintStaticpredict(idx, model, data, Truelabel, KeyCategories, KeyCord, grid
         plt.imshow(img, cm.Spectral)
 
                    
-    print('Prediction :', prediction[0,:,:,0:len(KeyCategories) + len(KeyCord) ])         
-    print('True Label : ', Truelabel[0,0,0:len(KeyCategories) + len(KeyCord) ])
+    print('Prediction :', prediction[0,:,:,0: ])         
+    print('True Label : ', Truelabel[0,0,0: ])
 
     if plot:
               plt.show()          

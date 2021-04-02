@@ -12,7 +12,7 @@ from NEATUtils import helpers
 from keras import callbacks
 import os
 from NEATModels import nets
-from NEATModels.loss import static_yolo_loss
+from NEATModels.loss import static_yolo_loss, simple_yolo_loss
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
@@ -49,7 +49,7 @@ class NEATStaticDetection(object):
     """
     
     
-    def __init__(self, staticconfig, anchors, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
+    def __init__(self, staticconfig, TrainDirectory, KeyCatagories, KeyCord, model_dir, model_name,  show = False ):
 
         self.TrainDirectory = TrainDirectory
         self.model_dir = model_dir
@@ -59,7 +59,6 @@ class NEATStaticDetection(object):
         self.KeyCord = KeyCord
         self.model_weights = None
         self.show = show
-        self.anchors = anchors
         self.categories = len(KeyCatagories)
         self.depth = staticconfig.depth
         self.start_kernel = staticconfig.start_kernel
@@ -86,7 +85,7 @@ class NEATStaticDetection(object):
     def loadData(self):
         
         self.train_image_size = (self.ImageX, self.ImageY)
-        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.box_vector, self.train_image_size, self.gridX, self.gridY, self.anchors  )
+        (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.box_vector, self.train_image_size, self.gridX, self.gridY, self.nboxes )
 
         self.X = X
         self.Y = Y
@@ -132,7 +131,7 @@ class NEATStaticDetection(object):
         
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.anchors, self.box_vector, self.entropy, self.batch_size), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.entropy, self.batch_size), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
