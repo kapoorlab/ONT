@@ -194,7 +194,7 @@ def load_full_training_data(directory, categories, box_vector, train_image_size,
                          catarr =  [float(s) for s in train_vec[0:categories]]
                          xarr = [float(s) for s in train_vec[categories:]]
                          newxarr = []
-                         print(Name, xarr)
+                        
                          for b in range(nboxes):
                                newxarr+= [xarr[s] for s in range(len(xarr))]
 

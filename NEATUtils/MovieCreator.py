@@ -189,14 +189,27 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         Label[TotalCategories + 3] = height/ImagesizeY
                         #Width
                         Label[TotalCategories + 4] = width/ImagesizeX
-                         
+               
+               
+                        #Object confidence is  1
+                        Label[TotalCategories + 5] = 1
+                            
                           
                         Label[TotalCategories + 6] = angle  
+                        
+                        if trainlabel == 0:
+                                       Label[TotalCategories + 5] = 0
+                                       Label[TotalCategories] =  0.5
+                                       Label[TotalCategories + 1] = 0.5
+                                       Label[TotalCategories + 2] = 0.5
+                                       Label[TotalCategories + 3] = 1
+                                       Label[TotalCategories + 4] = 1
+                                       Label[TotalCategories + 6] = 2
                       
                         #Write the image as 32 bit tif file 
                         if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
+                                  
                                    imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))    
-        
                                    Event_data.append([Label[i] for i in range(0,len(Label))])
                                    writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "a"))
                                    writer.writerows(Event_data)
@@ -299,9 +312,8 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                             height = 10
                                             width = 10
                                     
-                        Label = np.zeros([TotalCategories + 4])
+                        Label = np.zeros([TotalCategories + 5])
                         Label[trainlabel] = 1
-                        
                         if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
                                     crop_Xminus = x + shift[0] - int(ImagesizeX/2)
                                     crop_Xplus = x + shift[0] + int(ImagesizeX/2)
@@ -322,13 +334,23 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     Label[TotalCategories + 2] = height/ImagesizeY
                                     Label[TotalCategories + 3] = width/ImagesizeX
                                    
-                                    
-                                    
+                                    #Object confidence is 1
+                                    if trainlabel > 0:
+                                       Label[TotalCategories + 4] = 1
+                                    if trainlabel == 0:
+                                       Label[TotalCategories + 4] = 0
+                                       Label[TotalCategories] =  0.5
+                                       Label[TotalCategories + 1] = 0.5
+                                       Label[TotalCategories + 2] = 1
+                                       Label[TotalCategories + 3] = 1
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                              imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
                                              Event_data.append([Label[i] for i in range(0,len(Label))])
                                              writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "a"))
                                              writer.writerows(Event_data)
 
+       
+
        except:
-              pass
+          
+          pass

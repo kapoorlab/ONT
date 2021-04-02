@@ -12,7 +12,7 @@ from NEATUtils import helpers
 from keras import callbacks
 import os
 from NEATModels import nets
-from NEATModels.loss import static_yolo_loss, simple_yolo_loss
+from NEATModels.loss import static_yolo_loss
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
