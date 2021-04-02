@@ -17,9 +17,7 @@ import argparse
 import numpy as np
 class StaticNeatConfig(argparse.Namespace):
     
-    def __init__(self, residual = True, gridX = 1, gridY = 1, ImageX = 128, ImageY = 128, nboxes = 1,  depth = 29, start_kernel = 3, mid_kernel = 3,
-                 
-                 startfilter = 48,  epochs =100,categories = 6, box_vector = 5, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
+    def __init__(self, residual = True, gridX = 1, gridY = 1, ImageX = 128, ImageY = 128, nboxes = 1,  depth = 29, start_kernel = 3, mid_kernel = 3,startfilter = 32,  epochs =100,categories = 6, box_vector = 5, learning_rate = 1.0E-4, batch_size = 10, ModelName = 'NEATModel', multievent = True,  **kwargs):
         
            self.residual = residual
            self.depth = depth

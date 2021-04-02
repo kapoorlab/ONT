@@ -167,8 +167,8 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                             if SegLabel == 0:
                                 
                                 center = TwoDLocation
-                                height = ImagesizeY
-                                width = ImagesizeX
+                                height = 10
+                                width = 10
                 
                 Label = np.zeros([TotalCategories + 7])
                 Label[7 + trainlabel] = 1
@@ -199,11 +199,8 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                
                
                         #Object confidence is  1
-                        Label[5] = 0
-                        if SegLabel > 0:
-                           Label[5] = 1
+                        Label[5] = 1
                             
-                         
                           
                         Label[6] = angle  
                       
@@ -311,8 +308,8 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                         if SegLabel == 0:
                                             
                                             center = TwoDLocation
-                                            height = ImagesizeY
-                                            width = ImagesizeX
+                                            height = 10
+                                            width = 10
                                     
                         Label = np.zeros([TotalCategories + 5])
                         Label[5 + trainlabel] = 1
@@ -337,9 +334,8 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     Label[3] = width/ImagesizeX
                                    
                                     #Object confidence is 1
-                                    Label[4] = 0
-                                    if SegLabel > 0:
-                                       Label[4] = 1
+                                    
+                                    Label[4] = 1
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                              imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
                                    
