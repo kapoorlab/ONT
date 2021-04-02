@@ -17,13 +17,13 @@ lambdaclass = 1
 grid_h = 1
 grid_w = 1
 
-def get_cell_grid(grid_h, grid_w, batch_size, boxes):
+def get_cell_grid(grid_h, grid_w, boxes):
     
     cell_grid = np.array([ [[float(x),float(y)]]*boxes   for y in range(grid_h) for x in range(grid_w)])
     
     return cell_grid
     
-def adjust_scale_prediction(y_pred, cell_grid, nboxes,grid_h, grid_w, box_vector, categories):
+def adjust_scale_prediction(y_pred, cell_grid, nboxes,grid_h, grid_w, box_vector, categories, version = 1):
     
     pred_nboxes = K.reshape(y_pred[...,categories:], (-1, grid_h * grid_w, nboxes, box_vector))
     
@@ -31,19 +31,25 @@ def adjust_scale_prediction(y_pred, cell_grid, nboxes,grid_h, grid_w, box_vector
     
     pred_box_wh = (pred_nboxes[..., 2:4]) 
     
-    pred_box_conf = (y_pred[..., 4])
-    
+    if version > 1:
+       pred_box_conf = (y_pred[..., 4])
+    else:
+      pred_box_conf = 1.0  
+        
     pred_box_class = y_pred[..., :categories]
     
     return pred_box_xy, pred_box_wh, pred_box_conf, pred_box_class
 
-def extract_ground_truth(y_true, nboxes, grid_h, grid_w, box_vector, categories):
+def extract_ground_truth(y_true, nboxes, grid_h, grid_w, box_vector, categories, version = 1):
 
     true_nboxes = K.reshape(y_true[...,categories:], (-1, grid_h * grid_w, nboxes, box_vector))
     
     true_box_xy    = true_nboxes[..., 0:2]  
     true_box_wh    = true_nboxes[..., 2:4] 
-    true_box_conf  = y_true[...,4]
+    if version > 1:
+         true_box_conf  = y_true[...,4]
+    else:
+        true_box_conf = 1.0
     true_box_class = y_true[..., :categories]
 
     return true_box_xy, true_box_wh, true_box_conf, true_box_class
@@ -90,15 +96,16 @@ def compute_conf_loss(best_ious, true_box_conf, true_box_conf_iou,pred_box_conf)
 
     loss_obj = K.sum(K.square(true_box_conf_iou-pred_box_conf) * indicator_o)#, axis=[1,2,3])
 
-    return loss_obj / 2
+    return loss_obj 
 
 def calc_loss_xywh(true_box_conf, true_box_xy, pred_box_xy, true_box_wh, pred_box_wh):
 
     
     coord_mask  = K.expand_dims(true_box_conf, axis=-1) * lambdacoord
-    loss_xy      = K.sum(K.square(true_box_xy-pred_box_xy) * coord_mask)
-    loss_wh      = K.sum(K.square(true_box_wh-pred_box_wh) * coord_mask) 
-    loss_xywh = (loss_xy + loss_wh) / 2
+    loss_xy      =  K.sum(K.sum(K.square(true_box_xy - pred_box_xy), axis = -1), axis = -1)
+    loss_wh      = K.sum(K.sum(K.square(K.sqrt(true_box_wh) - K.sqrt(pred_box_wh)), axis=-1), axis=-1)
+    loss_xywh = (loss_xy + loss_wh)
+    loss_xywh = lambdacoord * loss_xywh
     return loss_xywh, coord_mask
 
 def calc_loss_class(true_box_conf, true_box_class, pred_box_class, entropy):
@@ -116,14 +123,79 @@ def calc_loss_class(true_box_conf, true_box_class, pred_box_class, entropy):
     return loss_class
 
 
+def yolo_loss_v1(categories, grid_h, grid_w, nboxes, box_vector, entropy):
+    
+    def loss(y_true, y_pred):    
 
-def static_yolo_loss(categories, grid_h, grid_w, nboxes, box_vector, entropy, batch_size):
+            
+        true_box_class = y_true[...,0:categories]
+        pred_box_class = y_pred[...,0:categories]
+        
+        
+        pred_box_xy = y_pred[...,categories:categories + 2] 
+        
+        true_box_xy = y_true[...,categories:categories + 2] 
+        
+        
+        pred_box_wh = y_pred[...,categories + 2:] 
+        
+        true_box_wh = y_true[...,categories + 2:] 
+        
+
+
+        loss_xy      = K.sum(K.sum(K.square(true_box_xy - pred_box_xy), axis = -1), axis = -1)
+        loss_wh      = K.sum(K.sum(K.square(true_box_wh - pred_box_wh), axis=-1), axis=-1)
+        loss_xywh = (loss_xy + loss_wh)
+        loss_xywh = lambdacoord * loss_xywh
+
+        if entropy == 'binary':
+            loss_class = K.sum(K.binary_crossentropy(true_box_class, pred_box_class), axis=-1)
+        if entropy == 'notbinary':
+            loss_class   = K.sum(K.categorical_crossentropy(true_box_class, pred_box_class), axis=-1)
+
+        loss_class   = loss_class * lambdaclass 
+
+        combinedloss = loss_xywh + loss_class
+            
+        return combinedloss 
+        
+    return loss 
+
+
+def yolo_loss_v0(categories, grid_h, grid_w, nboxes, box_vector, entropy):
+    
+    def loss(y_true, y_pred):    
+
+            
+        true_box_class = y_true[...,0:categories]
+        pred_box_class = y_pred[...,0:categories]
+        
+        
+        pred_box_xy = y_pred[...,categories:categories + 2] 
+        
+        true_box_xy = y_true[...,categories:categories + 2] 
+        
+       
+
+        loss_xy      = K.sum(K.sum(K.square(true_box_xy - pred_box_xy), axis = -1), axis = -1)
+        
+        loss_class   = K.sum(K.categorical_crossentropy(true_box_class, pred_box_class), axis=-1)
+
+       
+
+        combinedloss = loss_xy + loss_class
+            
+        return combinedloss 
+        
+    return loss
+
+def static_yolo_loss(categories, grid_h, grid_w, nboxes, box_vector, entropy):
     
     def loss(y_true, y_pred):    
 
             
             # Get the cell grid
-            cell_grid = get_cell_grid(grid_h, grid_w, batch_size, nboxes)  
+            cell_grid = get_cell_grid(grid_h, grid_w, nboxes)  
             
             #Extract the ground truth 
             true_box_xy, true_box_wh, true_box_conf, true_box_class = extract_ground_truth(y_true, nboxes, grid_h, grid_w, box_vector, categories)

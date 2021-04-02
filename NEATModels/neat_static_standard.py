@@ -12,13 +12,13 @@ from NEATUtils import helpers
 from keras import callbacks
 import os
 from NEATModels import nets
-from NEATModels.loss import static_yolo_loss
+from NEATModels.loss import static_yolo_loss, yolo_loss_v1, yolo_loss_v0
 from keras import backend as K
 #from IPython.display import clear_output
 from keras import optimizers
 from pathlib import Path
 import tensorflow as tf
-
+from sklearn.utils.class_weight import compute_class_weight
 
 class NEATStaticDetection(object):
     
@@ -55,7 +55,7 @@ class NEATStaticDetection(object):
         self.model_dir = model_dir
         self.model_name = model_name
         self.KeyCatagories = KeyCatagories
-        self.box_vector = len(KeyCord)
+        self.box_vector = staticconfig.box_vector
         self.KeyCord = KeyCord
         self.model_weights = None
         self.show = show
@@ -100,7 +100,16 @@ class NEATStaticDetection(object):
         input_shape = (self.X.shape[1], self.X.shape[2], self.X.shape[3])
         
         Path(self.model_dir).mkdir(exist_ok=True)
+        Y_rest = self.Y[:,:,:,self.categories:]
+        Y_main = self.Y[:,:,:,0:self.categories]
+ 
+        y_integers = np.argmax(Y_main, axis = -1)
+        y_integers = y_integers[:,0,0]
+
         
+        print(self.box_vector)
+        d_class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
+        d_class_weights = d_class_weights.reshape(1,d_class_weights.shape[0])
         
         
         if self.residual:
@@ -131,7 +140,7 @@ class NEATStaticDetection(object):
         
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.entropy, self.batch_size), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = yolo_loss_v0(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
@@ -143,7 +152,7 @@ class NEATStaticDetection(object):
         
         
         #Train the model and save as a h5 file
-        self.Trainingmodel.fit(self.X,self.Y, batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
+        self.Trainingmodel.fit(self.X,self.Y, class_weight = d_class_weights, batch_size = self.batch_size, epochs = self.epochs, validation_data=(self.X_val, self.Y_val), shuffle = True, callbacks = [lrate,hrate,srate,prate])
      
         # Removes the old model to be replaced with new model, if old one exists
         if os.path.exists(self.model_dir + self.model_name ):
