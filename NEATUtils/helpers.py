@@ -198,13 +198,16 @@ def load_full_training_data(directory, categories, box_vector, train_image_size,
                          for b in range(nboxes):
                                newxarr+= [xarr[s] for s in range(len(xarr))]
 
-                         trainarr = catarr + newxarr    
-               
-                         y_t.append(trainarr)   
+                         trainarr = catarr + xarr 
+                         
+                         
+                         y_t.append(trainarr) 
+             if len(y_t) > 1:               
+              y_t = y_t[:-1]               
                 
              Ytrain.append(y_t)     
              Xtrain.append(image)
-    
+
     
      Xtrain = np.array(Xtrain)
      Ytrain = np.array(Ytrain)

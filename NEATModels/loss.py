@@ -12,7 +12,7 @@ from keras import backend as K
 
 lambdaobject = 1
 lambdanoobject = 1
-lambdacoord = 1
+lambdacoord = 5
 lambdaclass = 1
 grid_h = 1
 grid_w = 1
@@ -144,7 +144,7 @@ def yolo_loss_v1(categories, grid_h, grid_w, nboxes, box_vector, entropy):
 
 
         loss_xy      = K.sum(K.sum(K.square(true_box_xy - pred_box_xy), axis = -1), axis = -1)
-        loss_wh      = K.sum(K.sum(K.square(true_box_wh - pred_box_wh), axis=-1), axis=-1)
+        loss_wh      = K.sum(K.sum(K.square(K.sqrt(true_box_wh) - K.sqrt(pred_box_wh)), axis=-1), axis=-1)
         loss_xywh = (loss_xy + loss_wh)
         loss_xywh = lambdacoord * loss_xywh
 

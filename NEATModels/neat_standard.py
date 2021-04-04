@@ -1,23 +1,15 @@
 from NEATUtils import plotters
 import numpy as np
 from NEATUtils import helpers
+from csbdeep.utils import normalize
+from tqdm import tqdm
 from keras import callbacks
 import os
 from NEATModels import nets
 from keras import backend as K
 from keras import optimizers
-try:
-    from pathlib import Path
-    Path().expanduser()
-except (ImportError,AttributeError):
-    from pathlib2 import Path
+from pathlib import Path
 
-try:
-    import tempfile
-    tempfile.TemporaryDirectory
-
-except (ImportError,AttributeError):
-    from backports import tempfile
 
 
 class NEATDetection(object):
@@ -89,9 +81,10 @@ class NEATDetection(object):
     def loadData(self):
         
         (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.nboxes)
-
+        
         self.X = X
         self.Y = Y
+        
         self.X_val = X_val
         self.Y_val = Y_val
               

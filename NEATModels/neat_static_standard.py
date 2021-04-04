@@ -11,9 +11,11 @@ import numpy as np
 from NEATUtils import helpers
 from keras import callbacks
 import os
+from tqdm import tqdm
 from NEATModels import nets
 from NEATModels.loss import static_yolo_loss, yolo_loss_v1, yolo_loss_v0
 from keras import backend as K
+from csbdeep.utils import normalize
 #from IPython.display import clear_output
 from keras import optimizers
 from pathlib import Path
@@ -86,9 +88,9 @@ class NEATStaticDetection(object):
         
         self.train_image_size = (self.ImageX, self.ImageY)
         (X,Y), (X_val,Y_val) = helpers.load_full_training_data(self.TrainDirectory, self.categories, self.box_vector, self.train_image_size, self.gridX, self.gridY, self.nboxes )
-
         self.X = X
         self.Y = Y
+        
         self.X_val = X_val
         self.Y_val = Y_val
           
@@ -140,7 +142,7 @@ class NEATStaticDetection(object):
         
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = yolo_loss_v0(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.entropy), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = yolo_loss_v1(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         
