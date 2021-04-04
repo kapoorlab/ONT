@@ -145,7 +145,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
            
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
-                name = name + 'shift' + str(shift)
+                newname = name + 'shift' + str(shift)
                 Event_data = []
                 properties = measure.regionprops(currentsegimage, currentsegimage)
                 TwoDLocation = (defaultY,defaultX)
@@ -209,11 +209,11 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                         #Write the image as 32 bit tif file 
                         if(crop_image.shape[0] == sizeTplus + sizeTminus + 1 and crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
                                   
-                                   imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))    
+                                   imwrite((save_dir + '/' + newname + '.tif'  ) , crop_image.astype('float32'))    
                                    Event_data.append([Label[i] for i in range(0,len(Label))])
-                                   if(os.path.exists(save_dir + '/' + (name) + ".csv")):
-                                                os.remove(save_dir + '/' + (name) + ".csv")
-                                   writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "a"))
+                                   if(os.path.exists(save_dir + '/' + (newname) + ".csv")):
+                                                os.remove(save_dir + '/' + (newname) + ".csv")
+                                   writer = csv.writer(open(save_dir + '/' + (newname) + ".csv", "a"))
                                    writer.writerows(Event_data)
 
        
@@ -296,7 +296,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                  currentsegimage = segimage[int(time),:].astype('uint16')
                  for shift in AllShifts:
                    
-                        name = name + 'shift' + str(shift)
+                        newname = name + 'shift' + str(shift)
                         defaultX = int(x + shift[0])  
                         defaultY = int(y + shift[1])
                         Event_data = []
@@ -352,11 +352,11 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                       Label[TotalCategories + 4] = 0  
                                  
                                     if(crop_image.shape[1]== ImagesizeY and crop_image.shape[2]== ImagesizeX):
-                                             imwrite((save_dir + '/' + name + '.tif'  ) , crop_image.astype('float32'))  
+                                             imwrite((save_dir + '/' + newname + '.tif'  ) , crop_image.astype('float32'))  
                                              Event_data.append([Label[i] for i in range(0,len(Label))])
-                                             if(os.path.exists(save_dir + '/' + (name) + ".csv")):
-                                                os.remove(save_dir + '/' + (name) + ".csv")
-                                             writer = csv.writer(open(save_dir + '/' + (name) + ".csv", "a"))
+                                             if(os.path.exists(save_dir + '/' + (newname) + ".csv")):
+                                                os.remove(save_dir + '/' + (newname) + ".csv")
+                                             writer = csv.writer(open(save_dir + '/' + (newname) + ".csv", "a"))
                                              writer.writerows(Event_data)
 
        
