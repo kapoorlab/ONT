@@ -145,7 +145,7 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
            
                 defaultX = int(x + shift[0])  
                 defaultY = int(y + shift[1])
-                
+                name = name + 'shift' + str(shift)
                 Event_data = []
                 properties = measure.regionprops(currentsegimage, currentsegimage)
                 TwoDLocation = (defaultY,defaultX)
@@ -296,6 +296,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                  currentsegimage = segimage[int(time),:].astype('uint16')
                  for shift in AllShifts:
                    
+                        name = name + 'shift' + str(shift)
                         defaultX = int(x + shift[0])  
                         defaultY = int(y + shift[1])
                         Event_data = []
