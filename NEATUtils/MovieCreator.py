@@ -51,8 +51,9 @@ def MovieLabelDataSet(ImageDir, SegImageDir, CSVDir,SaveDir, StaticName, StaticL
             filesCsv.sort
             Path(SaveDir).mkdir(exist_ok=True)
             TotalCategories = len(StaticName)
-            count = 0
+            
             for csvfname in filesCsv:
+              count = 0  
               print(csvfname)
               CsvName =  os.path.basename(os.path.splitext(csvfname)[0])
             
@@ -84,7 +85,7 @@ def MovieLabelDataSet(ImageDir, SegImageDir, CSVDir,SaveDir, StaticName, StaticL
                                                 angle = dataset[dataset.keys()[3]][1:]                          
                                             #Categories + XYHW + Confidence 
                                             for t in range(1, len(time)):
-                                               MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, Name + str(count), SaveDir)
+                                               MovieMaker(time[t], y[t], x[t], angle[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, Name + Eventname + str(count), SaveDir)
                                                count = count + 1
                                                
 
@@ -149,6 +150,13 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
                 properties = measure.regionprops(currentsegimage, currentsegimage)
                 TwoDLocation = (defaultY,defaultX)
                 SegLabel = currentsegimage[TwoDLocation]
+                TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
+                TwoDtree = spatial.cKDTree(TwoDCoordinates)
+                closestpoint = TwoDtree.query(TwoDLocation)
+                ClosestLocation = ( int(TwoDCoordinates[closestpoint[1]][0]), int(TwoDCoordinates[closestpoint[1]][1]))
+                SegLabel = currentsegimage[TwoDLocation]
+                if trainlabel > 0 and SegLabel == 0:
+                    SegLabel = currentsegimage[ClosestLocation]
                 for prop in properties:
                                    
                                    
@@ -225,9 +233,10 @@ def ImageLabelDataSet(ImageDir, SegImageDir, CSVDir,SaveDir, StaticName, StaticL
             filesCsv.sort
             Path(SaveDir).mkdir(exist_ok=True)
             TotalCategories = len(StaticName)
-            count = 0
+            
             for csvfname in filesCsv:
               print(csvfname)
+              count = 0
               CsvName =  os.path.basename(os.path.splitext(csvfname)[0])
             
               for fname in filesRaw:
@@ -246,7 +255,6 @@ def ImageLabelDataSet(ImageDir, SegImageDir, CSVDir,SaveDir, StaticName, StaticL
                              Eventname = StaticName[i]
                              trainlabel = StaticLabel[i]
                              if CsvName == CSVNameDiff + Name + Eventname:
-                                            print('in')
                                             dataset = pd.read_csv(csvfname)
                                             time = dataset[dataset.keys()[0]][1:]
                                             y = dataset[dataset.keys()[1]][1:]
@@ -254,7 +262,7 @@ def ImageLabelDataSet(ImageDir, SegImageDir, CSVDir,SaveDir, StaticName, StaticL
                                             
                                             #Categories + XYHW + Confidence 
                                             for t in range(1, len(time)):
-                                               ImageMaker(time[t], y[t], x[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, Name + str(count), SaveDir)    
+                                               ImageMaker(time[t], y[t], x[t], image, segimage, crop_size, gridX, gridY, offset, TotalCategories, trainlabel, Name + Eventname + str(count), SaveDir)    
                                                count = count + 1
     
 
@@ -293,7 +301,13 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                         Event_data = []
                         properties = measure.regionprops(currentsegimage, currentsegimage)
                         TwoDLocation = (defaultY,defaultX)
+                        TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
+                        TwoDtree = spatial.cKDTree(TwoDCoordinates)
+                        closestpoint = TwoDtree.query(TwoDLocation)
+                        ClosestLocation = ( int(TwoDCoordinates[closestpoint[1]][0]), int(TwoDCoordinates[closestpoint[1]][1]))
                         SegLabel = currentsegimage[TwoDLocation]
+                        if trainlabel > 0 and SegLabel == 0:
+                            SegLabel = currentsegimage[ClosestLocation]
                         for prop in properties:
                                                
                                                
