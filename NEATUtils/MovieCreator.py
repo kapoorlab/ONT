@@ -124,15 +124,15 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
        
        shiftNone = [0,0]
        if offset > 0 and trainlabel > 0:
-         shiftLX = [-1.0 * offset, 0] 
-         shiftRX = [offset, 0]
-         shiftLXY = [-1.0 * offset, -1.0 * offset]
-         shiftRXY = [offset, -1.0 * offset]
-         shiftDLXY = [-1.0 * offset, offset]
-         shiftDRXY = [offset, offset]
-         shiftUY = [0, -1.0 * offset]
-         shiftDY = [0, offset]
-         AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
+                 shiftLX = [int(offset), 0] 
+                 shiftRX = [-offset, 0]
+                 shiftLXY = [int(offset), int(offset)]
+                 shiftRXY = [-int(offset), int(offset)]
+                 shiftDLXY = [int(offset), -int(offset)]
+                 shiftDRXY = [-int(offset), -int(offset)]
+                 shiftUY = [0, int(offset)]
+                 shiftDY = [0, -int(offset)]
+                 AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
 
        else:
            
@@ -141,54 +141,31 @@ def MovieMaker(time, y, x, angle, image, segimage, crop_size, gridX, gridY, offs
 
        
        currentsegimage = segimage[time,:].astype('uint16')
+       height, width, center, SegLabel = getHW(x, y, trainlabel, currentsegimage)
        for shift in AllShifts:
            
-                defaultX = int(x + shift[0])  
-                defaultY = int(y + shift[1])
                 newname = name + 'shift' + str(shift)
                 Event_data = []
-                properties = measure.regionprops(currentsegimage, currentsegimage)
-                TwoDLocation = (defaultY,defaultX)
-                SegLabel = currentsegimage[TwoDLocation]
-                TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
-                TwoDtree = spatial.cKDTree(TwoDCoordinates)
-                closestpoint = TwoDtree.query(TwoDLocation)
-                ClosestLocation = ( int(TwoDCoordinates[closestpoint[1]][0]), int(TwoDCoordinates[closestpoint[1]][1]))
-                SegLabel = currentsegimage[TwoDLocation]
-                if trainlabel > 0 and SegLabel == 0:
-                    SegLabel = currentsegimage[ClosestLocation]
-                for prop in properties:
-                                   
-                                   
-                            if SegLabel > 0 and prop.label == SegLabel:
-                                                minr, minc, maxr, maxc = prop.bbox
-                                                center = prop.centroid
-                                                height =  abs(maxc - minc)
-                                                width =  abs(maxr - minr)
-                            if SegLabel == 0:
-                                
-                                center = TwoDLocation
-                                height = 10
-                                width = 10
-                
+                newcenter = (center[0] - shift[1],center[1] - shift[0] )
+                x = center[1]
+                y = center[0]
                 Label = np.zeros([TotalCategories + 7])
                 Label[trainlabel] = 1
                 #T co ordinate
                 Label[TotalCategories + 2] = (sizeTminus) / (sizeTminus + sizeTplus)
-                if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1] and time > sizeTminus and time + sizeTplus + 1 < image.shape[0]:
-                        crop_Xminus = x + shift[0] - int(ImagesizeX/2)
-                        crop_Xplus = x + shift[0] + int(ImagesizeX/2)
-                        crop_Yminus = y + shift[1] - int(ImagesizeY/2)
-                        crop_Yplus = y + shift[1] + int(ImagesizeY/2)
-                       
+                if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] + int(ImagesizeX/2) < image.shape[2] and y + shift[1]+ int(ImagesizeY/2) < image.shape[1] and time > sizeTminus and time + sizeTplus + 1 < image.shape[0]:
+                        crop_Xminus = x  - int(ImagesizeX/2)
+                        crop_Xplus = x  + int(ImagesizeX/2)
+                        crop_Yminus = y  - int(ImagesizeY/2)
+                        crop_Yplus = y   + int(ImagesizeY/2)
                         # Cut off the region for training movie creation
-                        region =(slice(int(time - sizeTminus),int(time + sizeTplus  + 1)),slice(int(crop_Yminus), int(crop_Yplus)),
-                              slice(int(crop_Xminus), int(crop_Xplus)))
+                        region =(slice(int(time - sizeTminus),int(time + sizeTplus  + 1)),slice(int(crop_Yminus)+ shift[1], int(crop_Yplus)+ shift[1]),
+                              slice(int(crop_Xminus) + shift[0], int(crop_Xplus) + shift[0]))
                         #Define the movie region volume that was cut
                         crop_image = image[region]   
                         crop_image =  normalizeFloatZeroOne(crop_image ,1,99.8)
-                        seglocationX = (center[1] - crop_Xminus)
-                        seglocationY = (center[0] -  crop_Yminus)
+                        seglocationX = (newcenter[1] - crop_Xminus)
+                        seglocationY = (newcenter[0] - crop_Yminus)
                          
                         Label[TotalCategories] =  seglocationX/sizeX
                         Label[TotalCategories + 1] = seglocationY/sizeY
@@ -277,14 +254,14 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
 
                shiftNone = [0,0]
                if offset > 0 and trainlabel > 0:
-                 shiftLX = [-1.0 * offset, 0] 
-                 shiftRX = [offset, 0]
-                 shiftLXY = [-1.0 * offset, -1.0 * offset]
-                 shiftRXY = [offset, -1.0 * offset]
-                 shiftDLXY = [-1.0 * offset, offset]
-                 shiftDRXY = [offset, offset]
-                 shiftUY = [0, -1.0 * offset]
-                 shiftDY = [0, offset]
+                 shiftLX = [int(offset), 0] 
+                 shiftRX = [-offset, 0]
+                 shiftLXY = [int(offset), int(offset)]
+                 shiftRXY = [-int(offset), int(offset)]
+                 shiftDLXY = [int(offset), -int(offset)]
+                 shiftDRXY = [-int(offset), -int(offset)]
+                 shiftUY = [0, int(offset)]
+                 shiftDY = [0, -int(offset)]
                  AllShifts = [shiftNone, shiftLX, shiftRX,shiftLXY,shiftRXY,shiftDLXY,shiftDRXY,shiftUY,shiftDY]
 
                else:
@@ -294,49 +271,32 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
        
                if time < segimage.shape[0] - 1:
                  currentsegimage = segimage[int(time),:].astype('uint16')
+                
+                 height, width, center, SegLabel  = getHW(x, y,trainlabel, currentsegimage)
                  for shift in AllShifts:
                    
                         newname = name + 'shift' + str(shift)
-                        defaultX = int(x + shift[0])  
-                        defaultY = int(y + shift[1])
+                        newcenter = (center[0] - shift[1],center[1] - shift[0] )
                         Event_data = []
-                        properties = measure.regionprops(currentsegimage, currentsegimage)
-                        TwoDLocation = (defaultY,defaultX)
-                        TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
-                        TwoDtree = spatial.cKDTree(TwoDCoordinates)
-                        closestpoint = TwoDtree.query(TwoDLocation)
-                        ClosestLocation = ( int(TwoDCoordinates[closestpoint[1]][0]), int(TwoDCoordinates[closestpoint[1]][1]))
-                        SegLabel = currentsegimage[TwoDLocation]
-                        if trainlabel > 0 and SegLabel == 0:
-                            SegLabel = currentsegimage[ClosestLocation]
-                        for prop in properties:
-                                               
-                                               
-                                        if SegLabel > 0 and prop.label == SegLabel:
-                                                            minr, minc, maxr, maxc = prop.bbox
-                                                            center = prop.centroid
-                                                            height =  abs(maxc - minc)
-                                                            width =  abs(maxr - minr)
-                                        if SegLabel == 0:
-                                            
-                                            center = TwoDLocation
-                                            height = 10
-                                            width = 10
-                                    
+                        
+                        x = center[1]
+                        y = center[0]
                         Label = np.zeros([TotalCategories + 5])
                         Label[trainlabel] = 1
-                        if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] < image.shape[2] and y + shift[1] < image.shape[1]:
-                                    crop_Xminus = x + shift[0] - int(ImagesizeX/2)
-                                    crop_Xplus = x + shift[0] + int(ImagesizeX/2)
-                                    crop_Yminus = y + shift[1] - int(ImagesizeY/2)
-                                    crop_Yplus = y + shift[1] + int(ImagesizeY/2)
-              
-                                    region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus), int(crop_Yplus)),
-                                           slice(int(crop_Xminus), int(crop_Xplus)))
+                        if x + shift[0]> sizeX/2 and y + shift[1] > sizeY/2 and x + shift[0] + int(ImagesizeX/2) < image.shape[2] and y + shift[1]+ int(ImagesizeY/2) < image.shape[1]:
+                                    crop_Xminus = x  - int(ImagesizeX/2)
+                                    crop_Xplus = x   + int(ImagesizeX/2)
+                                    crop_Yminus = y  - int(ImagesizeY/2)
+                                    crop_Yplus = y   + int(ImagesizeY/2)
+                                 
+                                    
+                                    region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus)+ shift[1], int(crop_Yplus)+ shift[1]),
+                                           slice(int(crop_Xminus) + shift[0], int(crop_Xplus) + shift[0]))
+                                    print(region, newname)
                                     crop_image = image[region]      
                                     crop_image =  normalizeFloatZeroOne(crop_image ,1,99.8)
-                                    seglocationX = (center[1] - crop_Xminus)
-                                    seglocationY = (center[0] -  crop_Yminus)
+                                    seglocationX = (newcenter[1] - crop_Xminus)
+                                    seglocationY = (newcenter[0] - crop_Yminus)
                                       
                                     Label[TotalCategories] =  seglocationX/sizeX
                                     Label[TotalCategories + 1] = seglocationY/sizeY
@@ -360,3 +320,30 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                              writer.writerows(Event_data)
 
        
+def getHW(defaultX, defaultY, trainlabel, currentsegimage):
+    
+    properties = measure.regionprops(currentsegimage, currentsegimage)
+    TwoDLocation = (defaultY,defaultX)
+    TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
+    TwoDtree = spatial.cKDTree(TwoDCoordinates)
+    closestpoint = TwoDtree.query(TwoDLocation)
+    ClosestLocation = ( int(TwoDCoordinates[closestpoint[1]][0]), int(TwoDCoordinates[closestpoint[1]][1]))
+    SegLabel = currentsegimage[TwoDLocation]
+    if trainlabel > 0 and SegLabel == 0:
+           SegLabel = currentsegimage[ClosestLocation]
+    for prop in properties:
+                                               
+                  if SegLabel > 0 and prop.label == SegLabel:
+                                    minr, minc, maxr, maxc = prop.bbox
+                                    center = prop.centroid
+                                    height =  abs(maxc - minc)
+                                    width =  abs(maxr - minr)
+                                
+                  if SegLabel == 0:
+                    
+                             center = (defaultY, defaultX)
+                             height = 10
+                             width = 10
+                    
+                                
+    return height, width, center, SegLabel                            
