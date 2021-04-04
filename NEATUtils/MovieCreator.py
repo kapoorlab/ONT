@@ -292,7 +292,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
                                     
                                     region =(slice(int(time - 1),int(time)),slice(int(crop_Yminus)+ shift[1], int(crop_Yplus)+ shift[1]),
                                            slice(int(crop_Xminus) + shift[0], int(crop_Xplus) + shift[0]))
-                                    print(region, newname)
+                                   
                                     crop_image = image[region]      
                                     crop_image =  normalizeFloatZeroOne(crop_image ,1,99.8)
                                     seglocationX = (newcenter[1] - crop_Xminus)
