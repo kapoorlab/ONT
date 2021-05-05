@@ -54,6 +54,7 @@ def IntergerLabelGen(fname, savedir):
             BinaryImage = imread(fname)
             Name = os.path.basename(os.path.splitext(fname)[0])
             InputBinaryImage = BinaryImage.astype('uint8')
+            
             IntegerImage = np.zeros([BinaryImage.shape[0],BinaryImage.shape[1], BinaryImage.shape[2]])
             for i in tqdm(range(0, InputBinaryImage.shape[0])):
                  
@@ -61,7 +62,7 @@ def IntergerLabelGen(fname, savedir):
                     Orig = normalizeFloatZeroOne(BinaryImageOriginal)
                     InvertedBinaryImage = invertimage(BinaryImageOriginal)
                     BinaryImage = normalizeFloatZeroOne(InvertedBinaryImage)
-                    image = binary_dilation(BinaryImage)
+                    image = binary_dilation(BinaryImage, iterations = 2)
                     image = invertimage(image)
                     labelclean = label(image)
                     labelclean = remove_big_objects(labelclean, max_size = 15000) 
@@ -379,18 +380,18 @@ def PredictionLoop(j, k, sx, sy, nboxes, stride, time_prediction, config, key_ca
                                           max_prob_label = np.argmax(prediction_vector[:total_classes])
                                           max_prob_class = prediction_vector[max_prob_label]
                                           
-                                          if EventType == 'Dynamic':
-                                                  if Mode == 'Detection':
+                                          if event_type == 'Dynamic':
+                                                  if mode == 'Detection':
                                                           time_frames = config['size_tminus'] + config['size_tplus'] + 1
                                                           real_time_event = int(inputtime + prediction_vector[total_classes + config['t']] * time_frames)
                                                           box_time_event = prediction_vector[total_classes + config['t']]    
-                                                  if Mode == 'Prediction':
+                                                  if mode == 'Prediction':
                                                           real_time_event = int(inputtime)
                                                           box_time_event = int(inputtime)
                                                   realangle = math.pi * (prediction_vector[total_classes + config['angle']] - 0.5)
                                                   rawangle = prediction_vector[total_classes + config['angle']]
                                           
-                                          if EventType == 'Static':
+                                          if event_type == 'Static':
                                                           real_time_event = int(inputtime)
                                                           box_time_event = int(inputtime)
                                                           realangle = 0
