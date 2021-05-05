@@ -108,7 +108,7 @@ public class LoadCSV implements ActionListener {
 									Angle = (int) Float.parseFloat(TYXApoints[3]);
 
 								if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
-								OvalRoi roi = new OvalRoi(X, Y, 10, 10);
+								OvalRoi roi = new OvalRoi(X - 5, Y - 5, 10, 10);
 								Allrois.add(new Roiobject(parent.RejectColor, roi, 
 										new RealPoint(new double[] { X, Y, Angle }), T));
 								

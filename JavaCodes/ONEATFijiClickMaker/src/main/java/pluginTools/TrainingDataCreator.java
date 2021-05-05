@@ -328,9 +328,7 @@ public class TrainingDataCreator extends JPanel {
                       bwbud.write(T + "," 
 								+ nf.format(Y) + "," 
 								+ nf.format(X) +  "," 
-								+ nf.format(angle) + "," +
-								
-								
+								+ nf.format(angle) +
 								"\n");
 						}
                       
