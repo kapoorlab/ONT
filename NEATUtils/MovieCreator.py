@@ -323,7 +323,7 @@ def  ImageMaker(time, y, x, image, segimage, crop_size, gridX, gridY, offset, To
 def getHW(defaultX, defaultY, trainlabel, currentsegimage):
     
     properties = measure.regionprops(currentsegimage, currentsegimage)
-    TwoDLocation = (defaultY,defaultX)
+    TwoDLocation = (int(defaultY),int(defaultX))
     TwoDCoordinates = [(prop.centroid[0], prop.centroid[1]) for prop in properties]
     TwoDtree = spatial.cKDTree(TwoDCoordinates)
     closestpoint = TwoDtree.query(TwoDLocation)
@@ -346,4 +346,42 @@ def getHW(defaultX, defaultY, trainlabel, currentsegimage):
                              width = 10
                     
                                 
-    return height, width, center, SegLabel                            
+    return height, width, center, SegLabel      
+
+
+def  AngleAppender(AngleCSV, ONTCSV, save_dir, ColumnA = 'Y'):
+
+     dataset = pd.read_csv(AngleCSV)
+     time = dataset[dataset.keys()[0]][1:]
+     if ColumnA == 'Y':
+       y = dataset[dataset.keys()[1]][1:]
+       x = dataset[dataset.keys()[2]][1:]
+       angle = dataset[dataset.keys()[2]][1:]
+     else:
+       x = dataset[dataset.keys()[1]][1:]
+       y = dataset[dataset.keys()[2]][1:]
+       angle = dataset[dataset.keys()[2]][1:]  
+       
+     clickeddataset = pd.read_csv(ONTCSV)  
+     clickedtime = clickeddataset[clickeddataset.keys()[0]][1:]
+     clickedy = clickeddataset[clickeddataset.keys()[1]][1:]
+     clickedx = clickeddataset[clickeddataset.keys()[2]][1:]
+                               
+     Event_data = []
+     
+     Name = os.path.basename(os.path.splitext(ONTCSV)[0])
+     for clickedt in range(1, len(clickedtime)):
+                          
+                for t in range(1, len(time)): 
+
+                          if time[t] == clickedtime[clickedt] and y[t] == clickedy[clickedt] and x[t] == clickedx[clickedt]:
+                              
+                                Event_data.append([time[t],y[t],x[t],angle[t]])
+                              
+                                     
+                              
+                               
+     writer = csv.writer(open(save_dir + '/' + (Name) + ".csv", "a"))
+     writer.writerows(Event_data)
+     
+                      

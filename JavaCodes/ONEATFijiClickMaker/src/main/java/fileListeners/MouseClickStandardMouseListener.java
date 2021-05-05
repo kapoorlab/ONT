@@ -35,12 +35,7 @@ public class MouseClickStandardMouseListener implements MouseListener
 	public void mousePressed( MouseEvent arg0 ){
 		
 		
-		/*
-		deltascrollbar.setLocation(arg0.getLocationOnScreen());
-		deltascrollbar.repaint();
-		deltascrollbar.validate();
-		System.out.println(arg0.getLocationOnScreen());
-		*/
+	
 	}
 
 	@Override

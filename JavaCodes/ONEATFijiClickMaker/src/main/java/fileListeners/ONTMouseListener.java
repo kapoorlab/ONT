@@ -36,7 +36,7 @@ public class ONTMouseListener implements MouseListener, ImageListener {
 		getTime(parent.impOrig);
 
 		// Make a dot red or green
-		System.out.println(parent.AddDot);
+		
 		if (SwingUtilities.isLeftMouseButton(e) && parent.AddDot != "a") {
 
 			int X = canvas.offScreenX(e.getX());

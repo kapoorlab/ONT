@@ -178,8 +178,7 @@ public class LoadCSV implements ActionListener {
 				parent.eventfieldname.setText(parent.addToName);
 				parent.impOrig.updateAndDraw();
 				parent.Clickrecorder();
-			} else
-				csvfile = null;
+			} 
 		}
 
 	}
