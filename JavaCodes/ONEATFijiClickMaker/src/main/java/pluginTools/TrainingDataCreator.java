@@ -588,23 +588,31 @@ public class TrainingDataCreator extends JPanel {
 
 	public static ImagePlus Reshape(ImagePlus image) {
 
-		int channels, frames;
+		int channels, frames, slices;
 
 		ImagePlus imp = image;
 		if (imp.getNChannels() > imp.getNFrames()) {
 			channels = imp.getNFrames();
 			frames = imp.getNChannels();
-
+            slices = 1;
+		}
+		
+		if(imp.getNSlices() > imp.getNFrames()) {
+			
+			slices = 1;
+			frames = imp.getNSlices();
+			channels = 1;
 		}
 
 		else {
 
 			channels = imp.getNChannels();
 			frames = imp.getNFrames();
+			slices = 1;
 
 		}
 
-		imp.setDimensions(channels, imp.getNSlices(), frames);
+		imp.setDimensions(channels, slices, frames);
 		imp.show();
 
 		return imp;
