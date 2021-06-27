@@ -13,7 +13,7 @@ from keras import callbacks
 import os
 from tqdm import tqdm
 from NEATModels import nets
-from NEATModels.loss import static_yolo_loss, yolo_loss_v1, yolo_loss_v0
+from NEATModels.loss import static_yolo_loss, yolo_loss_v1, yolo_loss_v0, static_yolo_loss_segfree
 from keras import backend as K
 from csbdeep.utils import normalize
 #from IPython.display import clear_output
@@ -142,7 +142,7 @@ class NEATStaticDetection(object):
         
         sgd = optimizers.SGD(lr=self.learning_rate, momentum = 0.99, decay=1e-6, nesterov = True)
         
-        self.Trainingmodel.compile(optimizer=sgd, loss = yolo_loss_v1(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.entropy), metrics=['accuracy'])
+        self.Trainingmodel.compile(optimizer=sgd, loss = static_yolo_loss_segfree(self.categories, self.gridX, self.gridY, self.nboxes, self.box_vector, self.entropy), metrics=['accuracy'])
         self.Trainingmodel.summary()
         print('Training Model:', model_keras)
         

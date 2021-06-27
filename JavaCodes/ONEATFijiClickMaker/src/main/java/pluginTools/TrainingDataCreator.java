@@ -154,9 +154,12 @@ public class TrainingDataCreator extends JPanel {
 				
 				for (Roiobject roi : MatlabOvalRois.get(thirdDimension)) {
 
-					overlay.add(roi.roi);
+					
 					roi.roi.setStrokeColor(roi.color);
 
+					roi.roi.setStrokeWidth(2);
+					roi.roi.drawPixels(impOrig.getProcessor());
+					overlay.add(roi.roi);
 				}
 
 			}

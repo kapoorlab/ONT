@@ -189,6 +189,33 @@ def yolo_loss_v0(categories, grid_h, grid_w, nboxes, box_vector, entropy):
         
     return loss
 
+def static_yolo_loss_segfree(categories, grid_h, grid_w, nboxes, box_vector, entropy):
+    
+    def loss(y_true, y_pred):    
+
+            
+        true_box_class = y_true[...,0:categories]
+        pred_box_class = y_pred[...,0:categories]
+        
+        
+        pred_box_xy = y_pred[...,categories:categories + 2] 
+        
+        true_box_xy = y_true[...,categories:categories + 2] 
+        
+       
+
+        loss_xy      = K.sum(K.sum(K.square(true_box_xy - pred_box_xy), axis = -1), axis = -1)
+        
+        loss_class   = K.sum(K.categorical_crossentropy(true_box_class, pred_box_class), axis=-1)
+
+       
+
+        combinedloss = loss_xy + loss_class
+            
+        return combinedloss 
+        
+    return loss
+
 def static_yolo_loss(categories, grid_h, grid_w, nboxes, box_vector, entropy):
     
     def loss(y_true, y_pred):    

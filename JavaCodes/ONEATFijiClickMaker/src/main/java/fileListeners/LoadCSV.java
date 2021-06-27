@@ -15,6 +15,7 @@ import javax.swing.filechooser.FileFilter;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.OvalRoi;
+import ij.plugin.frame.RoiManager;
 import net.imglib2.RealPoint;
 import net.imglib2.type.numeric.real.FloatType;
 import pluginTools.TrainingDataCreator;
@@ -112,6 +113,7 @@ public class LoadCSV implements ActionListener {
 								Allrois.add(new Roiobject(parent.RejectColor, roi, 
 										new RealPoint(new double[] { X, Y, Angle }), T));
 								
+								
 								}
 								
 								}
@@ -132,6 +134,8 @@ public class LoadCSV implements ActionListener {
 								if (X > 0 && Y > 0 && X < parent.inputimage.dimension(0) && Y < parent.inputimage.dimension(1) ) {
 								OvalRoi roi = new OvalRoi(X, Y, 10, 10);
 								Allrois.add(new Roiobject(parent.RejectColor, roi,
+										new RealPoint(new double[] { X, Y, Angle }), T));
+								Allrois.add(new Roiobject(parent.RejectColor, roi, 
 										new RealPoint(new double[] { X, Y, Angle }), T));
 								
 								}
